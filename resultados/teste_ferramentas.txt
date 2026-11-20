@@ -1,0 +1,45 @@
+Ferramentas e a primeira linha da docstring de cada uma:
+  consultar_servidor             Consulta o cadastro funcional do servidor pela matrícula e confere o nome.
+  calcular_diarias               Calcula a quantidade e o valor das diárias e a antecedência do pedido.
+  consultar_historico_diarias    Consulta o histórico de diárias do servidor: limite do mês e prestações de contas.
+  consultar_saldo_diarias        Consulta o saldo da dotação de diárias de uma unidade e o compara com o valor pedido.
+
+[DIA-2026-0112 · matrícula digitada 207481]
+  Matrícula 207481: Rafael Lima Antunes, Analista de Meio Ambiente. Grupo da diária: B. Unidade de lotação: CFA. Sede: Cuiabá. Nome informado no pedido: DIVERGE do cadastro: o pedido informa 'Carla Regina Souza', mas a matrícula 207481 pertence a outro servidor; diligência (art. 9º).
+
+[DIA-2026-0112 · matrícula corrigida 207418 (complementação)]
+  Matrícula 207418: Carla Regina Souza, Técnica Ambiental. Grupo da diária: C. Unidade de lotação: CUC. Sede: Cuiabá. Nome informado no pedido: CONFERE com o cadastro.
+
+[Complementação DIA-2026-0112 · cálculo com o grupo C de Carla]
+  Quantidade: 3.5 diária(s) (3 pernoite(s), art. 4º). Valor unitário: R$ 220,00 (grupo C, interior de MT, Anexo I). Valor total: R$ 770,00 = 770.00. Antecedência: 46 dia(s) corridos entre o protocolo (2026-10-09) e a partida (2026-11-24): ATENDE o mínimo de 10 dias (art. 5º).
+
+[DIA-2026-0108 · prestação do DIA-2026-0023]
+  Mês da partida 11/2026: 0 diária(s) já concedida(s) (nenhuma) + 3.5 pedida(s) = 3.5. Limite de 10.0 por mês: ATENDE (art. 6º). Prestação de contas do DIA-2026-0023 (retorno em 2026-09-18): pendente, VENCIDA em 2026-09-25; o servidor está impedido de receber nova diária até a regularização (art. 7º). Data da análise: 2026-10-09 (feriados não considerados).
+
+[DIA-2026-0102 · prestação do DIA-2026-0041]
+  Mês da partida 11/2026: 0 diária(s) já concedida(s) (nenhuma) + 3.5 pedida(s) = 3.5. Limite de 10.0 por mês: ATENDE (art. 6º). Prestação de contas do DIA-2026-0041 (retorno em 2026-10-06): pendente, NO PRAZO até 2026-10-13; não impede nova diária (art. 7º). Data da análise: 2026-10-09 (feriados não considerados).
+
+[DIA-2026-0103 · meia diária]
+  Quantidade: 0.5 diária(s) (0 pernoite(s), art. 4º). Valor unitário: R$ 280,00 (grupo B, interior de MT, Anexo I). Valor total: R$ 140,00 = 140.00. Antecedência: 29 dia(s) corridos entre o protocolo (2026-10-07) e a partida (2026-11-05): ATENDE o mínimo de 10 dias (art. 5º).
+
+[DIA-2026-0104 · Distrito Federal]
+  Quantidade: 2.5 diária(s) (2 pernoite(s), art. 4º). Valor unitário: R$ 600,00 (grupo A, Distrito Federal, Anexo I). Valor total: R$ 1.500,00 = 1500.00. Antecedência: 41 dia(s) corridos entre o protocolo (2026-10-06) e a partida (2026-11-16): ATENDE o mínimo de 10 dias (art. 5º).
+
+[DIA-2026-0105 · antecedência insuficiente]
+  Quantidade: 2.5 diária(s) (2 pernoite(s), art. 4º). Valor unitário: R$ 280,00 (grupo B, interior de MT, Anexo I). Valor total: R$ 700,00 = 700.00. Antecedência: 5 dia(s) corridos entre o protocolo (2026-10-08) e a partida (2026-10-13): NÃO ATENDE o mínimo de 10 dias (art. 5º); só se admite em urgência do § 1º, com autorização expressa e escrita do Secretário Adjunto (§ 2º); autorização verbal não supre.
+
+[DIA-2026-0109 · limite mensal]
+  Mês da partida 11/2026: 8.0 diária(s) já concedida(s) (DIA-2026-0062, DIA-2026-0063) + 3.5 pedida(s) = 11.5. Limite de 10.0 por mês: EXCEDE (art. 6º). Prestação de contas: nenhuma pendente. Não há impedimento (art. 7º).
+
+[DIA-2026-0110 · cálculo para outra UF]
+  Quantidade: 4.5 diária(s) (4 pernoite(s), art. 4º). Valor unitário: R$ 400,00 (grupo B, outra unidade da federação, Anexo I). Valor total: R$ 1.800,00 = 1800.00. Antecedência: 39 dia(s) corridos entre o protocolo (2026-10-02) e a partida (2026-11-10): ATENDE o mínimo de 10 dias (art. 5º).
+
+[DIA-2026-0110 · saldo da CRH]
+  Saldo da unidade CRH: R$ 640.00. Saldo INSUFICIENTE para R$ 1800.00 (art. 8º).
+
+[DIA-2026-0111 · retorno ausente]
+  Data de retorno ausente ou inválida: não é possível calcular as diárias. Pedido incompleto, diligência (art. 9º).
+
+[Minimização] 40 servidores consultados: nenhum CPF nem e-mail devolvido ao modelo.
+
+Todas as verificações passaram.

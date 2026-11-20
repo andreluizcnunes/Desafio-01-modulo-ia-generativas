@@ -24,11 +24,15 @@
         · calcular_diarias: grupo 'B' não veio do cadastro de uma matrícula do pedido
         · matrícula 204775 da instrução não consta do pedido nem da complementação
         · quantidade e valor calculados para 204775, cujo cadastro não confere com o nome do pedido
+        · recomendação de aptidão contrariada pelas ferramentas: cadastro divergente
     0111 com data de retorno inventada                       -> RECUSADA
         · calcular_diarias: data_retorno='2026-11-21' não consta do pedido nem da complementação
     0112 calculado para o servidor errado (Rafael, grupo B)  -> RECUSADA
         · quantidade e valor calculados para 207481, cujo cadastro não confere com o nome do pedido
+        · recomendação de aptidão contrariada pelas ferramentas: cadastro divergente
     complementação do 0112 com a matrícula corrigida         -> liberada
+    0108 marcado apto apesar da prestação VENCIDA            -> RECUSADA
+        · recomendação de aptidão contrariada pelas ferramentas: prestação de contas vencida
 
 [3] DIA-2026-0104 instruído de verdade: o CPF chega ao modelo ou ao banco?
     situação: entregue · recomendação: apto_para_autorizacao
@@ -36,6 +40,6 @@
     tabela agno_sessions            1 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_schema_versions     2 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_runs                1 registro(s) · dado pessoal encontrado: nenhum
-    alertas do agente: ['A justificativa contém CPF, conta corrente e agência mascarados; esses dados pessoais não foram utilizados na instrução e não devem ser expostos desnecessariamente.']
+    alertas do agente: ['A justificativa contém dados pessoais e bancários mascarados (CPF, conta corrente e agência); esses dados não foram utilizados na instrução e devem ser tratados com cautela.']
 
 Todas as verificações da Etapa 3 passaram.

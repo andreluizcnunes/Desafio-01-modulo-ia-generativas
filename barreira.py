@@ -17,8 +17,12 @@ Ela confere o que o agente fez contra o que a aplicação tem em mãos:
    `calcular_diarias` produziu nesta execução, para o grupo do servidor cuja
    matrícula está na instrução, e o nome desse servidor confere com o pedido.
    É o que impede a instrução "calculada para o servidor errado".
-4. Coerência mínima do contrato: número do pedido igual, e recomendação de
-   aptidão só com os seis critérios atendidos.
+4. Recomendação ancorada: "apto" não pode contrariar um impedimento que a
+   ferramenta devolveu (VENCIDA, EXCEDE, INSUFICIENTE, DIVERGE, ou antecedência
+   NÃO ATENDE sem urgência sinalizada). Protege contra a ordem embutida na
+   justificativa que convença o modelo (Aula 03, 6.3).
+5. Coerência mínima do contrato: número do pedido igual, os seis critérios
+   presentes, e recomendação de aptidão só com todos atendidos.
 
 Qualquer falha devolve a lista de problemas, e a aplicação mostra ao servidor
 apenas a mensagem padrão (Aula 06, 5.3): nada do conteúdo recusado é exibido.
@@ -128,7 +132,32 @@ def verificar(instrucao, consultas: list[dict], pedido: dict,
                                  f"{instrucao.valor_total} não foram produzidos pelo cálculo "
                                  f"para o grupo do servidor {matricula}")
 
-    # 4. Coerência do contrato.
+    # 4. A recomendação não pode contrariar o que as ferramentas devolveram.
+    # Sem esta regra, uma ordem embutida na justificativa que convencesse o
+    # modelo a marcar "apto" passaria com os números corretos (Aula 03, 6.3).
+    if instrucao.recomendacao == "apto_para_autorizacao":
+        impedimentos = []
+        for c in consultas:
+            r = c["resultado"]
+            if (c["ferramenta"] == "consultar_servidor"
+                    and str(c["argumentos"].get("matricula", "")).strip() == matricula
+                    and ("DIVERGE" in r or "não localizada" in r)):
+                impedimentos.append("cadastro divergente")
+            if c["ferramenta"] == "calcular_diarias" and "NÃO ATENDE" in r \
+                    and not instrucao.exige_autorizacao_superior:
+                impedimentos.append("antecedência insuficiente sem urgência sinalizada")
+            if c["ferramenta"] == "consultar_historico_diarias":
+                if "VENCIDA" in r:
+                    impedimentos.append("prestação de contas vencida")
+                if "EXCEDE" in r:
+                    impedimentos.append("limite mensal excedido")
+            if c["ferramenta"] == "consultar_saldo_diarias" and "INSUFICIENTE" in r:
+                impedimentos.append("saldo insuficiente")
+        if impedimentos:
+            problemas.append(f"recomendação de aptidão contrariada pelas ferramentas: "
+                             f"{', '.join(sorted(set(impedimentos)))}")
+
+    # 5. Coerência do contrato.
     vistos = {v.criterio for v in instrucao.verificacoes}
     if vistos != CRITERIOS:
         problemas.append(f"verificações incompletas: faltam {sorted(CRITERIOS - vistos)}")

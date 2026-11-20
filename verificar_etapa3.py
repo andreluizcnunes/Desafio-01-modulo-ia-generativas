@@ -24,7 +24,7 @@ from agno.run.agent import RunInput
 from barreira import verificar
 from instrutor import (FILTRO_DADOS_PESSOAIS, Instrucao, Verificacao, apagar_banco, construir_agente, instruir,
                        texto_da_complementacao, texto_do_pedido)
-from ferramentas import calcular_diarias, consultar_servidor
+from ferramentas import calcular_diarias, consultar_historico_diarias, consultar_servidor
 
 BASE = pathlib.Path(__file__).parent
 SAIDA = BASE / "resultados" / "etapa3_filtro_e_barreira.txt"
@@ -130,6 +130,17 @@ def parte2_barreira() -> None:
                             data_retorno="2026-11-27")],
                   instrucao_base("DIA-2026-0112", "207418", 3.5, 770.0, "apto_para_autorizacao"),
                   False))
+    p108 = POR_NUMERO["DIA-2026-0108"]
+    casos.append(("0108 marcado apto apesar da prestação VENCIDA", p108, None,
+                  [consulta("consultar_servidor", consultar_servidor, matricula="203648",
+                            nome_informado="Gustavo Henrique Prado"),
+                   consulta("calcular_diarias", calcular_diarias, grupo="B", destino_uf="MT",
+                            data_pedido="2026-10-05", data_partida="2026-11-03",
+                            data_retorno="2026-11-06"),
+                   consulta("consultar_historico_diarias", consultar_historico_diarias,
+                            matricula="203648", data_partida="2026-11-03", quantidade_pedida=3.5)],
+                  instrucao_base("DIA-2026-0108", "203648", 3.5, 980.0, "apto_para_autorizacao"),
+                  True))
     for rotulo, pedido, compl, consultas, instrucao, deve_recusar in casos:
         problemas = verificar(instrucao, consultas, pedido, compl)
         assert bool(problemas) == deve_recusar, (rotulo, problemas)

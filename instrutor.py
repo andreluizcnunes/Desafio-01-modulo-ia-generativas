@@ -128,8 +128,10 @@ Saída:
   artigos aplicados e o encaminhamento sugerido, sem deferir nem indeferir.
 
 Complementação: quando receber a complementação de um pedido em diligência, recupere o
-pedido do histórico desta conversa, aplique a correção e refaça a instrução completa,
-na mesma ordem de consultas."""
+pedido do histórico desta conversa e aplique a correção. Depois refaça a instrução
+completa, chamando de novo as quatro ferramentas, na mesma ordem: o histórico serve só
+para recuperar o pedido; cadastro, cálculo, histórico de diárias e saldo podem ter
+mudado e nunca são reaproveitados de consultas anteriores."""
 
 # Filtro de dados pessoais (Aula 06, 5.2). Os padrões de fábrica são
 # norte-americanos: o de telefone casa com sequências de dez algarismos e o de
@@ -268,7 +270,10 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
 def medir(resposta, duracao: float) -> dict:
     """Tokens, chamadas, tempo e custo lidos do objeto de resposta (Aula 06, 4.2)."""
     m = resposta.metrics
-    mensagens = [msg for msg in (resposta.messages or []) if msg.role == "assistant"]
+    # Com histórico ligado, `messages` traz também as mensagens de execuções
+    # anteriores, marcadas com `from_history`; elas não são chamadas deste turno.
+    mensagens = [msg for msg in (resposta.messages or [])
+                 if msg.role == "assistant" and not getattr(msg, "from_history", False)]
     entrada = (m.input_tokens if m else 0) or 0
     saida = (m.output_tokens if m else 0) or 0
     return {

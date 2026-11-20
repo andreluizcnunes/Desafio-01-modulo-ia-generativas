@@ -1,0 +1,24 @@
+[1] Atendimentos gravados no banco do agente
+    sessão DIA-2026-0101 · user_id 204317
+    sessão DIA-2026-0111 · user_id 206689
+    sessão DIA-2026-0112 · user_id 207481
+
+[2] Busca só pelo user_id da titular (o caminho intuitivo)
+    Beatriz Moraes Cunha (206689): sessões pelo user_id = ['DIA-2026-0111'] · mas o titular aparece em {'agno_sessions': 1, 'agno_runs': 2, 'agno_memories': 1}
+    Carla Regina Souza (207418): sessões pelo user_id = nenhuma · mas o titular aparece em {'agno_runs': 2, 'agno_memories': 1}
+
+[3] Rotina de eliminação completa
+    titular: Beatriz Moraes Cunha (206689)
+      antes            : {'agno_sessions': 1, 'agno_runs': 2, 'agno_memories': 1}
+      etapa 1 sessões  : {'pelo_user_id': ['DIA-2026-0111'], 'por_mencao_sob_outro_user_id': []}
+      após a etapa 1   : {'agno_memories': 1}
+      etapa 2 memórias : 1 apagada(s) ['Beatriz Moraes Cunha (matrícula 206689) possui o pedido de diárias DIA-2026-0111']
+      depois (tabela por tabela): nenhuma tabela · nada restou: SIM
+    titular: Carla Regina Souza (207418)
+      antes            : {'agno_runs': 2, 'agno_memories': 1}
+      etapa 1 sessões  : {'pelo_user_id': [], 'por_mencao_sob_outro_user_id': ['DIA-2026-0112']}
+      após a etapa 1   : {'agno_memories': 1}
+      etapa 2 memórias : 1 apagada(s) ['Carla Regina Souza (matrícula correta 207418) tem uma viagem a Alta Floresta/MT,']
+      depois (tabela por tabela): nenhuma tabela · nada restou: SIM
+
+[4] Controle: a outra servidora (Ana Paula, 204317) continua no banco? sim {'agno_sessions': 1, 'agno_runs': 1}

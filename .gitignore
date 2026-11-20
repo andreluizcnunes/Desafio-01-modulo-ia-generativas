@@ -9,6 +9,8 @@ __pycache__/
 # Bancos SQLite do agente: cópia de trabalho com dados pessoais (Aula 07, Seção 6)
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 
 # Configurações locais
 .streamlit/secrets.toml

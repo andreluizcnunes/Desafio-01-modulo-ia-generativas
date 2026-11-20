@@ -1,0 +1,179 @@
+[
+  {
+    "configuracao": "A · sem memória",
+    "pedido": "DIA-2026-0111",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "206689",
+      "valor_total": null,
+      "entrada_1a_chamada": 2354,
+      "entrada_total": 4805,
+      "saida_total": 592,
+      "chamadas": 2,
+      "custo": 0.001671,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "recusada",
+      "recomendacao": "diligencia",
+      "matricula": "",
+      "valor_total": null,
+      "entrada_1a_chamada": 2277,
+      "entrada_total": 4621,
+      "saida_total": 585,
+      "chamadas": 2,
+      "custo": 0.001626,
+      "motivo_recusa": [
+        "consultar_servidor: matrícula  não consta do pedido nem da complementação",
+        "matrícula  da instrução não consta do pedido nem da complementação"
+      ]
+    },
+    "aplicada_ao_pedido_certo": false
+  },
+  {
+    "configuracao": "A · sem memória",
+    "pedido": "DIA-2026-0112",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "207481",
+      "valor_total": null,
+      "entrada_1a_chamada": 2354,
+      "entrada_total": 4832,
+      "saida_total": 480,
+      "chamadas": 2,
+      "custo": 0.001542,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "207418",
+      "valor_total": null,
+      "entrada_1a_chamada": 2280,
+      "entrada_total": 4683,
+      "saida_total": 486,
+      "chamadas": 2,
+      "custo": 0.00152,
+      "motivo_recusa": []
+    },
+    "aplicada_ao_pedido_certo": false
+  },
+  {
+    "configuracao": "B · histórico da sessão (teto 4)",
+    "pedido": "DIA-2026-0111",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "206689",
+      "valor_total": null,
+      "entrada_1a_chamada": 2354,
+      "entrada_total": 4805,
+      "saida_total": 585,
+      "chamadas": 2,
+      "custo": 0.001663,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "entregue",
+      "recomendacao": "apto_para_autorizacao",
+      "matricula": "206689",
+      "valor_total": 980.0,
+      "entrada_1a_chamada": 3075,
+      "entrada_total": 16659,
+      "saida_total": 737,
+      "chamadas": 5,
+      "custo": 0.004216,
+      "motivo_recusa": []
+    },
+    "aplicada_ao_pedido_certo": true
+  },
+  {
+    "configuracao": "B · histórico da sessão (teto 4)",
+    "pedido": "DIA-2026-0112",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "207481",
+      "valor_total": null,
+      "entrada_1a_chamada": 2354,
+      "entrada_total": 4832,
+      "saida_total": 507,
+      "chamadas": 2,
+      "custo": 0.001575,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "entregue",
+      "recomendacao": "apto_para_autorizacao",
+      "matricula": "207418",
+      "valor_total": 770.0,
+      "entrada_1a_chamada": 3029,
+      "entrada_total": 16411,
+      "saida_total": 773,
+      "chamadas": 5,
+      "custo": 0.00421,
+      "motivo_recusa": []
+    },
+    "aplicada_ao_pedido_certo": true
+  },
+  {
+    "configuracao": "C · histórico + memórias do usuário",
+    "pedido": "DIA-2026-0111",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "206689",
+      "valor_total": null,
+      "entrada_1a_chamada": 2379,
+      "entrada_total": 5967,
+      "saida_total": 538,
+      "chamadas": 2,
+      "custo": 0.001839,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "entregue",
+      "recomendacao": "apto_para_autorizacao",
+      "matricula": "206689",
+      "valor_total": 980.0,
+      "entrada_1a_chamada": 3045,
+      "entrada_total": 17546,
+      "saida_total": 740,
+      "chamadas": 5,
+      "custo": 0.004397,
+      "motivo_recusa": []
+    },
+    "aplicada_ao_pedido_certo": true
+  },
+  {
+    "configuracao": "C · histórico + memórias do usuário",
+    "pedido": "DIA-2026-0112",
+    "turno_pedido": {
+      "situacao": "entregue",
+      "recomendacao": "diligencia",
+      "matricula": "207481",
+      "valor_total": null,
+      "entrada_1a_chamada": 2379,
+      "entrada_total": 6103,
+      "saida_total": 684,
+      "chamadas": 2,
+      "custo": 0.002041,
+      "motivo_recusa": []
+    },
+    "turno_complementacao": {
+      "situacao": "entregue",
+      "recomendacao": "apto_para_autorizacao",
+      "matricula": "207418",
+      "valor_total": 770.0,
+      "entrada_1a_chamada": 3185,
+      "entrada_total": 18527,
+      "saida_total": 1007,
+      "chamadas": 5,
+      "custo": 0.004914,
+      "motivo_recusa": []
+    },
+    "aplicada_ao_pedido_certo": true
+  }
+]

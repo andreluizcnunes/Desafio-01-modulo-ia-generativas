@@ -1,0 +1,14 @@
+# Chave da API: nunca versionada (Aula 02, Requisitos; Aula 06, Seção 6.5)
+.env
+
+# Ambiente virtual Python
+.venv/
+__pycache__/
+*.pyc
+
+# Bancos SQLite do agente: cópia de trabalho com dados pessoais (Aula 07, Seção 6)
+*.db
+*.db-journal
+
+# Configurações locais
+.streamlit/secrets.toml

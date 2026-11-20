@@ -22,7 +22,7 @@ import sqlite3
 from agno.run.agent import RunInput
 
 from barreira import verificar
-from instrutor import (FILTRO_DADOS_PESSOAIS, Instrucao, Verificacao, construir_agente, instruir,
+from instrutor import (FILTRO_DADOS_PESSOAIS, Instrucao, Verificacao, apagar_banco, construir_agente, instruir,
                        texto_da_complementacao, texto_do_pedido)
 from ferramentas import calcular_diarias, consultar_servidor
 
@@ -141,7 +141,7 @@ def parte2_barreira() -> None:
 def parte3_api() -> None:
     log("\n[3] DIA-2026-0104 instruído de verdade: o CPF chega ao modelo ou ao banco?")
     banco = BASE / "resultados" / "etapa3_verificacao.db"
-    banco.unlink(missing_ok=True)
+    apagar_banco(banco)
     resultado = instruir(POR_NUMERO["DIA-2026-0104"], construir_agente(banco=banco))
     log(f"    situação: {resultado.situacao} · recomendação: "
         f"{resultado.instrucao.recomendacao if resultado.instrucao else '-'}")
@@ -157,7 +157,7 @@ def parte3_api() -> None:
             f"dado pessoal encontrado: {achou or 'nenhum'}")
         assert not achou
     conexao.close()
-    banco.unlink()
+    apagar_banco(banco)
     if resultado.instrucao:
         log(f"    alertas do agente: {resultado.instrucao.alertas}")
 

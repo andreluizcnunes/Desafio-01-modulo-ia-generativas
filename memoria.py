@@ -20,7 +20,7 @@ Saída: resultados/memoria.json e resultados/memoria.md
 import json
 import pathlib
 
-from instrutor import construir_agente, instruir
+from instrutor import apagar_banco, construir_agente, instruir
 
 BASE = pathlib.Path(__file__).parent
 RESULTADOS = BASE / "resultados"
@@ -62,7 +62,7 @@ def main() -> None:
     registros = []
     for rotulo, memoria in CONFIGURACOES:
         banco = RESULTADOS / f"memoria_{memoria}.db"
-        banco.unlink(missing_ok=True)  # nenhuma configuração herda a anterior
+        apagar_banco(banco)  # nenhuma configuração herda a anterior
         agente = construir_agente(memoria=memoria, banco=banco)
         for c in COMPLEMENTOS:
             pedido = PEDIDOS[c["numero"]]
@@ -76,7 +76,7 @@ def main() -> None:
                   f" · T2 1ª chamada {registro['turno_complementacao']['entrada_1a_chamada']}"
                   f" · T2 total {registro['turno_complementacao']['entrada_total']}"
                   f" · aplicada certo: {registro['aplicada_ao_pedido_certo']}")
-        banco.unlink(missing_ok=True)  # cópia de trabalho com dados pessoais: não fica
+        apagar_banco(banco)  # cópia de trabalho com dados pessoais: não fica
 
     (RESULTADOS / "memoria.json").write_text(
         json.dumps(registros, ensure_ascii=False, indent=2), encoding="utf-8")

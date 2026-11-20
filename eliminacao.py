@@ -107,12 +107,12 @@ def eliminar_titular(banco: pathlib.Path, matricula: str, nome: str) -> dict:
 # Teste com as duas servidoras que passaram por diligência.
 # ----------------------------------------------------------------------
 def main() -> None:
-    from instrutor import construir_agente, instruir
+    from instrutor import apagar_banco, construir_agente, instruir
 
     pedidos = {p["numero"]: p for p in json.loads((BASE / "dados" / "pedidos.json").read_text("utf-8"))}
     complementos = json.loads((BASE / "dados" / "complementacoes.json").read_text("utf-8"))
     banco = BASE / "resultados" / "eliminacao_teste.db"
-    banco.unlink(missing_ok=True)
+    apagar_banco(banco)
     saida: list[str] = []
 
     def log(texto: str = "") -> None:
@@ -159,7 +159,7 @@ def main() -> None:
     assert restante, "a rotina apagou dados de quem não pediu"
 
     (BASE / "resultados" / "eliminacao.txt").write_text("\n".join(saida) + "\n", encoding="utf-8")
-    banco.unlink(missing_ok=True)
+    apagar_banco(banco)
 
 
 if __name__ == "__main__":

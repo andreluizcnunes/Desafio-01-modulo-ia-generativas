@@ -185,6 +185,13 @@ def construir_agente(memoria: str = "historico", paralelas: bool = False,
     )
 
 
+def apagar_banco(banco: pathlib.Path) -> None:
+    """Apaga o banco de teste junto com os arquivos -wal e -shm do SQLite,
+    que também guardam conteúdo das execuções."""
+    for sufixo in ("", "-wal", "-shm", "-journal"):
+        pathlib.Path(f"{banco}{sufixo}").unlink(missing_ok=True)
+
+
 def texto_do_pedido(pedido: dict) -> str:
     """O pedido como foi protocolado, em texto, para o agente."""
     return ("Instrua o pedido de diárias abaixo.\n"

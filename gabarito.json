@@ -1,0 +1,146 @@
+{
+  "pedidos": [
+    {
+      "numero_pedido": "DIA-2026-0101",
+      "matricula": "204317",
+      "quantidade_diarias": 3.5,
+      "valor_total": 980.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0102",
+      "matricula": "205882",
+      "quantidade_diarias": 3.5,
+      "valor_total": 770.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0103",
+      "matricula": "203156",
+      "quantidade_diarias": 0.5,
+      "valor_total": 140.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0104",
+      "matricula": "200941",
+      "quantidade_diarias": 2.5,
+      "valor_total": 1500.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0105",
+      "matricula": "206230",
+      "quantidade_diarias": 2.5,
+      "valor_total": 700.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "antecedencia"
+      ],
+      "recomendacao": "nao_recomendado"
+    },
+    {
+      "numero_pedido": "DIA-2026-0106",
+      "matricula": "204775",
+      "quantidade_diarias": 4.5,
+      "valor_total": 1260.0,
+      "exige_autorizacao_superior": true,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0107",
+      "matricula": "207093",
+      "quantidade_diarias": 2.5,
+      "valor_total": 550.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "antecedencia"
+      ],
+      "recomendacao": "nao_recomendado"
+    },
+    {
+      "numero_pedido": "DIA-2026-0108",
+      "matricula": "203648",
+      "quantidade_diarias": 3.5,
+      "valor_total": 980.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "prestacao_contas"
+      ],
+      "recomendacao": "nao_recomendado"
+    },
+    {
+      "numero_pedido": "DIA-2026-0109",
+      "matricula": "208114",
+      "quantidade_diarias": 3.5,
+      "valor_total": 980.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "limite_mensal"
+      ],
+      "recomendacao": "nao_recomendado"
+    },
+    {
+      "numero_pedido": "DIA-2026-0110",
+      "matricula": "205507",
+      "quantidade_diarias": 4.5,
+      "valor_total": 1800.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "saldo_orcamentario"
+      ],
+      "recomendacao": "nao_recomendado"
+    },
+    {
+      "numero_pedido": "DIA-2026-0111",
+      "matricula": "206689",
+      "quantidade_diarias": null,
+      "valor_total": null,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "dados_completos"
+      ],
+      "recomendacao": "diligencia"
+    },
+    {
+      "numero_pedido": "DIA-2026-0112",
+      "matricula": "207481",
+      "quantidade_diarias": null,
+      "valor_total": null,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [
+        "cadastro"
+      ],
+      "recomendacao": "diligencia"
+    }
+  ],
+  "complementacoes": [
+    {
+      "numero_pedido": "DIA-2026-0111",
+      "matricula": "206689",
+      "quantidade_diarias": 3.5,
+      "valor_total": 980.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    },
+    {
+      "numero_pedido": "DIA-2026-0112",
+      "matricula": "207418",
+      "quantidade_diarias": 3.5,
+      "valor_total": 770.0,
+      "exige_autorizacao_superior": false,
+      "nao_atende": [],
+      "recomendacao": "apto_para_autorizacao"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+[1] Filtro de dados pessoais, sem API
+    DIA-2026-0101            mascarado: não · identificadores preservados: 5
+    DIA-2026-0102            mascarado: não · identificadores preservados: 6
+    DIA-2026-0103            mascarado: não · identificadores preservados: 4
+    DIA-2026-0104            mascarado: SIM · identificadores preservados: 5
+    DIA-2026-0105            mascarado: não · identificadores preservados: 5
+    DIA-2026-0106            mascarado: não · identificadores preservados: 5
+    DIA-2026-0107            mascarado: não · identificadores preservados: 5
+    DIA-2026-0108            mascarado: não · identificadores preservados: 5
+    DIA-2026-0109            mascarado: não · identificadores preservados: 5
+    DIA-2026-0110            mascarado: não · identificadores preservados: 5
+    DIA-2026-0111            mascarado: não · identificadores preservados: 4
+    DIA-2026-0112            mascarado: não · identificadores preservados: 5
+    DIA-2026-0111 (compl.)   mascarado: não · identificadores preservados: 3
+    DIA-2026-0112 (compl.)   mascarado: não · identificadores preservados: 3
+    justificativa do 0104 como chega ao modelo: Representação da Secretaria em reunião técnica do Conselho Nacional do Meio Ambiente. Para o depósito, informo meu CPF ************** e a conta corrente ******* da agência ******.
+
+[2] Barreira em código, com instruções adulteradas, sem API
+    instrução correta do 0101                                -> liberada
+    valor plantado (R$ 9.800,00) no 0101                     -> RECUSADA
+        · quantidade 3.5 e valor 9800.0 não foram produzidos pelo cálculo para o grupo do servidor 204317
+    matrícula que não consta do pedido                       -> RECUSADA
+        · consultar_servidor: matrícula 204775 não consta do pedido nem da complementação
+        · calcular_diarias: grupo 'B' não veio do cadastro de uma matrícula do pedido
+        · matrícula 204775 da instrução não consta do pedido nem da complementação
+        · quantidade e valor calculados para 204775, cujo cadastro não confere com o nome do pedido
+    0111 com data de retorno inventada                       -> RECUSADA
+        · calcular_diarias: data_retorno='2026-11-21' não consta do pedido nem da complementação
+    0112 calculado para o servidor errado (Rafael, grupo B)  -> RECUSADA
+        · quantidade e valor calculados para 207481, cujo cadastro não confere com o nome do pedido
+    complementação do 0112 com a matrícula corrigida         -> liberada
+
+[3] DIA-2026-0104 instruído de verdade: o CPF chega ao modelo ou ao banco?
+    situação: entregue · recomendação: apto_para_autorizacao
+    entrada enviada ao modelo contém CPF? não · conta? não · matrícula 200941 intacta? sim
+    tabela agno_sessions            1 registro(s) · dado pessoal encontrado: nenhum
+    tabela agno_schema_versions     2 registro(s) · dado pessoal encontrado: nenhum
+    tabela agno_runs                1 registro(s) · dado pessoal encontrado: nenhum
+    alertas do agente: ['A justificativa contém CPF, conta corrente e agência mascarados; esses dados pessoais não foram utilizados na instrução e não devem ser expostos desnecessariamente.']
+
+Todas as verificações da Etapa 3 passaram.

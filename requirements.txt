@@ -1,0 +1,6 @@
+agno==3.0.9
+openai==3.57.0
+python-dotenv==1.2.4
+pydantic==2.14.4
+streamlit==1.67.0
+sqlalchemy[asyncio]==2.1.9

@@ -62,6 +62,13 @@ CRITERIOS = ("cadastro", "dados_completos", "antecedencia", "prestacao_contas",
              "limite_mensal", "saldo_orcamentario")
 MERITO = ("antecedencia", "prestacao_contas", "limite_mensal", "saldo_orcamentario")
 CONSULTAS_DE_MERITO = ("calcular_diarias", "consultar_historico_diarias", "consultar_saldo_diarias")
+# Resultado de uma consulta de mérito barrada antes de executar (instrutor.py,
+# guarda_de_merito): a função não rodou e nada leu.
+CONSULTA_BLOQUEADA = "CONSULTA BLOQUEADA PELA APLICAÇÃO"
+
+
+def bloqueada(consulta: dict) -> bool:
+    return str(consulta.get("resultado", "")).startswith(CONSULTA_BLOQUEADA)
 
 # Art. 5º, § 1º: as hipóteses de urgência que a norma lista. A leitura é
 # conservadora (desenho.md, Seção 8): o código só reconhece as hipóteses
@@ -201,6 +208,8 @@ def _conferir_consultas(consultas: list[dict], pedido: dict, vigente: dict) -> t
     servidor = SERVIDORES.get(matricula)
     evidencias: dict = {"servidor": None, "calculo": None, "historico": None, "saldo": None}
 
+    # Uma consulta barrada antes de executar não é evidência de nada.
+    consultas = [c for c in consultas if not bloqueada(c)]
     # O cálculo vem antes porque histórico e saldo se ancoram nele.
     for c in consultas:
         if c["ferramenta"] != "calcular_diarias":
@@ -615,11 +624,13 @@ def conferir(instrucao, consultas: list[dict], pedido: dict,
         problemas.append(f"verificações incompletas ou repetidas: {vistos}")
 
     # Art. 9º: na diligência não há análise de mérito. Cálculo, histórico ou
-    # saldo feitos nesse cenário (inclusive para o servidor da matrícula
+    # saldo pedidos nesse cenário (inclusive para o servidor da matrícula
     # digitada, quando o cadastro diverge) são trilha indevida, e nada dela
-    # pode chegar ao formulário.
+    # pode chegar ao formulário. A aplicação já barra essas consultas antes de
+    # executar (instrutor.py); a tentativa barrada também é recusada aqui.
     if alvo["recomendacao"] == "diligencia":
-        indevidas = [c["ferramenta"] for c in consultas if c["ferramenta"] in CONSULTAS_DE_MERITO]
+        indevidas = [c["ferramenta"] + (" (bloqueada antes de executar)" if bloqueada(c) else "")
+                     for c in consultas if c["ferramenta"] in CONSULTAS_DE_MERITO]
         if indevidas:
             problemas.append(f"consultas de mérito em pedido que exige diligência (art. 9º): "
                              f"{', '.join(indevidas)}")

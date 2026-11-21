@@ -9,7 +9,9 @@ Parte A (sem chave): o agente é substituído por respostas controladas
 minuta errada do modelo substituída pela do código, os alertas errados do
 modelo fora da tela e os exigidos pelo enunciado presentes, o registro da divergência
 humana, a diligência com complementação na mesma sessão, a recusa da barreira,
-o status ERROR, o fluxo que termina sem resposta (inclusive sem evento
+a tentativa de consulta de mérito no 0112 em diligência, barrada antes de
+executar (Agno real com o modelo interceptado), o status ERROR, o fluxo que
+termina sem resposta (inclusive sem evento
 inicial, com uma instrução válida anterior no banco) e a eliminação (válida e
 com identidade inválida).
 
@@ -52,6 +54,7 @@ class AgenteComutavel:
     def __init__(self):
         self.cena = "normal"
         self.real = None
+        self.interceptado = self.roteirizado = None
         self.simulado = AgenteSimulado(self._roteiro)
 
     def _roteiro(self, session_id, entrada):
@@ -78,6 +81,15 @@ class AgenteComutavel:
         return {"modo": modo, "instrucao": instrucao, "consultas": consultas}
 
     def _alvo(self):
+        if self.cena == "interceptado":
+            # O Agno real, com o gancho de ferramenta e o banco, e só as
+            # requisições ao modelo interceptadas (teste_bloqueio.py).
+            if self.interceptado is None:
+                from teste_bloqueio import ModeloRoteirizado, agente_interceptado
+                self.roteirizado = ModeloRoteirizado()
+                self.interceptado = agente_interceptado(PASTA / "interceptado.db",
+                                                        self.roteirizado, FABRICA_ORIGINAL)
+            return self.interceptado
         if self.cena != "real":
             return self.simulado
         if self.real is None:
@@ -219,6 +231,25 @@ def parte_a() -> None:
         instruir_pela_tela(at, "DIA-2026-0101")
         so_mensagem_padrao(at, rotulo, proibidos + ["Consultando o cadastro", "204317 ·",
                                                     "Apto para autorização"])
+
+    log("[A4b] DIA-2026-0112 com tentativa de cálculo, histórico e saldo após o DIVERGE "
+        "(Agno real, modelo interceptado)")
+    import teste_bloqueio as tb
+    AGENTE.cena = "interceptado"
+    AGENTE._alvo()
+    AGENTE.roteirizado.passos = (tb.trilha("DIA-2026-0112")[:1] + tb.MERITO_207481
+                                 + [tb.final("DIA-2026-0112")])
+    inicio = len(tb.EXECUTADAS)
+    instruir_pela_tela(at, "DIA-2026-0112")
+    assert tb.EXECUTADAS[inicio:] == ["consultar_servidor"], tb.EXECUTADAS[inicio:]
+    so_mensagem_padrao(at, "tentativa de mérito em diligência",
+                       ["Valor unitário", "Saldo da unidade", "Mês da partida", "BLOQUEADA"])
+    log(f"    funções executadas: {tb.EXECUTADAS[inicio:]}; o formulário não mostra dado de mérito")
+    AGENTE.roteirizado.passos = tb.trilha("DIA-2026-0112")[:1] + [tb.final("DIA-2026-0112")]
+    instruir_pela_tela(at, "DIA-2026-0112")
+    assert "Diligência" in textos(at), textos(at)
+    log(f"    diligência legítima pelo mesmo caminho: {[m.value for m in at.metric][:3]}")
+    AGENTE.cena = "normal"
 
     log("[A5] Eliminação pela tela")
     montar_banco(BANCO_TESTE)

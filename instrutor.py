@@ -25,6 +25,13 @@ Decisões, cada uma com a aula de origem:
   papel; do modelo, chegam à tela só as situações, os números e a recomendação,
   depois de conferidos (barreira.py, itens 5 e 6; Aula 04, 8). Os alertas do
   modelo ficam registrados no resultado, fora da tela.
+- Cálculo, histórico e saldo só executam quando o pedido vigente está completo
+  e o cadastro da matrícula vigente CONFERE nesta execução: um gancho de
+  ferramenta (`tool_hooks`, o equivalente no Agno do `wrap_tool_call` da
+  Aula 03, 4.2) decide antes de a função rodar, e a consulta barrada devolve
+  ao modelo só o motivo, sem dado de mérito. O estado fica preso ao
+  identificador de cada execução, e o agente compartilhado pela tela não
+  mistura pedidos (art. 9º; Aula 01, 8).
 - Resposta ausente, de outra execução ou com status diferente de concluído é
   falha, conferida antes do conteúdo (Aula 06, 5.3). Sem o identificador da
   execução atual, nenhuma resposta é buscada no banco. A barreira em código de
@@ -33,7 +40,9 @@ Decisões, cada uma com a aula de origem:
 """
 import json
 import pathlib
+import threading
 import time
+import uuid
 import warnings
 from dataclasses import dataclass, field
 from typing import Literal, Optional
@@ -48,8 +57,9 @@ from agno.run.base import RunStatus
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from barreira import PADROES_DADOS_PESSOAIS, conferir
-from ferramentas import FERRAMENTAS
+from barreira import (CONSULTA_BLOQUEADA, CONSULTAS_DE_MERITO, OBRIGATORIOS, PADROES_DADOS_PESSOAIS,
+                      ROTULOS_CAMPOS, _texto, conferir, pedido_vigente)
+from ferramentas import FERRAMENTAS, _normalizar_nome
 
 BASE = pathlib.Path(__file__).parent
 load_dotenv(BASE / ".env")
@@ -166,6 +176,74 @@ FILTRO_DADOS_PESSOAIS = PIIDetectionGuardrail(
 )
 
 
+# ------------------------------------------------------------------
+# A guarda das consultas de mérito, antes de a função executar (art. 9º).
+# ------------------------------------------------------------------
+# Estado de cada execução em andamento, pelo identificador que `instruir`
+# gera e entrega ao Agno. A tela compartilha um único agente entre pedidos:
+# o estado de um pedido nunca vale para outro.
+_EXECUCOES: dict[str, dict] = {}
+_TRAVA = threading.Lock()
+
+
+def _registrar_execucao(run_id: str, pedido: dict, complemento: Optional[dict]) -> None:
+    vigente, problemas = pedido_vigente(pedido, complemento)
+    with _TRAVA:
+        _EXECUCOES[run_id] = {
+            "matricula": _texto(vigente.get("matricula")),
+            "nome": _normalizar_nome(_texto(vigente.get("nome"))),
+            "faltantes": [c for c in OBRIGATORIOS if not _texto(vigente.get(c))],
+            "problemas": problemas,
+            "cadastro_confere": False,
+            "bloqueadas": [],
+        }
+
+
+def _encerrar_execucao(run_id: str) -> dict:
+    with _TRAVA:
+        return _EXECUCOES.pop(run_id, {})
+
+
+def _motivo_do_bloqueio(estado: Optional[dict]) -> str:
+    if estado is None:
+        return "execução sem pedido registrado pela aplicação."
+    if estado["problemas"]:
+        return "complementação que não se consegue aplicar: " + "; ".join(estado["problemas"]) + "."
+    if estado["faltantes"]:
+        return ("pedido incompleto, falta: "
+                + ", ".join(ROTULOS_CAMPOS[c] for c in estado["faltantes"]) + ".")
+    if not estado["cadastro_confere"]:
+        return (f"o cadastro da matrícula vigente {estado['matricula']} não CONFERE com o nome "
+                f"do pedido nesta execução.")
+    return ""
+
+
+def guarda_de_merito(function_name: str, function_call, arguments: dict, run_context=None):
+    """Gancho de ferramenta: decide se a consulta executa (Aula 03, 4.2).
+
+    O cadastro sempre executa, e o resultado da matrícula vigente com o nome do
+    pedido registra se ele CONFERE. Cálculo, histórico e saldo só executam com
+    o pedido vigente completo e o cadastro conferido nesta execução; senão, a
+    função não roda e o modelo recebe só o motivo (art. 9º).
+    """
+    with _TRAVA:
+        estado = _EXECUCOES.get(getattr(run_context, "run_id", None))
+    if function_name in CONSULTAS_DE_MERITO:
+        motivo = _motivo_do_bloqueio(estado)
+        if motivo:
+            if estado is not None:
+                estado["bloqueadas"].append(function_name)
+            return (f"{CONSULTA_BLOQUEADA}: {motivo} Sem análise de mérito (art. 9º): recomende "
+                    f"diligência, com quantidade e valor nulos.")
+    resultado = function_call(**arguments)
+    if function_name == "consultar_servidor" and estado is not None:
+        if (_texto(arguments.get("matricula")) == estado["matricula"]
+                and _normalizar_nome(_texto(arguments.get("nome_informado"))) == estado["nome"]
+                and "CONFERE com o cadastro" in str(resultado)):
+            estado["cadastro_confere"] = True
+    return resultado
+
+
 def construir_agente(memoria: str = "historico", paralelas: bool = False,
                      banco: pathlib.Path = BANCO_PADRAO, modelo: str = MODELO,
                      reasoning_effort: Optional[str] = "none") -> Agent:
@@ -194,6 +272,7 @@ def construir_agente(memoria: str = "historico", paralelas: bool = False,
         instructions=INSTRUCAO,
         output_schema=Instrucao,
         tool_call_limit=8,
+        tool_hooks=[guarda_de_merito],
         pre_hooks=[FILTRO_DADOS_PESSOAIS],
         markdown=False,
         telemetry=False,
@@ -234,6 +313,8 @@ class Resultado:
     # Os alertas que o modelo escreveu: registrados, nunca exibidos (a tela
     # mostra os alertas montados pelo código).
     alertas_do_modelo: list[str] = field(default_factory=list)
+    # Consultas de mérito barradas antes de executar (guarda_de_merito).
+    consultas_bloqueadas: list[str] = field(default_factory=list)
 
 
 def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
@@ -247,8 +328,22 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
     ferramenta é anunciada quando começa, que é o progresso que a tela mostra
     (Aula 06, 6.3).
     """
+    # O identificador da execução é gerado aqui e entregue ao Agno: é por ele
+    # que a guarda das consultas de mérito acha o pedido desta execução.
+    execucao = str(uuid.uuid4())
+    _registrar_execucao(execucao, pedido, complemento)
+    try:
+        resultado = _executar(pedido, agente, complemento, ao_chamar_ferramenta, execucao)
+    finally:
+        estado = _encerrar_execucao(execucao)
+    resultado.consultas_bloqueadas = estado.get("bloqueadas", [])
+    return resultado
+
+
+def _executar(pedido: dict, agente: Agent, complemento: Optional[dict], ao_chamar_ferramenta,
+              execucao: str) -> Resultado:
     entrada = texto_da_complementacao(complemento) if complemento else texto_do_pedido(pedido)
-    ids = {"session_id": pedido["numero"], "user_id": pedido["matricula"]}
+    ids = {"session_id": pedido["numero"], "user_id": pedido["matricula"], "run_id": execucao}
 
     inicio = time.perf_counter()
     run_id = None  # identificador da execução atual, anunciado no início do fluxo

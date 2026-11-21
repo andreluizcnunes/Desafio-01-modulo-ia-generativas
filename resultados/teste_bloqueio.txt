@@ -1,0 +1,40 @@
+[1] Tentativas de consulta de mérito em pedido que exige diligência (art. 9º)
+    DIA-2026-0112 (resposta direta): tentou calcular_diarias, consultar_historico_diarias, consultar_saldo_diarias
+        funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente 207481 não CONFERE com o nome do pedido nes...
+        banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
+    DIA-2026-0111 (resposta direta): tentou calcular_diarias
+        funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias']
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Sem análise de mérito (art. 9º):...
+        banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
+    DIA-2026-0112 (fluxo de eventos): tentou calcular_diarias, consultar_historico_diarias, consultar_saldo_diarias
+        funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente 207481 não CONFERE com o nome do pedido nes...
+        banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
+    DIA-2026-0111 (fluxo de eventos): tentou calcular_diarias
+        funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias']
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Sem análise de mérito (art. 9º):...
+        banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
+
+[2] Diligências legítimas e complementações na mesma sessão
+    DIA-2026-0112 (resposta direta): diligência entregue, quantidade e valor nulos; executou ['consultar_servidor']
+        complementação na mesma sessão (DIA-2026-0112): apto_para_autorizacao; executou ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        histórico com a matrícula 207418; cálculo com retorno 2026-11-27
+    DIA-2026-0111 (resposta direta): diligência entregue, quantidade e valor nulos; executou ['consultar_servidor']
+        complementação na mesma sessão (DIA-2026-0111): apto_para_autorizacao; executou ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        histórico com a matrícula 206689; cálculo com retorno 2026-11-20
+    DIA-2026-0112 (fluxo de eventos): diligência entregue, quantidade e valor nulos; executou ['consultar_servidor']
+        complementação na mesma sessão (DIA-2026-0112): apto_para_autorizacao; executou ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        histórico com a matrícula 207418; cálculo com retorno 2026-11-27
+    DIA-2026-0111 (fluxo de eventos): diligência entregue, quantidade e valor nulos; executou ['consultar_servidor']
+        complementação na mesma sessão (DIA-2026-0111): apto_para_autorizacao; executou ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
+        histórico com a matrícula 206689; cálculo com retorno 2026-11-20
+
+[3] Controle: pedido regular com as quatro ferramentas
+    DIA-2026-0101 (resposta direta): apto_para_autorizacao; as quatro funções executaram: ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']; o banco tem as 6 marcas de mérito (controle da busca)
+    DIA-2026-0101 (fluxo de eventos): apto_para_autorizacao; as quatro funções executaram: ['consultar_servidor', 'calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']; o banco tem as 6 marcas de mérito (controle da busca)
+
+[4] Agente compartilhado
+    mesmo agente, 0101 e depois 0112: o cadastro conferido do 0101 não libera o mérito do 0112 (executadas no 0112: ['consultar_servidor']); estado das execuções vazio ao final
+
+Todas as verificações da guarda das consultas de mérito passaram.

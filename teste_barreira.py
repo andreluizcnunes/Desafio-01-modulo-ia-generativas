@@ -23,7 +23,7 @@ Saída: resultados/teste_barreira.txt
 import json
 import pathlib
 
-from barreira import conferir, ler_urgencia
+from barreira import CONSULTA_BLOQUEADA, conferir, ler_urgencia
 from instrutor import instruir
 from medir import classificar
 from simulacao import (AgenteSimulado, alterar, consulta, consultas_corretas, esperado,
@@ -127,6 +127,15 @@ def montar_casos() -> list[tuple]:
                   alterar(i, alertas=["Conferir a escala da equipe de vistoria."]), "corrige", g,
                   "Conferir a escala"))
 
+    # Consulta barrada pela guarda antes de executar (instrutor.py): não é
+    # evidência. Uma tentativa prematura, refeita depois do cadastro, não atrapalha.
+    barrada = {"ferramenta": "consultar_historico_diarias",
+               "argumentos": dict(k[2]["argumentos"]),
+               "resultado": f"{CONSULTA_BLOQUEADA}: o cadastro da matrícula vigente 204317 não "
+                            f"CONFERE com o nome do pedido nesta execução."}
+    casos.append(("0101 com histórico barrado antes do cadastro e refeito depois", p101, None,
+                  [barrada] + k, i, "libera", g, None))
+
     # Consulta obrigatória omitida.
     g, k, i = caso_correto("DIA-2026-0108")
     sem_historico = [c for c in k if c["ferramenta"] != "consultar_historico_diarias"]
@@ -134,6 +143,10 @@ def montar_casos() -> list[tuple]:
                    situacoes={"prestacao_contas": "atende"})
     casos.append(("0108 sem a consulta de histórico, marcado apto", p108, None, sem_historico,
                   apto, "recusa", g, None))
+    so_barrado = sem_historico[:2] + [dict(barrada, argumentos=dict(
+        g["trilha"]["consultar_historico_diarias"]))] + sem_historico[2:]
+    casos.append(("0108 só com o histórico barrado (não executado), marcado apto", p108, None,
+                  so_barrado, apto, "recusa", g, None))
     casos.append(("0108 com todas as consultas, marcado apto apesar da VENCIDA", p108, None, k,
                   apto, "recusa", g, None))
     casos.append(("0108 correto: não recomendado pela prestação vencida", p108, None, k, i, "libera", g, None))

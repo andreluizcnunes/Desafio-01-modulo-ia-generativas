@@ -33,6 +33,7 @@ custo aqui são **estimativas**; o `relatorio.md` os confronta com o que foi med
 |---|---|---|---|
 | 1 | Código | Recebe o pedido; o **filtro de dados pessoais** mascara CPF e conta bancária antes do modelo (Aula 06, 5.2) | LGPD art. 6º, III |
 | 2 | Modelo → `consultar_servidor` | Cadastro pela matrícula; a ferramenta diz se o nome confere; não devolve CPF nem e-mail | art. 9º |
+| 2b | Código | **Guarda das consultas de mérito**: um gancho de ferramenta (`tool_hooks`, o `wrap_tool_call` da Aula 03, 4.2) só deixa cálculo, histórico e saldo executarem se o pedido vigente estiver completo e o cadastro da matrícula vigente CONFERE nesta execução; senão a função não roda e o modelo recebe só o motivo | art. 9º |
 | 3 | Modelo → `calcular_diarias` | Quantidade, valor e antecedência **calculados no código** | art. 3º, 4º, 5º |
 | 4 | Modelo → `consultar_historico_diarias` | Diárias do mês + pedidas vs. limite; prestações vencidas ou no prazo, **no código** | art. 6º, 7º |
 | 5 | Modelo → `consultar_saldo_diarias` | Saldo da unidade vs. valor, **no código** | art. 8º |
@@ -41,6 +42,11 @@ custo aqui são **estimativas**; o `relatorio.md` os confronta com o que foi med
 | 7b | Código | **Textos factuais**: com a instrução liberada, monta os fundamentos, as pendências e a minuta com os dados das consultas válidas, cada um no seu papel (valor unitário, total, saldo, situação da prestação), e os alertas pelas categorias que o código verifica no pedido (dados pessoais mascarados, ordem dirigida ao sistema, autorização verbal, autorização escrita a conferir na urgência), no lugar dos textos do modelo, que ficam registrados e não vão à tela (Aula 04, 8; Aula 01, 8) | arts. 4º a 10 |
 | 8 | Servidor | Confere no formulário, edita a minuta, registra o encaminhamento que decidiu (Aula 06, 6.2) | — |
 | 9 | Ordenador | Defere ou indefere | art. 10 |
+
+Na diligência, nenhuma consulta de mérito chega a executar: a guarda (passo 2b) decide
+antes da função, com o estado preso ao identificador da execução, e o agente
+compartilhado pela tela não mistura pedidos. Uma tentativa barrada não leva dado ao
+modelo, ao banco nem ao formulário, e a barreira (passo 7) ainda recusa a instrução.
 
 Na diligência, a complementação é enviada **na mesma sessão** (`session_id` = número do
 pedido) e o agente recupera o caso pelo histórico (Aula 07, 2).

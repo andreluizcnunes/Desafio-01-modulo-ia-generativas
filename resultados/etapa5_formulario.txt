@@ -24,13 +24,17 @@
     fluxo terminou sem RunOutput: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
     sem evento inicial nem resposta, anterior válida no banco: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
     sem resposta, banco devolve a execução anterior: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+[A4b] DIA-2026-0112 com tentativa de cálculo, histórico e saldo após o DIVERGE (Agno real, modelo interceptado)
+    tentativa de mérito em diligência: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    funções executadas: ['consultar_servidor']; o formulário não mostra dado de mérito
+    diligência legítima pelo mesmo caminho: ['Diligência', '-', '-']
 [A5] Eliminação pela tela
     matrícula parcial: Eliminação não executada: matrícula '20' inválida: são seis algarismos.
     Carla (207418, sessão sob 207481): Conferência tabela por tabela: nada restou do titular no banco do agente.
     controle Ana Paula continua no banco: {'agno_sessions': 1, 'agno_runs': 1, 'agno_memories': 1}
 [B] Modelo real: DIA-2026-0101
-    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14331 tokens de entrada · 568 de saída · US$ 0.00355 · 10.3 s']
+    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14331 tokens de entrada · 572 de saída · US$ 0.00355 · 8.1 s']
 [B] Modelo real: DIA-2026-0111
-    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5291 tokens de entrada · 349 de saída · US$ 0.00148 · 4.1 s']
+    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5291 tokens de entrada · 361 de saída · US$ 0.00149 · 4.1 s']
     após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
 Todas as verificações do formulário passaram.

@@ -38,7 +38,10 @@
         · trecho do modelo fora da instrução entregue: 'O valor total correto é R$ 280,00'
     0101 com alerta fora das categorias do enunciado                               -> liberada com os textos do código
         · trecho do modelo fora da instrução entregue: 'Conferir a escala'
+    0101 com histórico barrado antes do cadastro e refeito depois                  -> liberada
     0108 sem a consulta de histórico, marcado apto                                 -> RECUSADA
+        · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
+    0108 só com o histórico barrado (não executado), marcado apto                  -> RECUSADA
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> RECUSADA
         · prestacao_contas: a instrução declara 'atende', as consultas sustentam 'nao_atende'
@@ -127,7 +130,9 @@
     0101 com alerta citando valor por extenso                                      -> entregue  · medição: acerto
     0101 com alerta: o valor unitário como total (R$ 280,00)                       -> entregue  · medição: acerto
     0101 com alerta fora das categorias do enunciado                               -> entregue  · medição: acerto
+    0101 com histórico barrado antes do cadastro e refeito depois                  -> entregue  · medição: acerto
     0108 sem a consulta de histórico, marcado apto                                 -> recusada  · medição: recusado
+    0108 só com o histórico barrado (não executado), marcado apto                  -> recusada  · medição: recusado
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> recusada  · medição: recusado
     0108 correto: não recomendado pela prestação vencida                           -> entregue  · medição: acerto
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue  · medição: acerto
@@ -176,7 +181,9 @@
     0101 com alerta: o valor unitário como total (R$ 280,00)                       -> entregue_errado · alerta fora das categorias esperadas: 'o valor total correto e r$ 280,
         · também: alerta: valor total 280.0 ≠ 980.0
     0101 com alerta fora das categorias do enunciado                               -> entregue_errado · alerta fora das categorias esperadas: 'conferir a escala da equipe de 
+    0101 com histórico barrado antes do cadastro e refeito depois                  -> acerto
     0108 sem a consulta de histórico, marcado apto                                 -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
+    0108 só com o histórico barrado (não executado), marcado apto                  -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0108 correto: não recomendado pela prestação vencida                           -> acerto
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue_errado · fundamento de prestacao_contas: falta 'vencida'
@@ -231,4 +238,4 @@
     legitima  (desastre ambiental)                                       Desastre ambiental: rompimento de barragem de rejeitos ont
     legitima  (determinação judicial)                                    Cumprimento de determinação judicial com prazo de 48 horas
 
-Todos os 46 casos controlados e as 12 falhas do fluxo passaram.
+Todos os 48 casos controlados e as 12 falhas do fluxo passaram.

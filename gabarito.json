@@ -7,7 +7,67 @@
       "valor_total": 980.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "204317",
+          "nome_informado": "Ana Paula Figueiredo"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-08",
+          "data_partida": "2026-11-09",
+          "data_retorno": "2026-11-12"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "204317",
+          "data_partida": "2026-11-09",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFF",
+          "valor": 980.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          280.0,
+          980.0,
+          18400.0
+        ],
+        "numeros": [
+          0,
+          3.0,
+          3.5,
+          5.0,
+          10.0,
+          32.0
+        ],
+        "datas": [
+          "2026-09-22",
+          "2026-09-24",
+          "2026-10-08",
+          "2026-10-09",
+          "2026-11-09",
+          "2026-11-12"
+        ],
+        "matriculas": [
+          "204317"
+        ],
+        "pedidos": [
+          "DIA-2026-0035",
+          "DIA-2026-0101"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0102",
@@ -16,7 +76,69 @@
       "valor_total": 770.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "205882",
+          "nome_informado": "Marcos Antônio Rezende"
+        },
+        "calcular_diarias": {
+          "grupo": "C",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-08",
+          "data_partida": "2026-11-09",
+          "data_retorno": "2026-11-12"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "205882",
+          "data_partida": "2026-11-09",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFF",
+          "valor": 770.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          220.0,
+          770.0,
+          18400.0
+        ],
+        "numeros": [
+          0,
+          3.0,
+          3.5,
+          5.0,
+          10.0,
+          32.0
+        ],
+        "datas": [
+          "2026-10-01",
+          "2026-10-06",
+          "2026-10-08",
+          "2026-10-09",
+          "2026-10-13",
+          "2026-11-09",
+          "2026-11-12"
+        ],
+        "matriculas": [
+          "205882"
+        ],
+        "pedidos": [
+          "DIA-2026-0041",
+          "DIA-2026-0101",
+          "DIA-2026-0102"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0103",
@@ -25,7 +147,62 @@
       "valor_total": 140.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "203156",
+          "nome_informado": "Juliana Campos Arruda"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-07",
+          "data_partida": "2026-11-05",
+          "data_retorno": "2026-11-05"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "203156",
+          "data_partida": "2026-11-05",
+          "quantidade_pedida": 0.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CUC",
+          "valor": 140.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          140.0,
+          280.0,
+          7800.0
+        ],
+        "numeros": [
+          0.0,
+          0.5,
+          5.0,
+          10.0,
+          29.0
+        ],
+        "datas": [
+          "2026-10-07",
+          "2026-10-09",
+          "2026-11-05"
+        ],
+        "matriculas": [
+          "203156"
+        ],
+        "pedidos": [
+          "DIA-2026-0103"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0104",
@@ -34,7 +211,64 @@
       "valor_total": 1500.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "200941",
+          "nome_informado": "Heitor Vasconcelos Lima"
+        },
+        "calcular_diarias": {
+          "grupo": "A",
+          "destino_uf": "DF",
+          "data_pedido": "2026-10-06",
+          "data_partida": "2026-11-16",
+          "data_retorno": "2026-11-18"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "200941",
+          "data_partida": "2026-11-16",
+          "quantidade_pedida": 2.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "GAB",
+          "valor": 1500.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          600.0,
+          1500.0,
+          12000.0
+        ],
+        "numeros": [
+          0,
+          2.0,
+          2.5,
+          5.0,
+          10.0,
+          41.0
+        ],
+        "datas": [
+          "2026-10-06",
+          "2026-10-09",
+          "2026-11-16",
+          "2026-11-18"
+        ],
+        "matriculas": [
+          "200941"
+        ],
+        "pedidos": [
+          "DIA-2026-0104"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0105",
@@ -45,7 +279,63 @@
       "nao_atende": [
         "antecedencia"
       ],
-      "recomendacao": "nao_recomendado"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "nao_atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "206230",
+          "nome_informado": "Fernanda Lopes Martins"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-08",
+          "data_partida": "2026-10-13",
+          "data_retorno": "2026-10-15"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "206230",
+          "data_partida": "2026-10-13",
+          "quantidade_pedida": 2.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFA",
+          "valor": 700.0
+        }
+      },
+      "recomendacao": "nao_recomendado",
+      "fatos": {
+        "valores": [
+          280.0,
+          700.0,
+          9250.0
+        ],
+        "numeros": [
+          0,
+          2.0,
+          2.5,
+          5.0,
+          10.0
+        ],
+        "datas": [
+          "2026-10-08",
+          "2026-10-09",
+          "2026-10-13",
+          "2026-10-15"
+        ],
+        "matriculas": [
+          "206230"
+        ],
+        "pedidos": [
+          "DIA-2026-0105"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0106",
@@ -54,7 +344,63 @@
       "valor_total": 1260.0,
       "exige_autorizacao_superior": true,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "204775",
+          "nome_informado": "Diego Almeida Pires"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-09",
+          "data_partida": "2026-10-10",
+          "data_retorno": "2026-10-14"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "204775",
+          "data_partida": "2026-10-10",
+          "quantidade_pedida": 4.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CUC",
+          "valor": 1260.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          280.0,
+          1260.0,
+          7800.0
+        ],
+        "numeros": [
+          0,
+          1.0,
+          4.0,
+          4.5,
+          5.0,
+          10.0
+        ],
+        "datas": [
+          "2026-10-09",
+          "2026-10-10",
+          "2026-10-14"
+        ],
+        "matriculas": [
+          "204775"
+        ],
+        "pedidos": [
+          "DIA-2026-0106"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0107",
@@ -65,7 +411,63 @@
       "nao_atende": [
         "antecedencia"
       ],
-      "recomendacao": "nao_recomendado"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "nao_atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "207093",
+          "nome_informado": "Patrícia Nunes Barreto"
+        },
+        "calcular_diarias": {
+          "grupo": "C",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-07",
+          "data_partida": "2026-10-12",
+          "data_retorno": "2026-10-14"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "207093",
+          "data_partida": "2026-10-12",
+          "quantidade_pedida": 2.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFA",
+          "valor": 550.0
+        }
+      },
+      "recomendacao": "nao_recomendado",
+      "fatos": {
+        "valores": [
+          220.0,
+          550.0,
+          9250.0
+        ],
+        "numeros": [
+          0,
+          2.0,
+          2.5,
+          5.0,
+          10.0
+        ],
+        "datas": [
+          "2026-10-07",
+          "2026-10-09",
+          "2026-10-12",
+          "2026-10-14"
+        ],
+        "matriculas": [
+          "207093"
+        ],
+        "pedidos": [
+          "DIA-2026-0107"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0108",
@@ -76,7 +478,71 @@
       "nao_atende": [
         "prestacao_contas"
       ],
-      "recomendacao": "nao_recomendado"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "nao_atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "203648",
+          "nome_informado": "Gustavo Henrique Prado"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-05",
+          "data_partida": "2026-11-03",
+          "data_retorno": "2026-11-06"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "203648",
+          "data_partida": "2026-11-03",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFF",
+          "valor": 980.0
+        }
+      },
+      "recomendacao": "nao_recomendado",
+      "fatos": {
+        "valores": [
+          280.0,
+          980.0,
+          18400.0
+        ],
+        "numeros": [
+          0,
+          3.0,
+          3.5,
+          5.0,
+          10.0,
+          29.0
+        ],
+        "datas": [
+          "2026-08-04",
+          "2026-08-07",
+          "2026-09-14",
+          "2026-09-18",
+          "2026-09-25",
+          "2026-10-05",
+          "2026-10-09",
+          "2026-11-03",
+          "2026-11-06"
+        ],
+        "matriculas": [
+          "203648"
+        ],
+        "pedidos": [
+          "DIA-2026-0011",
+          "DIA-2026-0023",
+          "DIA-2026-0108"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0109",
@@ -87,7 +553,71 @@
       "nao_atende": [
         "limite_mensal"
       ],
-      "recomendacao": "nao_recomendado"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "nao_atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "208114",
+          "nome_informado": "Larissa Teixeira Moura"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-06",
+          "data_partida": "2026-11-23",
+          "data_retorno": "2026-11-26"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "208114",
+          "data_partida": "2026-11-23",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "URS",
+          "valor": 980.0
+        }
+      },
+      "recomendacao": "nao_recomendado",
+      "fatos": {
+        "valores": [
+          280.0,
+          980.0,
+          5300.0
+        ],
+        "numeros": [
+          3.0,
+          3.5,
+          5.0,
+          8.0,
+          10.0,
+          11.5,
+          48.0
+        ],
+        "datas": [
+          "2026-10-06",
+          "2026-10-09",
+          "2026-11-03",
+          "2026-11-07",
+          "2026-11-16",
+          "2026-11-19",
+          "2026-11-23",
+          "2026-11-26"
+        ],
+        "matriculas": [
+          "208114"
+        ],
+        "pedidos": [
+          "DIA-2026-0062",
+          "DIA-2026-0063",
+          "DIA-2026-0109"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0110",
@@ -98,7 +628,64 @@
       "nao_atende": [
         "saldo_orcamentario"
       ],
-      "recomendacao": "nao_recomendado"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "nao_atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "205507",
+          "nome_informado": "Rodrigo Siqueira Campos"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "RO",
+          "data_pedido": "2026-10-02",
+          "data_partida": "2026-11-10",
+          "data_retorno": "2026-11-14"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "205507",
+          "data_partida": "2026-11-10",
+          "quantidade_pedida": 4.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CRH",
+          "valor": 1800.0
+        }
+      },
+      "recomendacao": "nao_recomendado",
+      "fatos": {
+        "valores": [
+          400.0,
+          640.0,
+          1800.0
+        ],
+        "numeros": [
+          0,
+          4.0,
+          4.5,
+          5.0,
+          10.0,
+          39.0
+        ],
+        "datas": [
+          "2026-10-02",
+          "2026-10-09",
+          "2026-11-10",
+          "2026-11-14"
+        ],
+        "matriculas": [
+          "205507"
+        ],
+        "pedidos": [
+          "DIA-2026-0110"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0111",
@@ -109,7 +696,38 @@
       "nao_atende": [
         "dados_completos"
       ],
-      "recomendacao": "diligencia"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "nao_atende",
+        "antecedencia": "nao_verificado",
+        "prestacao_contas": "nao_verificado",
+        "limite_mensal": "nao_verificado",
+        "saldo_orcamentario": "nao_verificado"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "206689",
+          "nome_informado": "Beatriz Moraes Cunha"
+        }
+      },
+      "recomendacao": "diligencia",
+      "fatos": {
+        "valores": [],
+        "numeros": [
+          5.0,
+          10.0
+        ],
+        "datas": [
+          "2026-10-09",
+          "2026-11-17"
+        ],
+        "matriculas": [
+          "206689"
+        ],
+        "pedidos": [
+          "DIA-2026-0111"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0112",
@@ -120,7 +738,39 @@
       "nao_atende": [
         "cadastro"
       ],
-      "recomendacao": "diligencia"
+      "situacoes": {
+        "cadastro": "nao_atende",
+        "dados_completos": "atende",
+        "antecedencia": "nao_verificado",
+        "prestacao_contas": "nao_verificado",
+        "limite_mensal": "nao_verificado",
+        "saldo_orcamentario": "nao_verificado"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "207481",
+          "nome_informado": "Carla Regina Souza"
+        }
+      },
+      "recomendacao": "diligencia",
+      "fatos": {
+        "valores": [],
+        "numeros": [
+          5.0,
+          10.0
+        ],
+        "datas": [
+          "2026-10-09",
+          "2026-11-24",
+          "2026-11-27"
+        ],
+        "matriculas": [
+          "207481"
+        ],
+        "pedidos": [
+          "DIA-2026-0112"
+        ]
+      }
     }
   ],
   "complementacoes": [
@@ -131,7 +781,66 @@
       "valor_total": 980.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "206689",
+          "nome_informado": "Beatriz Moraes Cunha"
+        },
+        "calcular_diarias": {
+          "grupo": "B",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-09",
+          "data_partida": "2026-11-17",
+          "data_retorno": "2026-11-20"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "206689",
+          "data_partida": "2026-11-17",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CFF",
+          "valor": 980.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          280.0,
+          980.0,
+          18400.0
+        ],
+        "numeros": [
+          0,
+          3.0,
+          3.5,
+          5.0,
+          10.0,
+          39.0
+        ],
+        "datas": [
+          "2026-09-29",
+          "2026-10-01",
+          "2026-10-09",
+          "2026-11-17",
+          "2026-11-20"
+        ],
+        "matriculas": [
+          "206689"
+        ],
+        "pedidos": [
+          "DIA-2026-0037",
+          "DIA-2026-0111"
+        ]
+      }
     },
     {
       "numero_pedido": "DIA-2026-0112",
@@ -140,7 +849,64 @@
       "valor_total": 770.0,
       "exige_autorizacao_superior": false,
       "nao_atende": [],
-      "recomendacao": "apto_para_autorizacao"
+      "situacoes": {
+        "cadastro": "atende",
+        "dados_completos": "atende",
+        "antecedencia": "atende",
+        "prestacao_contas": "atende",
+        "limite_mensal": "atende",
+        "saldo_orcamentario": "atende"
+      },
+      "trilha": {
+        "consultar_servidor": {
+          "matricula": "207418",
+          "nome_informado": "Carla Regina Souza"
+        },
+        "calcular_diarias": {
+          "grupo": "C",
+          "destino_uf": "MT",
+          "data_pedido": "2026-10-09",
+          "data_partida": "2026-11-24",
+          "data_retorno": "2026-11-27"
+        },
+        "consultar_historico_diarias": {
+          "matricula": "207418",
+          "data_partida": "2026-11-24",
+          "quantidade_pedida": 3.5
+        },
+        "consultar_saldo_diarias": {
+          "unidade": "CUC",
+          "valor": 770.0
+        }
+      },
+      "recomendacao": "apto_para_autorizacao",
+      "fatos": {
+        "valores": [
+          220.0,
+          770.0,
+          7800.0
+        ],
+        "numeros": [
+          0,
+          3.0,
+          3.5,
+          5.0,
+          10.0,
+          46.0
+        ],
+        "datas": [
+          "2026-10-09",
+          "2026-11-24",
+          "2026-11-27"
+        ],
+        "matriculas": [
+          "207418",
+          "207481"
+        ],
+        "pedidos": [
+          "DIA-2026-0112"
+        ]
+      }
     }
   ]
 }

@@ -7,10 +7,16 @@ novo, para que nenhuma herde a memória da anterior (Aula 07, 3.1).
 
 Classificação de cada item, na ordem de gravidade do enunciado:
 - acerto: entregue ao conferente e igual ao gabarito em recomendação,
-  matrícula, quantidade, valor e exigência de autorização superior;
+  matrícula, quantidade, valor e exigência de autorização superior, nas
+  situações dos seis critérios, na trilha de consultas (cada argumento no seu
+  papel) e nos dados factuais dos fundamentos, pendências, alertas e minuta;
 - recusado: a barreira recusou e o servidor viu a mensagem padrão (erro visível);
 - erro de execução: status de erro ou saída fora do contrato (erro visível);
 - ENTREGUE ERRADO: chegou ao conferente diferente do gabarito (o que mais pesa).
+
+A conferência dos textos e da trilha é implementada aqui, e não importada da
+barreira: a medição precisa poder falhar de forma independente do sistema
+medido (Aula 03, 5.2). O gabarito só é lido pela avaliação.
 
 O custo é lido por item, para ver a cauda e não só a média (Aula 03, 5.4).
 
@@ -19,8 +25,10 @@ Saída: resultados/medicao.json e resultados/medicao.md
 """
 import json
 import pathlib
+import re
 import statistics
 import time
+import unicodedata
 
 from instrutor import apagar_banco, construir_agente, instruir
 
@@ -38,14 +46,82 @@ CAMPOS = ("recomendacao", "matricula", "quantidade_diarias", "valor_total",
           "exige_autorizacao_superior")
 
 
+MESES = ["janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho", "agosto",
+         "setembro", "outubro", "novembro", "dezembro"]
+
+
+def _num(texto: str) -> float:
+    """'1.260,00' -> 1260.0; '3,5' -> 3.5; '980.00' -> 980.0; '18400' -> 18400.0."""
+    if "," in texto:
+        return round(float(texto.replace(".", "").replace(",", ".")), 2)
+    if re.fullmatch(r"\d{1,3}(\.\d{3})+", texto):
+        return float(texto.replace(".", ""))
+    return round(float(texto), 2)
+
+
+def fatos_do_texto(texto: str) -> dict:
+    """Extração própria da medição: valores, datas, matrículas, pedidos e números com unidade."""
+    plano = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
+    datas = set(re.findall(r"\d{4}-\d{2}-\d{2}", texto))
+    datas |= {f"{a}-{int(m):02d}-{int(d):02d}" for d, m, a in
+              re.findall(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", texto)}
+    datas |= {f"{a}-{MESES.index(m) + 1:02d}-{int(d):02d}" for d, m, a in
+              re.findall(r"\b(\d{1,2})o? de ([a-z]+) de (\d{4})", plano) if m in MESES}
+    limpo = re.sub(r"\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{4}", " ", texto)
+    valores = {_num(v) for v in re.findall(r"R\$\s*(\d+(?:[.,]\d+)*)", limpo)}
+    valores |= {_num(v) for v in re.findall(r"(?<![\d.,])\d{1,3}(?:\.\d{3})*,\d{2}(?![\d,])",
+                                            limpo)}
+    numeros = {_num(n) for n in re.findall(r"(\d+(?:[.,]\d+)?)\s*(?:dias?\b|dia\(s\)|di[aá]ria)",
+                                           limpo)}
+    return {"valores": valores, "datas": datas,
+            "matriculas": set(re.findall(r"(?<![\d.,/-])\d{6}(?![\d.,/-]?\d)", limpo)),
+            "pedidos": set(re.findall(r"DIA-\d{4}-\d{4}", texto)), "numeros": numeros}
+
+
+def _igual(a, b) -> bool:
+    try:
+        return round(float(a), 2) == round(float(b), 2)
+    except (TypeError, ValueError):
+        return str(a or "").strip().upper() == str(b or "").strip().upper()
+
+
+def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
+    """Diferenças entre a instrução entregue e o gabarito."""
+    dif = [f"{c}: {getattr(instrucao, c)!r} ≠ {esperado[c]!r}" for c in CAMPOS
+           if getattr(instrucao, c) != esperado[c]]
+    declaradas = {v.criterio: v.situacao for v in instrucao.verificacoes}
+    dif += [f"situação de {c}: {declaradas.get(c)!r} ≠ {s!r}"
+            for c, s in esperado["situacoes"].items() if declaradas.get(c) != s]
+    # Trilha: cada ferramenta esperada foi chamada com os argumentos esperados, e
+    # nenhuma chamada a essas ferramentas usou argumento fora do papel.
+    for ferramenta, args in esperado["trilha"].items():
+        feitas = [c["argumentos"] for c in consultas if c["ferramenta"] == ferramenta]
+        if not any(all(_igual(f.get(k), v) for k, v in args.items()) for f in feitas):
+            dif.append(f"trilha: {ferramenta} não chamada com {args}")
+        for f in feitas:
+            if ferramenta == "consultar_servidor" and \
+                    str(f.get("matricula", "")).strip() in esperado["fatos"]["matriculas"]:
+                continue
+            if not all(_igual(f.get(k), v) for k, v in args.items()):
+                dif.append(f"trilha: {ferramenta} chamada fora do papel com {f}")
+    # Fatos citados nos textos.
+    permitidos = {k: set(v) for k, v in esperado["fatos"].items()}
+    textos = [v.detalhe for v in instrucao.verificacoes] + list(instrucao.pendencias) + \
+        list(instrucao.alertas) + [instrucao.minuta_despacho]
+    for texto in textos:
+        for tipo, achados in fatos_do_texto(texto or "").items():
+            fora = {a for a in achados if a not in permitidos[tipo]}
+            if fora:
+                dif.append(f"texto cita {tipo} sem fonte: {sorted(map(str, fora))}")
+    return dif
+
+
 def classificar(resultado, esperado: dict) -> tuple[str, list]:
     if resultado.situacao == "erro":
         return "erro_execucao", []
     if resultado.situacao == "recusada":
         return "recusado", []
-    i = resultado.instrucao
-    diferencas = [f"{c}: {getattr(i, c)!r} ≠ {esperado[c]!r}" for c in CAMPOS
-                  if getattr(i, c) != esperado[c]]
+    diferencas = conferir(resultado.instrucao, resultado.consultas, esperado)
     return ("acerto" if not diferencas else "entregue_errado"), diferencas
 
 

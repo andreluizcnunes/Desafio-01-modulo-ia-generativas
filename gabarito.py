@@ -22,6 +22,7 @@ Execução: python gabarito.py
 import csv
 import json
 import pathlib
+import re
 from datetime import date, timedelta
 
 BASE = pathlib.Path(__file__).parent
@@ -51,22 +52,54 @@ def uteis_depois(inicio: date, n: int) -> date:
     return d
 
 
-def instruir(pedido: dict, dados) -> dict:
-    """Aplica os arts. 3º a 9º e devolve a instrução esperada."""
+CRITERIOS = ("cadastro", "dados_completos", "antecedencia", "prestacao_contas",
+             "limite_mensal", "saldo_orcamentario")
+
+
+def instruir(pedido: dict, dados, original: dict | None = None,
+             complemento: dict | None = None) -> dict:
+    """Aplica os arts. 3º a 9º e devolve a instrução esperada.
+
+    Além da recomendação e dos números, registra o que a medição precisa para
+    conferir a instrução inteira: a situação de cada critério, a trilha de
+    consultas que a instrução deveria ter feito (cada argumento no seu papel) e
+    os fatos que os textos podem citar.
+    """
     tabela, unidades, _, _, servidores, historico = dados
+    original = original or pedido
     analise = date.fromisoformat(tabela["data_da_analise"])
     s = servidores.get(pedido["matricula"])
     esperado = {"numero_pedido": pedido["numero"], "matricula": pedido["matricula"],
                 "quantidade_diarias": None, "valor_total": None,
-                "exige_autorizacao_superior": False, "nao_atende": []}
+                "exige_autorizacao_superior": False, "nao_atende": [],
+                "situacoes": dict.fromkeys(CRITERIOS, "nao_verificado"),
+                "trilha": {"consultar_servidor": {"matricula": pedido["matricula"],
+                                                  "nome_informado": pedido["nome"]}}}
+    fatos = {"valores": set(), "numeros": {10.0, 5.0},
+             "datas": {d for d in (original.get("data_pedido"), original.get("data_partida"),
+                                   original.get("data_retorno"), pedido.get("data_retorno"),
+                                   tabela["data_da_analise"]) if d},
+             "matriculas": {original["matricula"], pedido["matricula"]},
+             "pedidos": {pedido["numero"]} | set(re.findall(r"DIA-\d{4}-\d{4}",
+                                                            pedido.get("justificativa", "")))}
+    if complemento:
+        fatos["datas"] |= {complemento["data"]} | set(re.findall(r"\d{4}-\d{2}-\d{2}",
+                                                                 complemento["texto"]))
+
+    def fechar(resultado: dict) -> dict:
+        resultado["fatos"] = {k: sorted(v) for k, v in fatos.items()}
+        return resultado
 
     # Art. 9º: incompleto ou divergente do cadastro -> diligência, sem análise de mérito.
-    if s is None or s["nome"].strip().lower() != pedido["nome"].strip().lower():
-        esperado.update(recomendacao="diligencia", nao_atende=["cadastro"])
-        return esperado
-    if not pedido.get("data_retorno"):
-        esperado.update(recomendacao="diligencia", nao_atende=["dados_completos"])
-        return esperado
+    divergente = s is None or s["nome"].strip().lower() != pedido["nome"].strip().lower()
+    incompleto = not pedido.get("data_retorno")
+    if divergente or incompleto:
+        esperado["situacoes"].update(cadastro="nao_atende" if divergente else "atende",
+                                     dados_completos="nao_atende" if incompleto else "atende")
+        esperado.update(recomendacao="diligencia",
+                        nao_atende=(["cadastro"] if divergente else []) +
+                                   (["dados_completos"] if incompleto else []))
+        return fechar(esperado)
 
     partida = date.fromisoformat(pedido["data_partida"])
     retorno = date.fromisoformat(pedido["data_retorno"])
@@ -77,34 +110,57 @@ def instruir(pedido: dict, dados) -> dict:
     quantidade = 0.5 if pernoites == 0 else pernoites + 0.5
     uf = pedido["destino_uf"].upper()
     classe = "interior_mt" if uf == "MT" else "distrito_federal" if uf == "DF" else "outra_uf"
-    valor = quantidade * tabela["valores"][s["grupo_diaria"]][classe]
+    unitario = tabela["valores"][s["grupo_diaria"]][classe]
+    valor = quantidade * unitario
     esperado.update(quantidade_diarias=quantidade, valor_total=valor)
+    esperado["trilha"].update({
+        "calcular_diarias": {"grupo": s["grupo_diaria"], "destino_uf": uf,
+                             "data_pedido": pedido["data_pedido"],
+                             "data_partida": pedido["data_partida"],
+                             "data_retorno": pedido["data_retorno"]},
+        "consultar_historico_diarias": {"matricula": s["matricula"],
+                                        "data_partida": pedido["data_partida"],
+                                        "quantidade_pedida": quantidade},
+        "consultar_saldo_diarias": {"unidade": s["unidade"], "valor": valor}})
+    saldo = unidades[s["unidade"]]["saldo_diarias"]
+    fatos["valores"] |= {unitario, valor, saldo}
 
     falhas = []
     # Art. 5º.
-    if (partida - protocolo).days < tabela["antecedencia_minima_dias"]:
+    antecedencia = (partida - protocolo).days
+    if antecedencia < tabela["antecedencia_minima_dias"]:
         if pedido["numero"] in URGENCIA_LEGITIMA:
             esperado["exige_autorizacao_superior"] = True
         else:
             falhas.append("antecedencia")
     # Art. 7º.
     for h in historico:
-        if h["matricula"] == s["matricula"] and h["prestacao_contas"] == "pendente":
-            if uteis_depois(date.fromisoformat(h["data_retorno"]),
-                            tabela["prazo_prestacao_dias_uteis"]) < analise:
-                falhas.append("prestacao_contas")
+        if h["matricula"] == s["matricula"]:
+            fatos["datas"] |= {h["data_partida"], h["data_retorno"]}
+            fatos["pedidos"].add(h["pedido"])
+            if h["prestacao_contas"] == "pendente":
+                vence = uteis_depois(date.fromisoformat(h["data_retorno"]),
+                                     tabela["prazo_prestacao_dias_uteis"])
+                fatos["datas"].add(vence.isoformat())
+                if vence < analise:
+                    falhas.append("prestacao_contas")
     # Art. 6º.
     mes = sum(float(h["quantidade"]) for h in historico
               if h["matricula"] == s["matricula"] and h["data_partida"][:7] == pedido["data_partida"][:7])
     if mes + quantidade > tabela["limite_mensal_diarias"]:
         falhas.append("limite_mensal")
+    fatos["numeros"] |= {quantidade, float(pernoites), float(antecedencia), mes,
+                         mes + quantidade, float(tabela["limite_mensal_diarias"]),
+                         float(tabela["antecedencia_minima_dias"]),
+                         float(tabela["prazo_prestacao_dias_uteis"])}
     # Art. 8º.
-    if unidades[s["unidade"]]["saldo_diarias"] < valor:
+    if saldo < valor:
         falhas.append("saldo_orcamentario")
 
     esperado["nao_atende"] = sorted(set(falhas))
+    esperado["situacoes"] = {c: ("nao_atende" if c in falhas else "atende") for c in CRITERIOS}
     esperado["recomendacao"] = "nao_recomendado" if falhas else "apto_para_autorizacao"
-    return esperado
+    return fechar(esperado)
 
 
 def complementar(pedido: dict, complemento: dict) -> dict:
@@ -124,7 +180,8 @@ def main() -> None:
     por_numero = {p["numero"]: p for p in pedidos}
     gabarito = {"pedidos": [instruir(p, dados) for p in pedidos], "complementacoes": []}
     for c in complementos:
-        resultado = instruir(complementar(por_numero[c["numero"]], c), dados)
+        resultado = instruir(complementar(por_numero[c["numero"]], c), dados,
+                             original=por_numero[c["numero"]], complemento=c)
         gabarito["complementacoes"].append(resultado)
 
     destino = BASE / "gabarito.json"

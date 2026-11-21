@@ -109,11 +109,11 @@ Por sete camadas, todas em código:
    o modelo que calculou de cabeça errou o art. 4º nas 3 execuções desta medição (3,0
    diárias em vez de 3,5 no 0101; 4,0 em vez de 4,5 no 0110), como em 20/11; numa
    execução anterior de 21/11, recusou-se a calcular e pediu diligência.
-2. **Consulta de mérito só com o pedido em condições.** Um gancho de ferramenta deixa
-   cálculo, histórico e saldo executarem só com o pedido vigente completo e o cadastro
-   da matrícula vigente conferido nesta execução. No 0112 em diligência, a função nem
-   roda, e nenhum dado de mérito chega ao modelo, ao banco ou à tela
-   (`teste_bloqueio.py`).
+2. **Autorização antes de cada consulta.** O gancho confere os argumentos das quatro
+   ferramentas contra o pedido vigente. Cálculo, histórico e saldo exigem dados completos
+   e cadastro conferido. Histórico e saldo também exigem, respectivamente, a quantidade
+   e o valor de um cálculo autorizado nesta execução. Uma chamada barrada devolve apenas
+   o motivo, e o formulário lista as consultas que executaram (`teste_bloqueio.py`).
 3. **A execução precisa ter concluído, e ser a atual.** Resposta ausente (fluxo que
    termina sem `RunOutput`), sem identificador, de outra execução ou com status
    diferente de concluído é falha, conferida antes de ler o conteúdo. O identificador é
@@ -127,6 +127,9 @@ Por sete camadas, todas em código:
      seu papel; cadastro, cálculo, histórico, saldo e instrução ficam presos à matrícula
      vigente. O histórico da matrícula digitada no 0112 (207481) não serve à instrução
      da matrícula corrigida (207418);
+   - **confirmação de datas:** informe o campo e o valor afirmativamente, como
+     `Data de retorno: 20/11/2026`. O formato `AAAA-MM-DD` também é aceito. Uma data
+     negada, condicional, indefinida ou citada em outro contexto não preenche o campo;
    - **papel de cada argumento:** a data de protocolo é a do protocolo e a de partida é a
      da partida, em todas as ferramentas; trocar as duas no 0101 (35,5 diárias,
      R$ 9.940,00) é recusado;
@@ -145,7 +148,9 @@ Por sete camadas, todas em código:
    com os dados das consultas, cada um no seu papel: valor unitário, total, saldo,
    situação da prestação. Os alertas são os das categorias que o enunciado pede e que o
    código verifica no pedido (dados pessoais, ordem ao sistema, autorização verbal,
-   autorização escrita na urgência). Na urgência, a condição da autorização expressa e
+   autorização escrita na urgência). A detecção de ordem usa o destinatário e o sentido
+   diretivo da oração. Uma referência descritiva a um sistema não dispara o alerta.
+   Na urgência, a condição da autorização expressa e
    escrita do Secretário Adjunto entra na minuta por regra. Um texto do modelo com o
    valor unitário como total, uma prestação vencida descrita como "regularizada", mesmo
    num alerta sem número, ou um valor por extenso não chegam ao conferente.

@@ -25,11 +25,11 @@ Decisões, cada uma com a aula de origem:
   papel; do modelo, chegam à tela só as situações, os números e a recomendação,
   depois de conferidos (barreira.py, itens 5 e 6; Aula 04, 8). Os alertas do
   modelo ficam registrados no resultado, fora da tela.
-- Cálculo, histórico e saldo só executam quando o pedido vigente está completo
-  e o cadastro da matrícula vigente CONFERE nesta execução: um gancho de
-  ferramenta (`tool_hooks`, o equivalente no Agno do `wrap_tool_call` da
-  Aula 03, 4.2) decide antes de a função rodar, e a consulta barrada devolve
-  ao modelo só o motivo, sem dado de mérito. O estado fica preso ao
+- Um gancho de ferramenta (`tool_hooks`) confere os argumentos antes de cada
+  consulta. Cálculo, histórico e saldo também exigem o pedido vigente completo
+  e o cadastro conferido nesta execução. Histórico e saldo usam o resultado
+  do cálculo autorizado. A consulta barrada devolve ao modelo só o motivo.
+  O estado fica preso ao
   identificador de cada execução, e o agente compartilhado pela tela não
   mistura pedidos (art. 9º; Aula 01, 8).
 - Resposta ausente, de outra execução ou com status diferente de concluído é
@@ -60,8 +60,9 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from barreira import (CONSULTA_BLOQUEADA, CONSULTAS_DE_MERITO, OBRIGATORIOS, PADROES_DADOS_PESSOAIS,
-                      ROTULOS_CAMPOS, _texto, conferir, pedido_vigente)
-from ferramentas import FERRAMENTAS, _normalizar_nome
+                      ROTULOS_CAMPOS, _calculo, _texto, bloqueada, cadastro_confere, conferir,
+                      pedido_vigente, validar_argumentos)
+from ferramentas import FERRAMENTAS
 
 BASE = pathlib.Path(__file__).parent
 load_dotenv(BASE / ".env")
@@ -159,10 +160,13 @@ Saída:
   pedido ou das ferramentas.
 
 Complementação: quando receber a complementação de um pedido em diligência, recupere o
-pedido do histórico desta conversa e aplique a correção. Depois refaça a instrução
-completa, chamando de novo as quatro ferramentas, na mesma ordem: o histórico serve só
-para recuperar o pedido; cadastro, cálculo, histórico de diárias e saldo podem ter
-mudado e nunca são reaproveitados de consultas anteriores."""
+pedido do histórico desta conversa e aplique apenas correções afirmativas ao campo
+expresso. Datas negadas, indefinidas, condicionais ou mencionadas em outro contexto não
+preenchem uma data pendente. Se ainda houver dado obrigatório ausente ou divergência
+cadastral, mantenha a diligência sem consultar o mérito. Se a correção completar o
+pedido, refaça as quatro consultas na ordem. Quando a aplicação bloquear uma consulta
+por argumentos fora do pedido vigente, use apenas os argumentos verificados nas fontes.
+O histórico serve só para recuperar o pedido, pois os dados das consultas podem mudar."""
 
 # Filtro de dados pessoais (Aula 06, 5.2). Os padrões de fábrica são
 # norte-americanos: o de telefone casa com sequências de dez algarismos e o de
@@ -179,70 +183,72 @@ FILTRO_DADOS_PESSOAIS = PIIDetectionGuardrail(
 
 
 # ------------------------------------------------------------------
-# A guarda das consultas de mérito, antes de a função executar (art. 9º).
+# A guarda das ferramentas, antes de cada função executar (Etapa 3, art. 9º).
 # ------------------------------------------------------------------
 # Estado de cada execução em andamento, pelo identificador que `instruir`
 # gera e entrega ao Agno. A tela compartilha um único agente entre pedidos:
 # o estado de um pedido nunca vale para outro.
-_EXECUCOES: dict[str, dict] = {}
+@dataclass
+class EstadoExecucao:
+    pedido: dict
+    vigente: dict
+    problemas: list[str]
+    faltantes: list[str]
+    cadastro_confirmado: bool = False
+    calculo: dict | None = None
+    bloqueadas: list[str] = field(default_factory=list)
+
+
+_EXECUCOES: dict[str, EstadoExecucao] = {}
 _TRAVA = threading.Lock()
 
 
 def _registrar_execucao(run_id: str, pedido: dict, complemento: Optional[dict]) -> None:
     vigente, problemas = pedido_vigente(pedido, complemento)
+    faltantes = [c for c in OBRIGATORIOS if not _texto(vigente.get(c))]
     with _TRAVA:
-        _EXECUCOES[run_id] = {
-            "matricula": _texto(vigente.get("matricula")),
-            "nome": _normalizar_nome(_texto(vigente.get("nome"))),
-            "faltantes": [c for c in OBRIGATORIOS if not _texto(vigente.get(c))],
-            "problemas": problemas,
-            "cadastro_confere": False,
-            "bloqueadas": [],
-        }
+        _EXECUCOES[run_id] = EstadoExecucao(pedido, vigente, problemas, faltantes)
 
 
-def _encerrar_execucao(run_id: str) -> dict:
+def _encerrar_execucao(run_id: str) -> list[str]:
     with _TRAVA:
-        return _EXECUCOES.pop(run_id, {})
+        return _EXECUCOES.pop(run_id).bloqueadas
 
 
-def _motivo_do_bloqueio(estado: Optional[dict]) -> str:
-    if estado is None:
-        return "execução sem pedido registrado pela aplicação."
-    if estado["problemas"]:
-        return "complementação que não se consegue aplicar: " + "; ".join(estado["problemas"]) + "."
-    if estado["faltantes"]:
-        return ("pedido incompleto, falta: "
-                + ", ".join(ROTULOS_CAMPOS[c] for c in estado["faltantes"]) + ".")
-    if not estado["cadastro_confere"]:
-        return (f"o cadastro da matrícula vigente {estado['matricula']} não CONFERE com o nome "
-                f"do pedido nesta execução.")
+def _merito_pendente(estado: EstadoExecucao) -> str:
+    if estado.problemas:
+        return "complementação que não se consegue aplicar: " + "; ".join(estado.problemas)
+    if estado.faltantes:
+        return "pedido incompleto, falta: " + ", ".join(ROTULOS_CAMPOS[c] for c in estado.faltantes)
+    if not estado.cadastro_confirmado:
+        return "o cadastro da matrícula vigente ainda não foi confirmado nesta execução"
     return ""
 
 
 def guarda_de_merito(function_name: str, function_call, arguments: dict, run_context=None):
-    """Gancho de ferramenta: decide se a consulta executa (Aula 03, 4.2).
-
-    O cadastro sempre executa, e o resultado da matrícula vigente com o nome do
-    pedido registra se ele CONFERE. Cálculo, histórico e saldo só executam com
-    o pedido vigente completo e o cadastro conferido nesta execução; senão, a
-    função não roda e o modelo recebe só o motivo (art. 9º).
-    """
+    """Autoriza cada ferramenta pelos argumentos e pré-requisitos desta execução."""
     with _TRAVA:
         estado = _EXECUCOES.get(getattr(run_context, "run_id", None))
-    if function_name in CONSULTAS_DE_MERITO:
-        motivo = _motivo_do_bloqueio(estado)
-        if motivo:
-            if estado is not None:
-                estado["bloqueadas"].append(function_name)
-            return (f"{CONSULTA_BLOQUEADA}: {motivo} Sem análise de mérito (art. 9º): recomende "
-                    f"diligência, com quantidade e valor nulos.")
+        if estado is None:
+            return f"{CONSULTA_BLOQUEADA}: execução sem pedido registrado pela aplicação."
+        merito_pendente = _merito_pendente(estado) if function_name in CONSULTAS_DE_MERITO else ""
+        if merito_pendente:
+            estado.bloqueadas.append(function_name)
+            return (f"{CONSULTA_BLOQUEADA}: {merito_pendente}. Havendo dado ausente ou divergente, "
+                    f"recomende diligência sem análise de mérito (art. 9º).")
+        erros = validar_argumentos(function_name, arguments, estado.pedido, estado.vigente,
+                                   estado.calculo)
+        if erros:
+            estado.bloqueadas.append(function_name)
+            return f"{CONSULTA_BLOQUEADA}: {'; '.join(erros)}. Confira a fonte antes de repetir."
+
     resultado = function_call(**arguments)
-    if function_name == "consultar_servidor" and estado is not None:
-        if (_texto(arguments.get("matricula")) == estado["matricula"]
-                and _normalizar_nome(_texto(arguments.get("nome_informado"))) == estado["nome"]
-                and "CONFERE com o cadastro" in str(resultado)):
-            estado["cadastro_confere"] = True
+    with _TRAVA:
+        if function_name == "consultar_servidor" and (
+                arguments["matricula"].strip() == _texto(estado.vigente.get("matricula"))):
+            estado.cadastro_confirmado = cadastro_confere(str(resultado))
+        elif function_name == "calcular_diarias":
+            estado.calculo = _calculo(str(resultado))
     return resultado
 
 
@@ -337,8 +343,8 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
     try:
         resultado = _executar(pedido, agente, complemento, ao_chamar_ferramenta, execucao)
     finally:
-        estado = _encerrar_execucao(execucao)
-    resultado.consultas_bloqueadas = estado.get("bloqueadas", [])
+        bloqueadas = _encerrar_execucao(execucao)
+    resultado.consultas_bloqueadas = bloqueadas
     return resultado
 
 
@@ -420,7 +426,9 @@ def _executar(pedido: dict, agente: Agent, complemento: Optional[dict], ao_chama
         return Resultado("recusada", instrucao=resposta.content, motivo=problemas,
                          consultas=consultas, medidas=medidas, entrada_enviada=entrada_enviada,
                          alertas_do_modelo=alertas_do_modelo)
-    return Resultado("entregue", instrucao=entregue, consultas=consultas, medidas=medidas,
+    executadas = [consulta for consulta in consultas if not bloqueada(consulta)]
+    medidas["ferramentas"] = [consulta["ferramenta"] for consulta in executadas]
+    return Resultado("entregue", instrucao=entregue, consultas=executadas, medidas=medidas,
                      entrada_enviada=entrada_enviada, textos_substituidos=substituidos,
                      alertas_do_modelo=alertas_do_modelo)
 

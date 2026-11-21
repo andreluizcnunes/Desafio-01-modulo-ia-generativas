@@ -1,19 +1,19 @@
 [1] Tentativas de consulta de mérito em pedido que exige diligência (art. 9º)
     DIA-2026-0112 (resposta direta): tentou calcular_diarias, consultar_historico_diarias, consultar_saldo_diarias
         funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
-        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente 207481 não CONFERE com o nome do pedido nes...
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente ainda não foi confirmado nesta execução. Ha...
         banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
     DIA-2026-0111 (resposta direta): tentou calcular_diarias
         funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias']
-        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Sem análise de mérito (art. 9º):...
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Havendo dado ausente ou divergen...
         banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
     DIA-2026-0112 (fluxo de eventos): tentou calcular_diarias, consultar_historico_diarias, consultar_saldo_diarias
         funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias', 'consultar_historico_diarias', 'consultar_saldo_diarias']
-        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente 207481 não CONFERE com o nome do pedido nes...
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: o cadastro da matrícula vigente ainda não foi confirmado nesta execução. Ha...
         banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
     DIA-2026-0111 (fluxo de eventos): tentou calcular_diarias
         funções executadas: ['consultar_servidor'] · bloqueadas antes de executar: ['calcular_diarias']
-        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Sem análise de mérito (art. 9º):...
+        mensagens ao modelo com dado de mérito: 0 · resposta da guarda: CONSULTA BLOQUEADA PELA APLICAÇÃO: pedido incompleto, falta: data de retorno. Havendo dado ausente ou divergen...
         banco temporário com dado de mérito: nenhum · formulário: recusada (mensagem padrão; tentativa registrada: consultas de mérito em pedido que exige diligência (art. 9º): calcular...)
 
 [2] Diligências legítimas e complementações na mesma sessão
@@ -37,4 +37,29 @@
 [4] Agente compartilhado
     mesmo agente, 0101 e depois 0112: o cadastro conferido do 0101 não libera o mérito do 0112 (executadas no 0112: ['consultar_servidor']); estado das execuções vazio ao final
 
-Todas as verificações da guarda das consultas de mérito passaram.
+[5] Argumentos fora do pedido barrados antes de cada ferramenta
+    direto, variante 1: 4 tentativas barradas e 4 consultas válidas entregues.
+    direto, variante 2: 4 tentativas barradas e 4 consultas válidas entregues.
+    eventos, variante 1: 4 tentativas barradas e 4 consultas válidas entregues.
+    eventos, variante 2: 4 tentativas barradas e 4 consultas válidas entregues.
+
+[6] Complementação negada pela entrada normal do agente
+    direto: data negada mantida pendente; tentativa de mérito barrada e diligência regular entregue.
+    eventos: data negada mantida pendente; tentativa de mérito barrada e diligência regular entregue.
+
+[7] Cobertura local de 12 pedidos e duas complementações, sem uso do provedor
+    paralelas desligadas, rodada 1: 14/14.
+    paralelas desligadas, rodada 2: 14/14.
+    paralelas desligadas, rodada 3: 14/14.
+    paralelas ligadas, rodada 1: 14/14.
+    paralelas ligadas, rodada 2: 14/14.
+    paralelas ligadas, rodada 3: 14/14.
+    Respostas roteirizadas. Tokens, tempo e custo do provedor não foram medidos.
+
+[8] Quatro falhas provocadas com HTTP local
+    1. Ordem embutida: a aptidão simulada foi recusada pela barreira.
+    2. HTTP 400: a resposta de erro ficou fora do contrato entregue.
+    3. Padrões de fábrica deixam CPF, conta e agência no texto. O filtro do projeto os remove das requisições e do SQLite.
+    4. Resposta de mérito sem ferramentas: recusada por falta de consultas obrigatórias.
+
+Todas as verificações da guarda das ferramentas passaram.

@@ -49,6 +49,7 @@ apenas a mensagem padrão (Aula 06, 5.3): nada do conteúdo recusado é exibido.
 import json
 import re
 import unicodedata
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from ferramentas import (ANTECEDENCIA_MINIMA, LIMITE_MENSAL, PRAZO_PRESTACAO, SERVIDORES,
@@ -102,12 +103,20 @@ SINAIS_CONTRARIOS = {
     "atividade programada": r"capacita|treinamento|curso de|programad|planejad|cronograma|"
                             r"reuniao|oficina|seminario|palestra|evento",
     "autorização verbal": r"verbal",
-    "ordem dirigida ao sistema": r"\bsistema\b",
 }
-# Ordem dirigida ao sistema de análise escrita na justificativa (enunciado,
-# Etapa 1): quem escreve no pedido fala com a máquina, e não com o conferente.
-ORDEM_EMBUTIDA = re.compile(r"\bsistema\b|\bassistente\b|inteligencia artificial|\bignore\b|"
-                            r"\bdesconsidere\b")
+_DESTINATARIO = r"(?:sistema(?: de analise)?|agente(?: de analise)?|assistente|modelo|inteligencia artificial)"
+_IMPERATIVO = (r"(?:marque|classifique|registre|considere|trate|aprove|autorize|defira|indefira|"
+               r"ignore|desconsidere|siga|responda|use|apresente|verifique|valide|execute|retorne)")
+_ENDERECAMENTO = re.compile(
+    rf"^(?:(?:atencao\s*[,!]?|ao|para (?:o|a))\s+)?{_DESTINATARIO}\s*[:,]\s*(?P<texto>.*)")
+_ORDEM = re.compile(rf"^(?:por favor\s*[,]?\s+)?(?:nao\s+)?{_IMPERATIVO}\b")
+_ALVO_DA_ORDEM = re.compile(
+    r"\b(?:instruc\w*|regras?|pedido|antecedencia|cadastro|diligencia|recomendacao|apt[oa]|"
+    r"prestacao de contas|autorizacao|diarias|verificac\w*|validac\w*)\b")
+_ORDEM_INDIRETA = re.compile(
+    r"^(?:o|a) (?:sistema de analise|agente(?: de analise)?|assistente|modelo)\s+"
+    r"(?:deve|tem de|precisa)\s+(?:marcar|classificar|aprovar|autorizar|registrar|"
+    r"considerar|ignorar|desconsiderar|validar|responder)\b")
 MESES = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6,
          "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12}
 
@@ -122,6 +131,20 @@ def _texto(valor) -> str:
 
 def _sem_acento(texto: str) -> str:
     return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
+
+
+def ordem_dirigida_ao_agente(texto: str) -> bool:
+    """Detecta instruções de análise em orações, inclusive com destinatário explícito."""
+    for frase in re.split(r"[.!?\n]+", _sem_acento(texto)):
+        enderecamento = _ENDERECAMENTO.match(frase.strip())
+        trecho = enderecamento["texto"] if enderecamento else frase
+        for oracao in re.split(r";|,\s*e\s+|\s+e\s+(?=classifique|marque|registre)", trecho):
+            oracao = oracao.strip()
+            if _ORDEM_INDIRETA.match(oracao) and _ALVO_DA_ORDEM.search(oracao):
+                return True
+            if _ORDEM.match(oracao) and (enderecamento or _ALVO_DA_ORDEM.search(oracao)):
+                return True
+    return False
 
 
 def ler_urgencia(pedido: dict) -> tuple[str, str]:
@@ -143,6 +166,8 @@ def ler_urgencia(pedido: dict) -> tuple[str, str]:
     if not (afirmadas or negadas or isoladas):
         return "ausente", ""
     contrarios = [nome for nome, padrao in SINAIS_CONTRARIOS.items() if re.search(padrao, texto)]
+    if ordem_dirigida_ao_agente(texto):
+        contrarios.append("ordem dirigida ao sistema")
     if isoladas and not afirmadas:
         contrarios.insert(0, f"menção isolada a {NOMES_URGENCIA[isoladas[0]]}, sem situação "
                              f"emergencial em curso descrita")
@@ -167,6 +192,78 @@ def hipotese_de_urgencia(pedido: dict) -> str | None:
 # ----------------------------------------------------------------------
 # 1. Identidade vigente do pedido.
 # ----------------------------------------------------------------------
+_CAMPO_POR_ROTULO = {
+    "protocolo": "data_pedido", "data do protocolo": "data_pedido", "data do pedido": "data_pedido",
+    "partida": "data_partida", "ida": "data_partida", "data de partida": "data_partida",
+    "data da partida": "data_partida", "data de ida": "data_partida",
+    "retorno": "data_retorno", "volta": "data_retorno", "data de retorno": "data_retorno",
+    "data do retorno": "data_retorno", "data de volta": "data_retorno",
+}
+_ROTULOS_DATA = "|".join(sorted(_CAMPO_POR_ROTULO, key=len, reverse=True))
+_INICIO_CORRECAO = r"(?:(?:informo|confirmo|corrijo)(?: que)?\s+)?(?:[oa]\s+)?"
+_DATA_CONFIRMADA = re.compile(
+    rf"{_INICIO_CORRECAO}(?P<rotulo>{_ROTULOS_DATA})(?:\s*[:=]\s*|\s+"
+    r"(?:e|em|para|sera (?:em|no dia)|ocorrera em|ficou para|"
+    r"(?:esta |foi )?(?:previst[oa]|confirmad[oa]|(?:re)?marcad[oa]|alterad[oa]) para)\s+)"
+    r"(?P<data>\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})")
+_ROTULO_NO_INICIO = re.compile(rf"{_INICIO_CORRECAO}(?P<rotulo>{_ROTULOS_DATA})\b")
+_REFERENCIA_A_DATA = re.compile(rf"\b(?:{_ROTULOS_DATA})\b")
+_MATRICULA_CONFIRMADA = re.compile(
+    r"(?:^|,\s*(?:e\s+)?)(?:a\s+)?(?:minha\s+)?matricula(?:\s+correta)?"
+    r"(?:\s*[:=]\s*|\s+e\s+)(\d{6})$")
+_DATA_INDEFINIDA = re.compile(
+    r"\b(?:nao|a definir|indefinid\w*|sem (?:data|previsao|confirmacao)|"
+    r"ainda|aguard\w*|pendente|sujeit[oa]|talvez|se|depois|posteriormente|mais tarde|a confirmar|"
+    r"sera (?:informad\w*|definid\w*|confirmad\w*)|informarei|definirei|confirmarei|"
+    r"cancelad\w*|descartad\w*|suspens\w*)\b")
+
+
+def _correcoes_da_complementacao(texto: str, pedido: dict) -> tuple[dict, list[str]]:
+    """Reconhece atribuições afirmativas de campos e invalida datas contraditórias."""
+    candidatos: dict[str, set[str]] = {}
+    indefinidas = set()
+    data_generica_indefinida = False
+    texto = re.sub(r"^\s*complementacao ao pedido(?: em diligencia)?\s*:\s*", "", _sem_acento(texto))
+    for oracao in re.split(r"[.;!?\n]+", texto):
+        oracao = oracao.strip()
+        if confirmado := _DATA_CONFIRMADA.fullmatch(oracao):
+            campo = _CAMPO_POR_ROTULO[confirmado["rotulo"]]
+            valor = confirmado["data"]
+            try:
+                valor = (datetime.strptime(valor, "%d/%m/%Y").date() if "/" in valor
+                         else date.fromisoformat(valor)).isoformat()
+            except ValueError:
+                indefinidas.add(campo)
+            else:
+                candidatos.setdefault(campo, set()).add(valor)
+        elif rotulo := _ROTULO_NO_INICIO.match(oracao):
+            if _DATA_INDEFINIDA.search(oracao) or re.search(r"\d{2}[-/]\d{2}", oracao):
+                indefinidas.add(_CAMPO_POR_ROTULO[rotulo["rotulo"]])
+        elif matricula := _MATRICULA_CONFIRMADA.search(oracao):
+            candidatos.setdefault("matricula", set()).add(matricula[1])
+        elif _DATA_INDEFINIDA.search(oracao):
+            referencias = _REFERENCIA_A_DATA.findall(oracao)
+            indefinidas.update(_CAMPO_POR_ROTULO[r] for r in referencias)
+            if not referencias and re.search(r"\bdata\b", oracao):
+                data_generica_indefinida = True
+
+    problemas = []
+    if data_generica_indefinida:
+        datas_mencionadas = (set(candidatos) & set(CAMPOS_DATA)) | indefinidas
+        if not datas_mencionadas:
+            datas_mencionadas = {c for c in CAMPOS_DATA if not _texto(pedido.get(c))}
+        if len(datas_mencionadas) != 1:
+            problemas.append("a complementação declara uma data indefinida sem identificar o campo")
+        indefinidas.update(datas_mencionadas)
+    correcoes = dict.fromkeys(indefinidas)
+    for campo, valores in candidatos.items():
+        if len(valores) > 1:
+            problemas.append(f"complementação com valores conflitantes para {campo}")
+        elif campo not in indefinidas:
+            correcoes[campo] = next(iter(valores))
+    return correcoes, problemas
+
+
 def pedido_vigente(pedido: dict, complemento: dict | None) -> tuple[dict, list[str]]:
     """O pedido com as correções da complementação, cada dado no seu papel.
 
@@ -180,33 +277,8 @@ def pedido_vigente(pedido: dict, complemento: dict | None) -> tuple[dict, list[s
         problemas.append(f"complementação do pedido {complemento.get('numero')} aplicada ao "
                          f"pedido {pedido['numero']}")
         return vigente, problemas
-    texto = complemento.get("texto", "")
-
-    matriculas = set(MATRICULA.findall(texto))
-    if len(matriculas) == 1:
-        vigente["matricula"] = matriculas.pop()
-    elif len(matriculas) > 1:
-        problemas.append(f"complementação com mais de uma matrícula: {sorted(matriculas)}")
-
-    faltantes = [c for c in CAMPOS_DATA if not _texto(pedido.get(c))]
-    atribuidas: dict[str, str] = {}
-    for achado in DATA_ISO.finditer(texto):
-        antes = _sem_acento(texto[max(0, achado.start() - 50):achado.start()])
-        if "retorno" in antes or "volta" in antes:
-            papel = "data_retorno"
-        elif "partida" in antes or re.search(r"\bida\b", antes):
-            papel = "data_partida"
-        elif "protocol" in antes:
-            papel = "data_pedido"
-        elif len(faltantes) == 1:
-            papel = faltantes[0]
-        else:
-            problemas.append(f"data {achado.group()} da complementação sem papel definido")
-            continue
-        if papel in atribuidas and atribuidas[papel] != achado.group():
-            problemas.append(f"complementação com duas datas para {papel}")
-        atribuidas[papel] = achado.group()
-    vigente.update(atribuidas)
+    correcoes, problemas = _correcoes_da_complementacao(complemento.get("texto") or "", pedido)
+    vigente.update(correcoes)
     return vigente, problemas
 
 
@@ -222,74 +294,99 @@ def _calculo(resultado: str) -> dict | None:
             "antecedencia_atende": "NÃO ATENDE" not in resultado, "texto": resultado}
 
 
+_ARGUMENTOS_DAS_FERRAMENTAS = {
+    "consultar_servidor": {"matricula", "nome_informado"},
+    "calcular_diarias": {"grupo", "destino_uf", *CAMPOS_DATA},
+    "consultar_historico_diarias": {"matricula", "data_partida", "quantidade_pedida"},
+    "consultar_saldo_diarias": {"unidade", "valor"},
+}
+
+
+def validar_argumentos(ferramenta: str, argumentos: dict, pedido: dict, vigente: dict,
+                       calculo: dict | None) -> list[str]:
+    """Mesma regra antes da chamada e na conferência da trilha entregue."""
+    campos = _ARGUMENTOS_DAS_FERRAMENTAS.get(ferramenta)
+    if campos is None:
+        return ["ferramenta desconhecida"]
+    if argumentos.keys() != campos:
+        return ["argumentos obrigatórios ausentes ou desconhecidos"]
+    if any(type(valor) not in ((int, float) if campo in {"quantidade_pedida", "valor"} else (str,))
+           for campo, valor in argumentos.items()):
+        return ["argumento em formato inválido"]
+
+    matricula = _texto(vigente.get("matricula"))
+    servidor = SERVIDORES.get(matricula)
+    erros = []
+    if ferramenta == "consultar_servidor":
+        consultada = argumentos["matricula"].strip()
+        if (not re.fullmatch(r"[0-9]{6}", consultada)
+                or consultada not in {matricula, _texto(pedido.get("matricula"))}):
+            erros.append("matrícula não consta do pedido nem da complementação")
+        if _normalizar_nome(argumentos["nome_informado"]) != _normalizar_nome(_texto(vigente.get("nome"))):
+            erros.append("nome informado difere do pedido")
+    elif ferramenta == "calcular_diarias":
+        if servidor is None or argumentos["grupo"].strip().upper() != servidor["grupo_diaria"]:
+            erros.append("grupo não é o do cadastro da matrícula vigente")
+        if argumentos["destino_uf"].strip().upper() != _texto(vigente.get("destino_uf")).upper():
+            erros.append("UF de destino difere do pedido")
+        for campo in CAMPOS_DATA:
+            valor = argumentos[campo].strip()
+            if valor != _texto(vigente.get(campo)):
+                erros.append(f"{campo} não corresponde ao campo do pedido vigente")
+            if not _data_iso_valida(valor):
+                erros.append(f"{campo} precisa ser uma data válida no formato AAAA-MM-DD")
+        if not erros and argumentos["data_retorno"].strip() < argumentos["data_partida"].strip():
+            erros.append("data_retorno anterior à data_partida")
+    elif ferramenta == "consultar_historico_diarias":
+        if argumentos["matricula"].strip() != matricula:
+            erros.append("matrícula não é a matrícula vigente")
+        if argumentos["data_partida"].strip() != _texto(vigente.get("data_partida")):
+            erros.append("data_partida não é a data de partida do pedido vigente")
+        if calculo is None or argumentos["quantidade_pedida"] != calculo["quantidade"]:
+            erros.append("quantidade pedida não veio de um cálculo válido desta execução")
+    else:
+        if servidor is None or argumentos["unidade"].strip().upper() != servidor["unidade"]:
+            erros.append("unidade não é a do cadastro da matrícula vigente")
+        if calculo is None or argumentos["valor"] != calculo["valor"]:
+            erros.append("valor não veio de um cálculo válido desta execução")
+    return erros
+
+
+def cadastro_confere(resultado: str) -> bool:
+    return resultado.endswith("Nome informado no pedido: CONFERE com o cadastro.")
+
+
+def _data_iso_valida(valor: str) -> bool:
+    try:
+        return date.fromisoformat(valor).isoformat() == valor
+    except ValueError:
+        return False
+
+
 def _conferir_consultas(consultas: list[dict], pedido: dict, vigente: dict) -> tuple[list, dict]:
     """Confere os argumentos de cada consulta e devolve as evidências válidas."""
     problemas: list[str] = []
     matricula = _texto(vigente.get("matricula"))
-    servidor = SERVIDORES.get(matricula)
     evidencias: dict = {"servidor": None, "calculo": None, "historico": None, "saldo": None}
 
-    # Uma consulta barrada antes de executar não é evidência de nada.
-    consultas = [c for c in consultas if not bloqueada(c)]
-    # O cálculo vem antes porque histórico e saldo se ancoram nele.
     for c in consultas:
-        if c["ferramenta"] != "calcular_diarias":
+        # Uma consulta barrada antes de executar não é evidência de nada.
+        if bloqueada(c):
             continue
-        args, erros = c["argumentos"], []
-        if servidor is None or _texto(args.get("grupo")).upper() != servidor["grupo_diaria"]:
-            erros.append(f"grupo {args.get('grupo')!r} não é o do cadastro da matrícula "
-                         f"vigente {matricula}")
-        if _texto(args.get("destino_uf")).upper() != _texto(vigente.get("destino_uf")).upper():
-            erros.append(f"UF {args.get('destino_uf')!r} difere do pedido")
-        for campo in CAMPOS_DATA:
-            if _texto(args.get(campo)) != _texto(vigente.get(campo)):
-                erros.append(f"{campo}={args.get(campo)!r} não é a {campo} do pedido "
-                             f"({vigente.get(campo)})")
-        problemas += [f"calcular_diarias: {e}" for e in erros]
-        if not erros:
-            evidencias["calculo"] = _calculo(c["resultado"]) or evidencias["calculo"]
-
-    calculo = evidencias["calculo"]
-    for c in consultas:
-        nome, args = c["ferramenta"], c["argumentos"]
-        if nome == "calcular_diarias":
+        nome, args, resultado = c["ferramenta"], c["argumentos"], c["resultado"]
+        erros = validar_argumentos(nome, args, pedido, vigente, evidencias["calculo"])
+        if erros:
+            problemas.extend(f"{nome}: {e}" for e in erros)
             continue
-        erros = []
         if nome == "consultar_servidor":
-            # Reconsultar a matrícula digitada, na complementação, é inofensivo:
-            # grupo e unidade só valem do cadastro da matrícula vigente.
-            consultada = _texto(args.get("matricula"))
-            if consultada not in {matricula, _texto(pedido.get("matricula"))}:
-                erros.append(f"matrícula {consultada} não consta do pedido nem da complementação")
-            elif consultada == matricula:
-                if _normalizar_nome(_texto(args.get("nome_informado"))) != \
-                        _normalizar_nome(_texto(vigente.get("nome"))):
-                    erros.append(f"nome informado {args.get('nome_informado')!r} difere do pedido")
-                else:
-                    evidencias["servidor"] = c["resultado"]
+            if args["matricula"].strip() == matricula:
+                evidencias["servidor"] = resultado
+        elif nome == "calcular_diarias":
+            evidencias["calculo"] = _calculo(resultado) or evidencias["calculo"]
         elif nome == "consultar_historico_diarias":
-            if _texto(args.get("matricula")) != matricula:
-                erros.append(f"matrícula {args.get('matricula')} não é a matrícula vigente "
-                             f"{matricula}")
-            if _texto(args.get("data_partida")) != _texto(vigente.get("data_partida")):
-                erros.append(f"data_partida={args.get('data_partida')!r} não é a data de "
-                             f"partida do pedido ({vigente.get('data_partida')})")
-            if calculo is None or _numero(args.get("quantidade_pedida")) != calculo["quantidade"]:
-                erros.append(f"quantidade {args.get('quantidade_pedida')} não veio de um cálculo "
-                             f"válido")
-            if not erros:
-                evidencias["historico"] = c["resultado"]
+            evidencias["historico"] = resultado
         elif nome == "consultar_saldo_diarias":
-            if servidor is None or _texto(args.get("unidade")).upper() != servidor["unidade"]:
-                erros.append(f"unidade {args.get('unidade')!r} não é a do cadastro da matrícula "
-                             f"vigente {matricula}")
-            if calculo is None or _numero(args.get("valor")) != calculo["valor"]:
-                erros.append(f"valor {args.get('valor')} não veio de um cálculo válido")
-            if not erros:
-                evidencias["saldo"] = c["resultado"]
-        else:
-            erros.append("ferramenta desconhecida")
-        problemas += [f"{nome}: {e}" for e in erros]
+            evidencias["saldo"] = resultado
     return problemas, evidencias
 
 
@@ -308,7 +405,7 @@ def esperado(pedido: dict, vigente: dict, evidencias: dict) -> dict:
     sit = dict.fromkeys(CRITERIOS, "nao_verificado")
     servidor = evidencias["servidor"]
     if servidor is not None:
-        sit["cadastro"] = "atende" if "CONFERE" in servidor else "nao_atende"
+        sit["cadastro"] = "atende" if cadastro_confere(servidor) else "nao_atende"
     sit["dados_completos"] = ("atende" if all(_texto(vigente.get(c)) for c in OBRIGATORIOS)
                               else "nao_atende")
     leitura, motivo_urgencia = ler_urgencia(pedido)
@@ -571,10 +668,12 @@ def redigir(pedido: dict, vigente: dict, complemento: dict | None, evidencias: d
     if tipos:
         alertas.append(f"O pedido traz dados pessoais ({', '.join(tipos)}), mascarados antes do "
                        f"envio ao modelo e não usados na instrução.")
-    if ORDEM_EMBUTIDA.search(_sem_acento(pedido.get("justificativa") or "")):
-        alertas.append("A justificativa traz uma ordem dirigida ao sistema de análise, que não "
-                       "foi obedecida: a justificativa é dado do pedido, e a instrução segue a "
-                       "norma.")
+    if ordem_dirigida_ao_agente(pedido.get("justificativa") or ""):
+        alertas.append("A justificativa traz uma ordem dirigida ao sistema de análise. A instrução "
+                       "segue a norma aplicável.")
+    if complemento and ordem_dirigida_ao_agente(complemento.get("texto") or ""):
+        alertas.append("A complementação traz uma ordem dirigida ao sistema de análise. A instrução "
+                       "segue a norma aplicável.")
     if verbal:
         alertas.append("A justificativa alega autorização verbal, que não supre a autorização "
                        "expressa e escrita do Secretário Adjunto (art. 5º, § 2º).")

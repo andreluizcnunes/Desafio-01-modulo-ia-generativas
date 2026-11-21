@@ -5,6 +5,22 @@ revisão (`CORRECOES.md`). Os arquivos de origem de cada número estão em `resu
 Como a saída do modelo é probabilística, os valores variam entre execuções (Aula 04,
 5.4): sempre que houve repetição, o relatório informa quantas vezes a medição foi feita.
 
+## Atualização da quarta revisão
+
+Os números do provedor abaixo são da revisão `067e97b`. A nova revisão foi exercitada
+com Agno real, ferramentas reais e respostas HTTP roteirizadas. As três rodadas por
+configuração cobriram os 12 pedidos e as duas complementações, com 42/42 em cada.
+As quatro falhas do exercício foram reproduzidas com HTTP local. Os casos adicionais
+confirmaram que datas negadas ficam pendentes, argumentos indevidos são barrados
+antes de executar e referências descritivas a sistemas não geram ordens falsas.
+Os resultados locais estão em `resultados/teste_bloqueio.txt` e a trilha de regressão
+está em `CORRECOES.md`.
+
+A instrução de controle com o `gpt-5.6-luna` retornou erro de conexão neste ambiente.
+As rodadas reais e as demais verificações que dependem do provedor seguem pendentes
+para a quarta revisão. O teste com respostas roteirizadas não produz novas medidas
+de acurácia do modelo, tokens, latência do provedor ou custo.
+
 ## 1. Resumo
 
 | Medida | Resultado |
@@ -358,10 +374,10 @@ mudança futura no ponto de conferência, não a medição de 42 itens deste rel
 | Memória A/B/C | `memoria.py` | sim |
 | Quatro falhas provocadas | `falhas.py` | sim |
 
-Etapas que dependem de acesso ao modelo: a medição, a parte B do formulário, o teste de
+Na terceira revisão (`067e97b`), as etapas que dependem do modelo foram a medição, a parte B do formulário, o teste de
 eliminação com as servidoras reais, a memória, as falhas provocadas e a parte 3 da
 Etapa 3. Todas foram executadas em 21/11/2026, depois das correções da terceira
-revisão. As demais rodam sem chave. Nenhuma execução ficou pendente.
+revisão. As demais rodam sem chave. Para a quarta revisão, veja a atualização acima.
 
 ## 10. Limitações
 

@@ -262,7 +262,8 @@ def item(rodada, config, numero, turno, resultado, esperado) -> dict:
             # Erros nos textos do modelo que o código substituiu antes da entrega.
             "textos_do_modelo_substituidos": resultado.textos_substituidos,
             # Alertas escritos pelo modelo, registrados e não exibidos.
-            "alertas_do_modelo": resultado.alertas_do_modelo}
+            "alertas_do_modelo": resultado.alertas_do_modelo,
+            "consultas_bloqueadas": resultado.consultas_bloqueadas}
 
 
 def resumir(itens: list[dict]) -> dict:

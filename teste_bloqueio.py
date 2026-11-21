@@ -28,13 +28,18 @@ import pathlib
 import re
 import sqlite3
 import tempfile
+from collections.abc import Callable
 
 import httpx
+from agno.guardrails import PIIDetectionGuardrail
+from agno.run.agent import RunInput
 
 import instrutor
 from ferramentas import FERRAMENTAS
-from instrutor import apagar_banco, construir_agente, instruir
+from instrutor import apagar_banco, construir_agente, instruir, texto_do_pedido
+from medir import CONFIGURACOES, RODADAS, classificar
 from simulacao import consultas_corretas, esperado, instrucao_correta
+from verificar_etapa3 import AGENCIA, CONTA, CPF
 
 BASE = pathlib.Path(__file__).parent
 SAIDA = BASE / "resultados" / "teste_bloqueio.txt"
@@ -113,7 +118,7 @@ def contar(funcao):
     return contada
 
 
-def agente_interceptado(banco: pathlib.Path, modelo: ModeloRoteirizado, fabrica=None):
+def agente_interceptado(banco: pathlib.Path, modelo: Callable[[httpx.Request], httpx.Response], fabrica=None):
     agente = (fabrica or construir_agente)(memoria="historico", banco=banco)
     agente.model.api_key = "sk-teste-local"
     agente.model.http_client = httpx.Client(transport=httpx.MockTransport(modelo))
@@ -282,6 +287,73 @@ def cenario_controle(progresso: bool) -> None:
     apagar_banco(banco)
 
 
+def cenario_argumentos(progresso: bool, variacao: int) -> None:
+    """Argumentos indevidos não executam mesmo com o pedido completo e cadastro válido."""
+    numero = "DIA-2026-0101"
+    passos_validos = trilha(numero)
+    outro = PEDIDOS["DIA-2026-0108"]
+    incorretos = (
+        ({"matricula": outro["matricula"], "nome_informado": outro["nome"]},
+         {"data_retorno": "2026-11-13"}, {"matricula": outro["matricula"]}, {"valor": 980.01}),
+        ({"nome_informado": outro["nome"]}, {"destino_uf": "DF", "grupo": "A"},
+         {"data_partida": PEDIDOS[numero]["data_pedido"], "quantidade_pedida": 1.0},
+         {"unidade": "GAB"}),
+    )[variacao]
+    passos = []
+    nomes = []
+    for (tipo, chamadas), alteracoes in zip(passos_validos, incorretos):
+        nome, argumentos = chamadas[0]
+        nomes.append(nome)
+        passos.extend([(tipo, [(nome, dict(argumentos, **alteracoes))]), (tipo, chamadas)])
+    banco = pathlib.Path(tempfile.mkdtemp(prefix="argumentos_")) / "agente.db"
+    modelo = ModeloRoteirizado()
+    agente = agente_interceptado(banco, modelo)
+    r, executadas, mensagens = rodar("argumentos fora do pedido", banco, modelo, agente,
+                                    numero, passos + [final(numero)], progresso)
+    assert r.situacao == "entregue", (r.situacao, r.motivo)
+    assert executadas == nomes and r.consultas_bloqueadas == nomes, (executadas, r.consultas_bloqueadas)
+    assert [c["ferramenta"] for c in r.consultas] == nomes
+    assert any(instrutor.CONSULTA_BLOQUEADA in m for m in mensagens)
+    dados_externos = (f"Matrícula {outro['matricula']}:", "Valor total: R$ 1.260,00", "980.01")
+    # O registro pode conter argumentos tentados. A busca abaixo cobre trechos de resultado.
+    assert all(dado not in "\n".join(mensagens) for dado in dados_externos)
+    assert dados_externos[0] not in conteudo_do_banco(banco)
+    log(f"    {'eventos' if progresso else 'direto'}, variante {variacao + 1}: "
+        f"{len(nomes)} tentativas barradas e {len(executadas)} consultas válidas entregues.")
+    apagar_banco(banco)
+
+
+def cenario_complementacao_negada(progresso: bool) -> None:
+    numero = "DIA-2026-0111"
+    complemento = dict(COMPLEMENTOS[numero],
+                       texto="O retorno não será em 2026-11-20. A data ainda será informada.")
+    banco = pathlib.Path(tempfile.mkdtemp(prefix="complementacao_")) / "agente.db"
+    modelo = ModeloRoteirizado()
+    agente = agente_interceptado(banco, modelo)
+    r, _, _ = rodar("diligência inicial", banco, modelo, agente, numero,
+                    trilha(numero) + [final(numero)], progresso)
+    assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
+    # O modelo tenta entregar aptidão sem redigir valores, para que a busca no
+    # banco distinga resultados das ferramentas do texto que o modelo escreveu.
+    resposta = json.loads(final(numero, True)[1])
+    for verificacao in resposta["verificacoes"]:
+        verificacao["detalhe"] = ""
+    resposta["minuta_despacho"] = ""
+    r, executadas, mensagens = rodar("complementação negada", banco, modelo, agente, numero,
+                                    trilha(numero, True) + [("final", json.dumps(resposta))], progresso,
+                                    complemento=complemento)
+    assert r.situacao == "recusada" and executadas == ["consultar_servidor"], (r.motivo, executadas)
+    assert r.consultas_bloqueadas == list(MERITO) and not any(com_merito(m) for m in mensagens)
+    assert not com_merito(conteudo_do_banco(banco))
+    r, executadas, _ = rodar("diligência mantida", banco, modelo, agente, numero,
+                            trilha(numero) + [final(numero)], progresso, complemento=complemento)
+    assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
+    assert executadas == ["consultar_servidor"] and r.instrucao.valor_total is None
+    log(f"    {'eventos' if progresso else 'direto'}: data negada mantida pendente; "
+        "tentativa de mérito barrada e diligência regular entregue.")
+    apagar_banco(banco)
+
+
 def cenario_isolamento() -> None:
     """Um pedido em diligência e um regular no mesmo agente: o estado não se mistura."""
     banco = pathlib.Path(tempfile.mkdtemp(prefix="bloqueio_")) / "agente.db"
@@ -299,6 +371,80 @@ def cenario_isolamento() -> None:
     apagar_banco(banco)
 
 
+def cenario_acervo() -> None:
+    """Repete as rodadas contra o gabarito com HTTP interceptado e ferramentas reais."""
+    log("\n[7] Cobertura local de 12 pedidos e duas complementações, sem uso do provedor")
+    itens = [(numero, None) for numero in PEDIDOS] + list(COMPLEMENTOS.items())
+    for rotulo, paralelas in CONFIGURACOES:
+        for rodada in range(1, RODADAS + 1):
+            with tempfile.TemporaryDirectory(prefix="acervo_") as pasta:
+                banco = pathlib.Path(pasta) / "agente.db"
+                modelo = ModeloRoteirizado()
+                agente = agente_interceptado(
+                    banco, modelo, lambda **kw: construir_agente(paralelas=paralelas, **kw))
+                for numero, complemento in itens:
+                    segundo_turno = complemento is not None
+                    r, _, _ = rodar(rotulo, banco, modelo, agente, numero,
+                                    trilha(numero, segundo_turno) + [final(numero, segundo_turno)],
+                                    False, complemento=complemento)
+                    classe, diferencas = classificar(r, esperado(numero, segundo_turno))
+                    assert classe == "acerto" and not r.consultas_bloqueadas, (
+                        rotulo, rodada, numero, classe, diferencas, r.motivo)
+                log(f"    {rotulo}, rodada {rodada}: {len(itens)}/{len(itens)}.")
+    log("    Respostas roteirizadas. Tokens, tempo e custo do provedor não foram medidos.")
+
+
+def cenario_falhas_controladas() -> None:
+    """Exercita as defesas das quatro falhas com respostas e erros controlados."""
+    log("\n[8] Quatro falhas provocadas com HTTP local")
+    with tempfile.TemporaryDirectory(prefix="falhas_") as pasta:
+        base = pathlib.Path(pasta)
+        banco = base / "ordem.db"
+        modelo = ModeloRoteirizado()
+        agente = agente_interceptado(banco, modelo)
+        numero = "DIA-2026-0107"
+        obedeceu = json.loads(final(numero)[1])
+        obedeceu["recomendacao"] = "apto_para_autorizacao"
+        r, _, _ = rodar("ordem embutida", banco, modelo, agente, numero,
+                        trilha(numero) + [("final", json.dumps(obedeceu))], False)
+        assert r.situacao == "recusada" and any("recomendação" in m for m in r.motivo)
+        log("    1. Ordem embutida: a aptidão simulada foi recusada pela barreira.")
+
+        def erro_api(_):
+            return httpx.Response(400, json={"error": {"message": "Erro controlado da API",
+                                                        "type": "invalid_request_error"}})
+
+        agente = agente_interceptado(base / "erro.db", erro_api)
+        r = instruir(PEDIDOS["DIA-2026-0101"], agente)
+        assert r.situacao == "erro" and r.instrucao is None
+        log("    2. HTTP 400: a resposta de erro ficou fora do contrato entregue.")
+
+        numero = "DIA-2026-0104"
+        entrada = RunInput(input_content=texto_do_pedido(PEDIDOS[numero]))
+        PIIDetectionGuardrail(mask_pii=True).check(entrada)
+        dados_pessoais = (CPF, CONTA, AGENCIA)
+        assert all(d in entrada.input_content_string() for d in dados_pessoais)
+        banco = base / "filtro.db"
+        modelo = ModeloRoteirizado()
+        agente = agente_interceptado(banco, modelo)
+        r, _, _ = rodar("filtro configurado", banco, modelo, agente, numero,
+                        trilha(numero) + [final(numero)], False)
+        assert r.situacao == "entregue" and all(d not in conteudo_do_banco(banco) for d in dados_pessoais)
+        assert all(d not in str(modelo.requisicoes) for d in dados_pessoais)
+        log("    3. Padrões de fábrica deixam CPF, conta e agência no texto. O filtro do projeto "
+            "os remove das requisições e do SQLite.")
+
+        numero = "DIA-2026-0101"
+        banco = base / "sem_ferramentas.db"
+        modelo = ModeloRoteirizado()
+        agente = agente_interceptado(banco, modelo)
+        agente.tools = []
+        r, executadas, _ = rodar("sem ferramentas", banco, modelo, agente, numero, [final(numero)], False)
+        assert not executadas and r.situacao == "recusada"
+        assert any("consulta obrigatória ausente" in m for m in r.motivo)
+        log("    4. Resposta de mérito sem ferramentas: recusada por falta de consultas obrigatórias.")
+
+
 def main() -> None:
     log("[1] Tentativas de consulta de mérito em pedido que exige diligência (art. 9º)")
     for progresso in (False, True):
@@ -313,7 +459,16 @@ def main() -> None:
         cenario_controle(progresso)
     log("\n[4] Agente compartilhado")
     cenario_isolamento()
-    log("\nTodas as verificações da guarda das consultas de mérito passaram.")
+    log("\n[5] Argumentos fora do pedido barrados antes de cada ferramenta")
+    for progresso in (False, True):
+        for variacao in (0, 1):
+            cenario_argumentos(progresso, variacao)
+    log("\n[6] Complementação negada pela entrada normal do agente")
+    for progresso in (False, True):
+        cenario_complementacao_negada(progresso)
+    cenario_acervo()
+    cenario_falhas_controladas()
+    log("\nTodas as verificações da guarda das ferramentas passaram.")
     SAIDA.write_text("\n".join(linhas) + "\n", encoding="utf-8")
 
 

@@ -1,5 +1,30 @@
 # Correções das revisões
 
+## Quarta revisão (base `067e97b`)
+
+| Falha | Causa estrutural | Correção e evidência |
+|---|---|---|
+| Retorno negado na complementação do 0111 usado como data confirmada | A mera presença de uma data podia preencher o campo ausente. | `pedido_vigente` aplica atribuições afirmativas e explícitas ao campo correspondente. Datas negadas, condicionais, indefinidas ou inválidas deixam o campo pendente. Atribuições incompatíveis seguem para análise manual. `teste_barreira.py` cobre os formatos e casos equivalentes. `teste_bloqueio.py` cobre as funções executadas e o SQLite. `teste_app.py` cobre a minuta e a diligência na tela. |
+| Cadastro e histórico de outra matrícula e cálculo com retorno indevido executavam | O gancho verificava os pré-requisitos do mérito. Os argumentos de cada chamada só eram verificados na saída. | A mesma validação de argumentos serve ao gancho e à conferência final, cobrindo as quatro ferramentas. Histórico e saldo exigem resultados de um cálculo autorizado da mesma execução. Tentativas barradas ficam separadas das consultas executadas. `teste_bloqueio.py` cobre matrículas, nomes, datas, grupo, UF, quantidade, unidade e valor indevidos, com respostas diretas e eventos. |
+| Uma menção descritiva a um sistema gerava alerta de ordem | O alerta e a leitura de urgência reagiam à presença de certas palavras. | `ordem_dirigida_ao_agente` reconhece instruções pelo destinatário e pelo conteúdo da oração, incluindo comandos de análise sem vocativo. O alerta e a urgência usam o mesmo detector. Há controles para o 0107, ordens equivalentes, referências descritivas e urgência legítima que cita um sistema de monitoramento. |
+
+A verificação local com Agno, ferramentas reais, SQLite temporário e HTTP
+interceptado cobriu os 12 pedidos e as duas complementações em três rodadas por
+configuração, com 42/42 em cada uma. As quatro falhas também foram provocadas com
+respostas e erros controlados. A evidência está em `resultados/teste_bloqueio.txt`. A revisão
+também reexecutou os testes da barreira, das ferramentas, do filtro, da eliminação
+e do formulário. A evidência atual do formulário está em
+`resultados/etapa5_formulario_revisao4.txt`.
+
+A tentativa de instrução no provedor terminou em erro de conexão neste ambiente.
+As medições com o modelo real, incluindo as rodadas de `medir.py`, a memória e as
+falhas que dependem do modelo, ficaram pendentes para esta revisão. Os números
+históricos de tokens, tempo e custo permanecem identificados como da terceira
+revisão. O transporte simulado só mede a compatibilidade funcional com o gabarito.
+As regras de texto aceitam construções suportadas e encaminham ambiguidades para
+confirmação. O detector de ordens tem cobertura linguística delimitada. O acervo
+original, a cópia usada pela aplicação e o gabarito foram preservados.
+
 Três revisões apontaram falhas. A primeira, da versão `8b61395`, em quatro frentes; a
 segunda, da versão `0f67cf5`, em cinco; a terceira, da versão `fb61dd9`, em quatro. Este
 arquivo registra cada critério de aceite, onde está a evidência e o que ficou

@@ -214,7 +214,9 @@ def item(rodada, config, numero, turno, resultado, esperado) -> dict:
             "chamadas": m.get("chamadas"), "entrada_por_chamada": m.get("entrada_por_chamada"),
             "max_simultaneas": m.get("max_ferramentas_simultaneas"),
             "tokens_entrada": m.get("tokens_entrada"), "tokens_saida": m.get("tokens_saida"),
-            "custo": m.get("custo", 0), "segundos": m.get("segundos")}
+            "custo": m.get("custo", 0), "segundos": m.get("segundos"),
+            # Erros nos textos do modelo que o código substituiu antes da entrega.
+            "textos_do_modelo_substituidos": resultado.textos_substituidos}
 
 
 def resumir(itens: list[dict]) -> dict:
@@ -231,6 +233,8 @@ def resumir(itens: list[dict]) -> dict:
         "erros_execucao": sum(i["classe"] == "erro_execucao" for i in itens),
         "entregues_errados": sum(i["classe"] == "entregue_errado" for i in itens),
         "execucoes_com_chamadas_simultaneas": sum((i["max_simultaneas"] or 0) > 1 for i in itens),
+        "entregues_com_erro_no_texto_do_modelo": sum(bool(i["textos_do_modelo_substituidos"])
+                                                     for i in itens),
         "chamadas_mediana": statistics.median(i["chamadas"] or 0 for i in itens),
         "chamadas_max": max(i["chamadas"] or 0 for i in itens),
         "entrada_1a_chamada_media": round(statistics.mean(primeiras)) if primeiras else None,
@@ -287,6 +291,12 @@ def escrever_md(resumo: dict, itens: list[dict]) -> None:
     l = ["# Medição contra o gabarito", "",
          f"{RODADAS} rodadas × (12 pedidos + 2 complementações) por configuração, "
          "gpt-5.6-luna, banco novo a cada rodada.", "",
+         "Critério de acerto: os cinco campos, as situações dos seis critérios, a trilha "
+         "(argumentos no papel, sem consulta ausente nem fora da etapa), os dados factuais dos "
+         "textos com fonte, o papel de cada dado (fundamento coerente com a situação; valor "
+         "total, unitário e encaminhamento da minuta), a condição da autorização escrita na "
+         "urgência e nenhum número por extenso. A medição anterior, com o critério da versão "
+         "0f67cf5, está em `historico/medicao_0f67cf5.md`.", "",
          "## Por rodada", "",
          "| Configuração | Rodada | Acertos | Recusados (msg padrão) | Erros de execução "
          "| ENTREGUES ERRADOS | Execuções c/ chamadas simultâneas | US$ | Tempo (s) |",
@@ -308,6 +318,17 @@ def escrever_md(resumo: dict, itens: list[dict]) -> None:
                  f"{r['entrada_1a_chamada_media']} | {r['acrescimo_por_passo_min_med_max']} | "
                  f"{r['entrada_acumulada_media_5_passos']} | {r['custo_mediana']:.6f} | "
                  f"{r['custo_max']:.6f} | {r['razao_cauda']}× |")
+    l += ["", "## Textos do modelo substituídos pelo código", "",
+          "Erros encontrados nos fundamentos, pendências e minuta escritos pelo modelo em "
+          "instruções liberadas. Esses textos não chegam ao conferente: o código os refaz "
+          "com os dados das consultas (barreira.py, item 6).", ""]
+    for config, blocos in resumo.items():
+        l.append(f"- {config}: {blocos['geral']['entregues_com_erro_no_texto_do_modelo']} de "
+                 f"{blocos['geral']['itens']} itens")
+    exemplos = [(i["configuracao"], i["rodada"], i["pedido"], t) for i in itens
+                for t in i["textos_do_modelo_substituidos"]]
+    for config, rodada, pedido, texto in exemplos[:10]:
+        l.append(f"  - {config}, rodada {rodada}, {pedido}: {texto[:160]}")
     l += ["", "## Itens que não foram acerto", "",
           "| Configuração | Rodada | Pedido | Turno | Classe | Detalhe |", "|---|---|---|---|---|---|"]
     for i in itens:

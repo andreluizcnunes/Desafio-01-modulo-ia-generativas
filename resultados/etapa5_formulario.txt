@@ -2,6 +2,8 @@
     métricas: [('Recomendação do agente', 'Apto para autorização'), ('Diárias', '3.5'), ('Valor total', 'R$ 980,00'), ('Autorização superior escrita', 'não exigida')]
     status: ['Instrução concluída em 0.0 s']
     minuta editável presente: True
+[A1b] Minuta do modelo com o valor unitário como total: a tela mostra a do código
+    minuta exibida: Quantidade: 3,5 diária(s). Valor unitário: R$ 280,00. Valor total: R$ 980,00.
 [A2] Servidor diverge sem motivo, depois com motivo
     sem motivo: ['Informe o motivo da divergência antes de registrar.']
     com motivo: Conferência registrada: agente sugeriu 'Apto para autorização', servidor decidiu 'Não recomendado'.
@@ -10,16 +12,18 @@
     recomendação no pedido: ['Diligência', '-', '-']
     recomendação após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
 [A4] Falhas: só a mensagem padrão, nada da execução recusada
-    recusa da barreira (valor plantado na minuta): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    recusa da barreira (valor plantado num alerta): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
     status ERROR (erro da API como conteúdo): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
     fluxo terminou sem RunOutput: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    sem evento inicial nem resposta, anterior válida no banco: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    sem resposta, banco devolve a execução anterior: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
 [A5] Eliminação pela tela
     matrícula parcial: Eliminação não executada: matrícula '20' inválida: são seis algarismos.
     Carla (207418, sessão sob 207481): Conferência tabela por tabela: nada restou do titular no banco do agente.
     controle Ana Paula continua no banco: {'agno_sessions': 1, 'agno_runs': 1, 'agno_memories': 1}
 [B] Modelo real: DIA-2026-0101
-    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14546 tokens de entrada · 776 de saída · US$ 0.00384 · 9.5 s']
+    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14471 tokens de entrada · 626 de saída · US$ 0.00365 · 8.8 s']
 [B] Modelo real: DIA-2026-0111
-    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5377 tokens de entrada · 495 de saída · US$ 0.00167 · 5.2 s']
+    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5347 tokens de entrada · 373 de saída · US$ 0.00152 · 4.5 s']
     após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
 Todas as verificações do formulário passaram.

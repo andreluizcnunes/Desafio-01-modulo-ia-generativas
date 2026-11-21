@@ -4,9 +4,9 @@ Entrada em tokens. T1 = turno do pedido; T2 = turno da complementação, na mesm
 
 | Configuração | Pedido | T1 1ª chamada | T1 total | T2 1ª chamada | T2 total | T2 recomendação | Aplicada ao pedido certo | US$ T1+T2 |
 |---|---|---:|---:|---:|---:|---|---|---:|
-| A · sem memória | DIA-2026-0111 | 2640 | 5377 | 2563 | 5256 | diligencia | NÃO | 0.00342 |
-| A · sem memória | DIA-2026-0112 | 2640 | 5404 | 2566 | 5249 | diligencia | NÃO | 0.00340 |
-| B · histórico da sessão (teto 4) | DIA-2026-0111 | 2640 | 5377 | 3269 | 17631 | apto_para_autorizacao | sim | 0.00607 |
-| B · histórico da sessão (teto 4) | DIA-2026-0112 | 2640 | 5404 | 3378 | 18156 | apto_para_autorizacao | sim | 0.00632 |
-| C · histórico + memórias do usuário | DIA-2026-0111 | 2665 | 6653 | 3468 | 19937 | apto_para_autorizacao | sim | 0.00728 |
-| C · histórico + memórias do usuário | DIA-2026-0112 | 2665 | 6667 | 3446 | 19796 | apto_para_autorizacao | sim | 0.00720 |
+| A · sem memória | DIA-2026-0111 | 2625 | 5347 | 2548 | 5220 | diligencia | NÃO | 0.00310 |
+| A · sem memória | DIA-2026-0112 | 2625 | 5374 | 2551 | 5221 | diligencia | NÃO | 0.00317 |
+| B · histórico da sessão (teto 4) | DIA-2026-0111 | 2625 | 5347 | 3156 | 17066 | apto_para_autorizacao | sim | 0.00569 |
+| B · histórico da sessão (teto 4) | DIA-2026-0112 | 2625 | 5374 | 3190 | 17216 | apto_para_autorizacao | sim | 0.00566 |
+| C · histórico + memórias do usuário | DIA-2026-0111 | 2650 | 6620 | 3264 | 18924 | apto_para_autorizacao | sim | 0.00660 |
+| C · histórico + memórias do usuário | DIA-2026-0112 | 2650 | 6648 | 3340 | 19301 | apto_para_autorizacao | sim | 0.00670 |

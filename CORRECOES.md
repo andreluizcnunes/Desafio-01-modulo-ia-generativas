@@ -1,8 +1,96 @@
 # Correções das revisões
 
-Duas revisões apontaram falhas. A primeira, da versão `8b61395`, em quatro frentes; a
-segunda, da versão `0f67cf5`, em cinco. Este arquivo registra cada critério de aceite,
-onde está a evidência e o que ficou pendente. A segunda revisão vem primeiro.
+Três revisões apontaram falhas. A primeira, da versão `8b61395`, em quatro frentes; a
+segunda, da versão `0f67cf5`, em cinco; a terceira, da versão `fb61dd9`, em quatro. Este
+arquivo registra cada critério de aceite, onde está a evidência e o que ficou
+pendente. A revisão mais recente vem primeiro.
+
+# Terceira revisão (versão fb61dd9)
+
+Testes e medições executados em 21/11/2026.
+
+## 1. Alertas contraditórios na tela e na medição
+
+| Critério de aceite | Situação | Onde está a evidência |
+|---|---|---|
+| 0101 com o alerta «O valor total correto é R$ 280,00»: a afirmação fica fora da tela e a saída aceita só tem fatos corretos | executado | `teste_barreira.py`, caso "0101 com alerta: o valor unitário como total": entregue com os alertas do código, sem o do modelo; `teste_app.py`, passo A1c, pela tela |
+| 0108 com o alerta «A prestação de contas foi regularizada»: fora da tela, prestação fundamentada no histórico | executado | caso "0108 com alerta sem número": entregue sem o alerta; o fundamento é a frase do histórico ("VENCIDA"); `teste_app.py`, passo A1c, confere "VENCIDA" na tabela de verificações |
+| As duas saídas incorretas, entregues como vieram, são entrega divergente; a intervenção do código é registrada à parte | executado | parte 2b: `entregue_errado` pelos dois motivos, categoria ("alerta fora das categorias esperadas") e papel ("alerta: valor total 280.0 ≠ 980.0"; "alerta sobre prestacao_contas contradiz a situação com 'regularizada'"); os alertas do modelo ficam em `Resultado.alertas_do_modelo` e na medição (`alertas_do_modelo`) |
+| Streamlit com os dois casos e com os alertas legítimos do enunciado | executado | `teste_app.py`, passo A1c: os dois alertas errados fora da tela; dados pessoais no 0104, ordem dirigida ao sistema e autorização verbal no 0107, autorização escrita a conferir no 0106 |
+
+**O que mudou.** O conferente só vê alertas montados pelo código, pelas categorias que
+o enunciado pede e que o código verifica no pedido (`barreira.redigir`): dados pessoais
+mascarados, ordem dirigida ao sistema, autorização verbal e, na urgência, a autorização
+escrita a conferir. Os alertas do modelo saem da tela e ficam registrados. A medição
+passou a conferir os alertas por categoria (o gabarito traz as categorias esperadas,
+definidas pelo enunciado), o valor rotulado e o que o alerta afirma sobre cada
+critério.
+
+## 2. Consultas de mérito bloqueadas antes de executar
+
+| Critério de aceite | Situação | Onde está a evidência |
+|---|---|---|
+| 0112 inicial: o modelo tenta as três funções após DIVERGE; nenhuma executa, nenhum resultado de mérito entra nas mensagens ao modelo, no SQLite ou no formulário; a tentativa é registrada e recusada | executado | `teste_bloqueio.py` (Agno real, requisições ao modelo interceptadas localmente), parte 1, nos dois modos: funções executadas só `consultar_servidor`; as três barradas; mensagens interceptadas e banco temporário sem dado de mérito; resultado recusado; `teste_app.py`, passo A4b, pela tela |
+| 0111 inicial: a falta do retorno também bloqueia; as diligências legítimas seguem, com quantidade e valor nulos | executado | `teste_bloqueio.py`, partes 1 e 2 |
+| 0112 após a complementação, na mesma sessão, consulta o histórico com 207418; 0111 retoma o cálculo com o retorno informado; pedido regular com as quatro ferramentas | executado | `teste_bloqueio.py`, partes 2 e 3; a parte 3 é o controle da própria busca (o banco do 0101 tem as seis marcas de mérito) |
+| Agente compartilhado pela tela isola cada execução | executado | `teste_bloqueio.py`, parte 4: o cadastro conferido do 0101 não libera o mérito do 0112 no mesmo agente |
+
+**O que mudou.** Um gancho de ferramenta (`tool_hooks`, o equivalente no Agno do
+`wrap_tool_call` da Aula 03, 4.2) decide antes de a função rodar: cálculo, histórico e
+saldo só executam com o pedido vigente completo e o cadastro da matrícula vigente
+CONFERE nesta execução. Barrada, a consulta devolve ao modelo só o motivo. O estado
+fica preso ao identificador que `instruir` gera para cada execução. A barreira final
+continua e recusa a tentativa barrada. Sem o gancho, o teste falha: as três funções
+executam.
+
+## 3. Contexto afirmativo para a exceção de urgência
+
+| Critério de aceite | Situação | Onde está a evidência |
+|---|---|---|
+| «Incêndio.» e «O incêndio foi extinto. A viagem é para vistoria de rotina.», com as datas do 0106, ficam fora de aptidão automática mesmo com o modelo marcando apto; expectativas próprias, fora do gabarito | executado | `teste_barreira.py`, casos "variante do 0106 'Incêndio.'" e "'O incêndio foi extinto…'": recusados (urgência ambígua: menção isolada; ocorrência encerrada; finalidade de rotina); expectativa "análise manual" definida no teste; parte 2b: `entregue_errado`; parte 5 |
+| 0106 original apto condicionado à autorização escrita; 0107 não recomendado, com o alerta da autorização verbal | executado | casos "0106 urgente correto" e "0107 correto"; `teste_app.py`, passo A1c; medição (`resultados/medicao.md`) |
+
+**O que mudou.** `barreira.ler_urgencia` exige contexto afirmativo de situação
+emergencial em curso na frase da menção e trata como sinal contrário a ocorrência
+encerrada, o contexto passado e a finalidade de rotina (`desenho.md`, Seção 8).
+
+## 4. Resultado sem identificador no fluxo do formulário
+
+| Critério de aceite | Situação | Onde está a evidência |
+|---|---|---|
+| Identificador válido da execução atual e correspondência com o retorno e a sessão, na saída direta e na recuperada do banco | executado | `instrutor.instruir` gera o identificador e o entrega ao Agno; `teste_bloqueio.py` confirma, com o Agno real, que a resposta traz esse identificador nos dois modos |
+| Caso sem evento inicial e com RunOutput sem run_id: mensagem padrão, sem a instrução | executado | `teste_barreira.py`, parte 3 ("resposta concluída sem run_id"), nos dois modos; `teste_app.py`, passo A4; na versão anterior, o mesmo caso era entregue |
+| Controles: execução atual concluída, fluxo sem resposta, resultado anterior da mesma sessão, erro da API e complementação legítima | executado | `teste_barreira.py`, partes 3 e 3b; `teste_app.py`, passos A1, A3 e A4 |
+
+## 5. Evidências da revisão
+
+| Critério de aceite | Situação | Onde está a evidência |
+|---|---|---|
+| Testes locais de ferramentas, barreira, eliminação e formulário; bloqueio de mérito com as requisições do Agno interceptadas e o banco temporário inspecionado; ponto de execução das funções conferido | executado | `teste_ferramentas.py`, `teste_barreira.py` (50 casos, 14 falhas do fluxo, 4 controles do vínculo), `teste_eliminacao.py`, `teste_bloqueio.py`, `teste_app.py` parte A (`resultados/`) |
+| `medir.py` e os testes do classificador nunca contam como acerto alertas incorretos nem consultas de mérito fora da etapa; gabarito independente; casos adicionais com expectativas próprias | executado | `medir.conferir` (alertas por categoria, valor rotulado, afirmação contra a situação; consultas fora da etapa); `gabarito.json` com `alertas`, definidos pelo enunciado; parte 2b: as 29 instruções erradas são `entregue_errado`, as 20 corretas são acerto; as variantes da urgência têm expectativa "análise manual" definida no teste |
+| Três rodadas de 14 itens por configuração e as quatro falhas provocadas; acertos, recusas, erros, entregas divergentes, tokens, tempo e custo; execuções que dependem do modelo | executado | 84/84 acertos (42/42 em cada configuração), 0 recusados, 0 erros, 0 entregues errados; 565.104 e 576.004 tokens de entrada, 23.615 e 24.078 de saída; US$ 0,1414 e 0,1441; 313 s e 355 s (`resultados/medicao.md`); `resultados/falhas.md`; dependem do modelo e foram executados em 21/11: `medir.py`, `falhas.py`, `memoria.py`, `eliminacao.py`, `verificar_etapa3.py` (parte 3) e `teste_app.py` (parte B) |
+| Medição anterior identificada pelo critério que aplicou | executado | `resultados/historico/medicao_fb61dd9.md` |
+| `resultados/`, `CORRECOES.md`, `relatorio.md` e `LEIA-ME.md` atualizados; acervo e chave fora das alterações | executado | `dados/` sem alteração; só `.env.example` versionado |
+
+## Pendências e limites da terceira revisão
+
+- **Alertas só do código:** o conferente vê os alertas das categorias que o código sabe
+  verificar. Um alerta útil do modelo fora delas fica só no registro. Na falha 1, a
+  variante sutil do 0108 ("prestação já regularizada", sem dirigir-se ao sistema) foi
+  alertada pelo modelo nas 3 execuções, mas esses alertas não vão mais à tela; o
+  conferente vê "não recomendado" com a prestação VENCIDA no fundamento.
+- **Urgência por palavras:** a leitura exige contexto afirmativo e recusa os sinais
+  contrários conhecidos, mas continua sendo leitura de palavras. Uma justificativa que
+  descreva, com essas palavras, uma emergência inexistente ainda abre a exceção; a
+  autorização escrita e a leitura da justificativa ficam com o conferente.
+- **Tentativa barrada recusa a instrução:** se o modelo tenta uma consulta de mérito
+  numa diligência, a guarda impede a execução e a barreira recusa a instrução, mesmo que
+  a diligência devolvida esteja correta. Nesta medição, isso não ocorreu (0 recusas).
+- **Contagem corrigida:** o registro da segunda revisão dizia que o 0106 e o 0107 foram
+  corretos em "12 de 12" execuções; eram 6 de 6 de cada (3 rodadas × 2 configurações).
+- **Falha 4:** nesta execução, com a tabela, o modelo calculou e errou nas 3; sem a
+  tabela, pediu diligência nas 3. A barreira recusou as 6.
+- **Gabarito reconstruído e expurgo automático:** como nas revisões anteriores.
 
 # Segunda revisão (versão 0f67cf5)
 
@@ -38,7 +126,7 @@ continuam na tela e são conferidos. Os erros dos textos substituídos ficam reg
 |---|---|---|
 | 0106 com minuta que dispensa a autorização escrita: recusar ou gerar a minuta com a condição | executado | caso "0106 urgente com minuta que dispensa a autorização escrita": a minuta entregue é a do código, com a condição; o alerta que afirma a dispensa é recusado |
 | Variante do 0106 com capacitação programada, incêndio negado e autorização verbal: a menção a incêndio não produz aptidão | executado | casos "variante do 0106 …": urgência ambígua, recusada nas duas respostas do modelo (apto ou não recomendado) e encaminhada à análise manual; `teste_barreira.py`, parte 5 |
-| 0106 original com a condição escrita explícita; 0107 não recomendado | executado | casos "0106 urgente correto" e "0107 correto"; medição: 0106 correto em 12 de 12 execuções e 0107 em 12 de 12 (`resultados/medicao.md`) |
+| 0106 original com a condição escrita explícita; 0107 não recomendado | executado | casos "0106 urgente correto" e "0107 correto"; medição: 0106 correto em 6 de 6 execuções e 0107 em 6 de 6 (`resultados/historico/medicao_fb61dd9.md`; o registro original dizia "12 de 12", contagem corrigida na terceira revisão) |
 
 **O que mudou.** `barreira.ler_urgencia` só reconhece a hipótese do § 1º afirmada e sem
 sinal contrário (menção negada, atividade programada, autorização verbal, ordem ao

@@ -44,18 +44,21 @@
     0101 com valor inventado na minuta                                             -> liberada (textos refeitos pelo código)
     0101 com o valor unitário como total na minuta (R$ 280,00)                     -> liberada (textos refeitos pelo código)
     0101 com valor por extenso na minuta (quarenta mil reais)                      -> liberada (textos refeitos pelo código)
-    0101 com alerta citando saldo inventado                                        -> RECUSADA
-        · alerta 1: valor sem fonte no pedido ou nas consultas: ['50000.00']
-    0101 com alerta citando valor por extenso                                      -> RECUSADA
-        · alerta 1: número por extenso, que não pode ser conferido
-    0101 com alerta legítimo (sem dado sem fonte)                                  -> liberada
+    0101 com alerta citando saldo inventado                                        -> liberada (textos refeitos pelo código)
+    0101 com alerta citando valor por extenso                                      -> liberada (textos refeitos pelo código)
+    0101 com alerta: o valor unitário como total (R$ 280,00)                       -> liberada (textos refeitos pelo código)
+    0101 com alerta fora das categorias do enunciado                               -> liberada (textos refeitos pelo código)
+    0101 com histórico barrado antes do cadastro e refeito depois                  -> liberada
     0108 sem a consulta de histórico, marcado apto                                 -> RECUSADA
+        · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
+    0108 só com o histórico barrado (não executado), marcado apto                  -> RECUSADA
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> RECUSADA
         · prestacao_contas: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
     0108 correto: não recomendado pela prestação vencida                           -> liberada
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> liberada (textos refeitos pelo código)
+    0108 com alerta sem número: 'a prestação foi regularizada'                     -> liberada (textos refeitos pelo código)
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> RECUSADA
         · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
@@ -65,15 +68,24 @@
     0107 correto: não recomendado, sem exceção                                     -> liberada
     0106 urgente correto: apto, autorização escrita na minuta                      -> liberada
     0106 urgente com minuta que dispensa a autorização escrita                     -> liberada (textos refeitos pelo código)
-    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> RECUSADA
-        · alerta 1: afirma que a autorização é dispensável
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> liberada (textos refeitos pelo código)
     variante do 0106 sem urgência, marcada apto com a exceção                      -> RECUSADA
-        · urgência ambígua na justificativa (menção negada a incêndio, atividade programada, autorização verbal): avaliação do conferente
+        · urgência ambígua na justificativa (menção negada a incêndio, menção isolada a incêndio, sem situação emergencial em curso descrita, atividade programada, autorização verbal): avaliação do conferente
         · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
         · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
     variante do 0106 sem urgência, marcada não recomendado                         -> RECUSADA
-        · urgência ambígua na justificativa (menção negada a incêndio, atividade programada, autorização verbal): avaliação do conferente
+        · urgência ambígua na justificativa (menção negada a incêndio, menção isolada a incêndio, sem situação emergencial em curso descrita, atividade programada, autorização verbal): avaliação do conferente
+    variante do 0106 'Incêndio.', marcada apto com a exceção                       -> RECUSADA
+        · urgência ambígua na justificativa (menção isolada a incêndio, sem situação emergencial em curso descrita): avaliação do conferente
+        · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
+        · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
+        · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
+    variante do 0106 'O incêndio foi extinto. A viagem é para vistoria de rotina.', marcada apto com a exceção -> RECUSADA
+        · urgência ambígua na justificativa (menção isolada a incêndio, sem situação emergencial em curso descrita, ocorrência encerrada, finalidade de rotina): avaliação do conferente
+        · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
+        · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
+        · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
     0106 urgente marcado não recomendado                                           -> RECUSADA
         · antecedencia: a instrução declara 'nao_atende', as consultas sustentam 'atende'
         · recomendação 'nao_recomendado', as consultas sustentam 'apto_para_autorizacao'
@@ -117,6 +129,6 @@
     tabela agno_sessions            1 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_schema_versions     2 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_runs                1 registro(s) · dado pessoal encontrado: nenhum
-    alertas do agente: ['O pedido traz dados pessoais (CPF, Conta ou agência bancária), mascarados antes do envio ao modelo e não usados na instrução.', 'O pedido contém CPF ************** e conta corrente ******* da agência ****** na justificativa; conferir o tratamento e a restrição de acesso desses dados pessoais.']
+    alertas do agente: ['O pedido traz dados pessoais (CPF, Conta ou agência bancária), mascarados antes do envio ao modelo e não usados na instrução.']
 
 Todas as verificações da Etapa 3 passaram.

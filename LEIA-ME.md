@@ -19,7 +19,8 @@ cp .env.example .env          # e preencha OPENAI_API_KEY
 |---|---|---|
 | `python teste_ferramentas.py` | Testa as quatro ferramentas com casos dos pedidos (Etapa 2) | Não |
 | `python gabarito.py` | Gera o `gabarito.json` aplicando a norma por código | Não |
-| `python teste_barreira.py` | Barreira e medição com respostas controladas: 44 casos, 12 falhas do fluxo e a leitura da urgência | Não |
+| `python teste_barreira.py` | Barreira e medição com respostas controladas: 50 casos, 14 falhas do fluxo, controles do vínculo com a execução e a leitura da urgência | Não |
+| `python teste_bloqueio.py` | Guarda das consultas de mérito com o Agno real e o modelo interceptado localmente: funções executadas, mensagens ao modelo e banco | Não |
 | `python teste_eliminacao.py` | Eliminação em SQLite temporário: nome em minúsculas, matrícula parcial, tabela ilegível | Não |
 | `python verificar_etapa3.py` | Filtro de dados pessoais e barreira; instrui o 0104 e varre o banco (Etapa 3) | Sim, na parte 3 |
 | `python memoria.py` | Custo da memória por turno nas duas complementações (Etapa 4) | Sim |
@@ -39,12 +40,12 @@ cada script, junto com os arquivos `-wal` e `-shm`.
 | `desenho.md` | Etapa 1: processo, PEAS, confiabilidade composta, custo por passos, quadrante |
 | `ferramentas.py` | As quatro ferramentas, funções Python comuns com as contas no código |
 | `instrutor.py` | O agente: contrato `Instrucao`, instrução de sistema, filtro, limites, memória, `instruir()` |
-| `barreira.py` | A verificação em código entre o agente e o conferente, e a redação por código dos fundamentos, pendências e minuta |
+| `barreira.py` | A verificação em código entre o agente e o conferente, e a redação por código dos fundamentos, pendências, alertas e minuta |
 | `memoria.py`, `eliminacao.py` | Etapa 4: custo da memória e rotina de eliminação |
 | `app.py` | Etapa 5: formulário Streamlit |
 | `gabarito.py`, `medir.py`, `falhas.py` | Medição contra o gabarito e falhas provocadas. O gabarito só é lido pela avaliação |
 | `simulacao.py` | Respostas controladas do agente (ferramentas reais, modelo simulado), usadas só pelos testes |
-| `CORRECOES.md` | Correções das duas revisões: critérios de aceite, evidências e pendências |
+| `CORRECOES.md` | Correções das três revisões: critérios de aceite, evidências e pendências |
 | `relatorio.md` | Números medidos, falhas e decisão sobre o ponto de conferência humana |
 | `dados/` | O acervo de entrada do desafio, copiado sem alteração |
 
@@ -53,16 +54,17 @@ cada script, junto com os arquivos `-wal` e `-shm`.
 | Decisão | Justificativa | Origem |
 |---|---|---|
 | Um agente, quatro ferramentas, modelo `gpt-5.6-luna` | Modelo de referência do curso; a tarefa é escolher entre quatro ferramentas bem descritas, o que o nível de menor custo resolve | Aula 03, 5.3; Aula 06, 4.1 |
-| Contas no código (antecedência, quantidade, valor, soma do mês, prazo da prestação, saldo) | "A aritmética é onde o modelo erra com segurança": na falha 4 (execução de 20/11), o modelo calculou 3,0 diárias em vez de 3,5 | Aula 06, 1; `relatorio.md`, Seção 7 |
+| Contas no código (antecedência, quantidade, valor, soma do mês, prazo da prestação, saldo) | "A aritmética é onde o modelo erra com segurança": na falha 4, o modelo calculou 3,0 diárias em vez de 3,5 (execuções de 20/11 e da terceira revisão) | Aula 06, 1; `relatorio.md`, Seção 7 |
 | Ferramentas não devolvem CPF nem e-mail | Minimização (LGPD, art. 6º, III) | Aula 06, 5.2 |
 | `output_schema=Instrucao`, sem campos além do contrato | A tela e a medição leem campos, não texto | Aula 02, 5; Aula 06, 6.1 |
 | `reasoning_effort="none"` | Exigido pela família GPT-5.6 com ferramentas; sem ele a API devolve erro (falha 2) | Aula 03, 3.2; Aula 06, 5.3 |
 | `telemetry=False`, `debug_mode` desligado | O registro de depuração leva o pedido inteiro | Aula 06, 5.2 e 5.4 |
 | `PIIDetectionGuardrail` com SSN, cartão e telefone desligados; CPF por máscara; conta/agência | Os padrões de fábrica não mascaram o CPF brasileiro (falha 3) | Aula 06, 5.2 |
-| Resposta ausente, de outra execução ou com status diferente de concluído é falha, antes de ler o conteúdo; sem o identificador da execução atual, nada é buscado no banco | O Agno devolve o erro da API como conteúdo; o fluxo pode terminar sem `RunOutput`, e o banco guarda a execução anterior da mesma sessão | Aula 06, 5.3 |
-| Barreira em `barreira.py`: identidade vigente, papel de cada data, evidência por critério, recomendação derivada das consultas, diligência sem consulta de mérito, alertas com fonte | "A barreira pertence ao código, e não ao prompt" | Aula 01, 8; Aula 03, 7; Aula 04, 8 |
-| Fundamentos, pendências e minuta redigidos pelo código com os dados das consultas | Conferir só se o número existe nas fontes deixava passar o valor unitário como total e a prestação vencida descrita como "regularizada" | Aula 04, 8; `desenho.md`, Seção 2 |
-| Urgência reconhecida pelo código (hipótese do § 1º afirmada e sem sinal contrário); ambígua vai à análise manual | A exceção é a decisão de maior risco; o 0107 alega autorização verbal, e uma palavra isolada não basta | art. 5º; `desenho.md`, Seção 8 |
+| Resposta ausente, sem identificador, de outra execução ou com status diferente de concluído é falha, antes de ler o conteúdo; o identificador é gerado por `instruir` e conferido na resposta direta e na do banco | O Agno devolve o erro da API como conteúdo; o fluxo pode terminar sem `RunOutput`, o banco guarda a execução anterior da mesma sessão, e dois identificadores ausentes não acusam divergência | Aula 06, 5.3 |
+| Gancho de ferramenta (`tool_hooks`): cálculo, histórico e saldo só executam com o pedido vigente completo e o cadastro conferido nesta execução | Na diligência, a consulta de mérito executava e o resultado ia ao modelo e ao banco antes da recusa | Aula 03, 4.2 (`wrap_tool_call`); art. 9º |
+| Barreira em `barreira.py`: identidade vigente, papel de cada data, evidência por critério, recomendação derivada das consultas, diligência sem consulta de mérito | "A barreira pertence ao código, e não ao prompt" | Aula 01, 8; Aula 03, 7; Aula 04, 8 |
+| Fundamentos, pendências, alertas e minuta redigidos pelo código com os dados das consultas e as categorias de alerta do enunciado | Conferir só se o número existe nas fontes deixava passar o valor unitário como total e a prestação vencida descrita como "regularizada", inclusive num alerta sem número | Aula 04, 8; `desenho.md`, Seção 2 |
+| Urgência reconhecida pelo código (hipótese do § 1º com emergência em curso descrita e sem sinal contrário); isolada ou ambígua vai à análise manual | A exceção é a decisão de maior risco; o 0107 alega autorização verbal, e a menção isolada não basta | art. 5º; `desenho.md`, Seção 8 |
 | `session_id` = número do pedido; `user_id` = matrícula do pedido; informados em cada `run` | Um agente em cache sem misturar pedidos; o `user_id` individualiza a pessoa | Aula 07, 2 e 5.1 |
 | Formulário com `st.form`, `st.status`, minuta editável e registro da decisão | A conferência humana precisa de lugar físico na aplicação | Aula 06, 6.2 e 6.3 |
 | Pedido urgente (0106): apto com `exige_autorizacao_superior=true` | O enunciado não fixa; ver `desenho.md`, Seção 8 | art. 5º, §§ 1º e 2º |
@@ -78,19 +80,20 @@ O enunciado anuncia "quatro perguntas", mas lista três. Respondo às três list
     em que a Aula 06, 4.3, mediu o cálculo feito com data errada em 2 de 6 execuções.
   - Na nossa medição, com as paralelas **ligadas**, o modelo pediu duas ferramentas ao
     mesmo tempo em **0 de 42** execuções, com 42/42 acertos nas duas configurações e
-    custo praticamente igual (US$ 0,1458 contra 0,1476).
+    custo praticamente igual (US$ 0,1441 contra 0,1414).
   - Desligar custa zero e passa a garantia do comportamento do modelo para a API.
 - **Teto: `tool_call_limit=8`.**
   - O pedido completo usa 4 ferramentas em **5 chamadas** ao modelo (mediana medida, igual
     ao previsto no `desenho.md`).
-  - O máximo observado na configuração escolhida foi 9 chamadas ao modelo, no 0110 de
-    uma rodada, e a instrução saiu correta. O teto acomoda esse caso e corta a cauda: a
-    razão entre o item mais caro e a mediana foi 1,8× (Aula 03, 5.4).
+  - O máximo observado foi 8 chamadas ao modelo (0110 de uma rodada, paralelas
+    ligadas); na medição anterior, 9, com as paralelas desligadas. Nas duas, a
+    instrução saiu correta. O teto acomoda esse caso e corta a cauda: a razão entre o
+    item mais caro e a mediana ficou entre 1,14× e 1,62× nesta medição (Aula 03, 5.4).
 - **Memória: histórico da sessão com teto de 4 execuções**, sem memórias do usuário.
   - Sem memória, as complementações foram aplicadas ao pedido certo em **0/2**. Com o
-    histórico, em **2/2**, acrescentando cerca de 550 tokens (531 a 565) à primeira chamada
+    histórico, em **2/2**, acrescentando cerca de 540 tokens (535 e 542) à primeira chamada
     do turno.
-  - As memórias do usuário também acertaram 2/2, mas custaram 16% a 18% mais e guardaram
+  - As memórias do usuário também acertaram 2/2, mas custaram 8% a 11% mais (16% a 18% na medição anterior) e guardaram
     fatos da servidora entre sessões, inclusive sob a matrícula de outro servidor no caso
     0112.
   - É a mesma conclusão da Aula 07, 3.3 e 7: histórico completo com teto para conversas
@@ -99,19 +102,26 @@ O enunciado anuncia "quatro perguntas", mas lista três. Respondo às três list
 
 ### 2. Como o sistema impede que uma instrução fundamentada em dado inventado chegue ao conferente?
 
-Por seis camadas, todas em código:
+Por sete camadas, todas em código:
 
 1. **As contas não ficam com o modelo.** Quantidade, valor, antecedência, soma do mês,
    prazo da prestação e comparação com o saldo saem prontos das ferramentas. Na falha 4b,
-   o modelo que calculou de cabeça errou o art. 4º (3,0 diárias em vez de 3,5, na
-   execução de 20/11; na de 21/11, recusou-se a calcular e pediu diligência).
-2. **A execução precisa ter concluído, e ser a atual.** Resposta ausente (fluxo que
-   termina sem `RunOutput`), resposta de outra execução ou status diferente de concluído
-   é falha, conferida antes de ler o conteúdo. Sem o identificador da execução atual,
-   nenhuma resposta é buscada no banco, que guarda a execução anterior da mesma sessão.
-   O erro da API chega como texto e com status `ERROR` (falha 2).
-3. **O contrato Pydantic.** Saída fora do esquema `Instrucao` não é aceita.
-4. **A barreira (`barreira.py`)** parte do que a aplicação tem em mãos (pedido,
+   o modelo que calculou de cabeça errou o art. 4º nas 3 execuções desta medição (3,0
+   diárias em vez de 3,5 no 0101; 4,0 em vez de 4,5 no 0110), como em 20/11; numa
+   execução anterior de 21/11, recusou-se a calcular e pediu diligência.
+2. **Consulta de mérito só com o pedido em condições.** Um gancho de ferramenta deixa
+   cálculo, histórico e saldo executarem só com o pedido vigente completo e o cadastro
+   da matrícula vigente conferido nesta execução. No 0112 em diligência, a função nem
+   roda, e nenhum dado de mérito chega ao modelo, ao banco ou à tela
+   (`teste_bloqueio.py`).
+3. **A execução precisa ter concluído, e ser a atual.** Resposta ausente (fluxo que
+   termina sem `RunOutput`), sem identificador, de outra execução ou com status
+   diferente de concluído é falha, conferida antes de ler o conteúdo. O identificador é
+   gerado por `instruir`, entregue ao Agno e exigido na resposta direta e na do banco,
+   que guarda a execução anterior da mesma sessão. O erro da API chega como texto e com
+   status `ERROR` (falha 2).
+4. **O contrato Pydantic.** Saída fora do esquema `Instrucao` não é aceita.
+5. **A barreira (`barreira.py`)** parte do que a aplicação tem em mãos (pedido,
    complementação e consultas desta execução) e não confia em nada que o modelo afirme:
    - **identidade vigente:** a complementação só corrige o próprio pedido, cada dado no
      seu papel; cadastro, cálculo, histórico, saldo e instrução ficam presos à matrícula
@@ -127,19 +137,19 @@ Por seis camadas, todas em código:
    - **recomendação, números e exceção derivados:** recomendação, quantidade, valor e
      `exige_autorizacao_superior` precisam ser os que as consultas sustentam. A urgência
      do § 1º é reconhecida pelo código, não pela marcação do modelo, e só com a
-     hipótese afirmada e sem sinal contrário; com menção negada, atividade programada
-     ou autorização verbal, a urgência é ambígua e o pedido vai à análise manual;
-   - **alertas com fonte:** os alertas do modelo, o único texto dele que vai à tela,
-     são recusados com dado sem fonte, número por extenso ou afirmação de que a
-     autorização escrita é dispensável.
-5. **Os textos factuais são do código.** Liberada a instrução, o código monta os
-   fundamentos (a frase da ferramenta que sustenta cada situação), as pendências e a
-   minuta com os dados das consultas, cada um no seu papel: valor unitário, total,
-   saldo, situação da prestação. Na urgência, a condição da autorização expressa e
+     emergência em curso descrita e sem sinal contrário; com menção isolada ou negada,
+     ocorrência encerrada, rotina, atividade programada ou autorização verbal, a
+     urgência é ambígua e o pedido vai à análise manual.
+6. **Os textos são do código.** Liberada a instrução, o código monta os fundamentos (a
+   frase da ferramenta que sustenta cada situação), as pendências, os alertas e a minuta
+   com os dados das consultas, cada um no seu papel: valor unitário, total, saldo,
+   situação da prestação. Os alertas são os das categorias que o enunciado pede e que o
+   código verifica no pedido (dados pessoais, ordem ao sistema, autorização verbal,
+   autorização escrita na urgência). Na urgência, a condição da autorização expressa e
    escrita do Secretário Adjunto entra na minuta por regra. Um texto do modelo com o
-   valor unitário como total, uma prestação vencida descrita como "regularizada" ou um
-   valor por extenso não chegam ao conferente.
-6. **Mensagem padrão.** Qualquer falha devolve o pedido à análise manual. Na tela não
+   valor unitário como total, uma prestação vencida descrita como "regularizada", mesmo
+   num alerta sem número, ou um valor por extenso não chegam ao conferente.
+7. **Mensagem padrão.** Qualquer falha devolve o pedido à análise manual. Na tela não
    aparece nada da execução recusada: progresso, instrução, minuta, consultas ou medidas
    (`teste_app.py`, passo A4).
 
@@ -147,11 +157,15 @@ Resultados medidos:
 
 - **Modelo real:** **84/84 acertos** e 0 instruções entregues diferentes do gabarito,
   com o critério que confere também situações, trilha sem consulta fora da etapa,
-  fatos dos textos e o papel de cada dado (`resultados/medicao.md`).
-- **Respostas controladas** (`teste_barreira.py`, sem chave), 44 casos: 18 recusados;
-  6 em que o modelo errou só o texto, liberados com os textos do código e sem o trecho
-  errado; 20 corretos, liberados. Entregues sem a barreira, as 23 instruções erradas
-  são classificadas pela medição como "entregue errado".
+  fatos dos textos, o papel de cada dado e os alertas por categoria
+  (`resultados/medicao.md`).
+- **Respostas controladas** (`teste_barreira.py`, sem chave), 50 casos: 18 recusados;
+  12 em que o modelo errou só o texto (6 deles num alerta), liberados com os textos do
+  código e sem o trecho errado; 20 corretos, liberados. Entregues sem a barreira, as 29
+  instruções erradas são classificadas pela medição como "entregue errado".
+- **Guarda das consultas de mérito** (`teste_bloqueio.py`, sem chave, Agno real com o
+  modelo interceptado): nas tentativas do 0112 e do 0111 em diligência, nenhuma função
+  de mérito executa e nenhum dado de mérito chega às mensagens, ao banco ou à tela.
 - **Cálculo sem ferramenta:** as 6 instruções foram recusadas (`resultados/falhas.md`).
 
 ### 3. Que dados do servidor o agente guarda, por quanto tempo, e como o titular os elimina?

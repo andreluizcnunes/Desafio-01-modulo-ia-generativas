@@ -33,8 +33,8 @@
     Carla (207418, sessão sob 207481): Conferência tabela por tabela: nada restou do titular no banco do agente.
     controle Ana Paula continua no banco: {'agno_sessions': 1, 'agno_runs': 1, 'agno_memories': 1}
 [B] Modelo real: DIA-2026-0101
-    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14331 tokens de entrada · 572 de saída · US$ 0.00355 · 8.1 s']
+    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14331 tokens de entrada · 587 de saída · US$ 0.00357 · 8.3 s']
 [B] Modelo real: DIA-2026-0111
-    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5291 tokens de entrada · 361 de saída · US$ 0.00149 · 4.1 s']
+    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5291 tokens de entrada · 364 de saída · US$ 0.00150 · 4.2 s']
     após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
 Todas as verificações do formulário passaram.

@@ -23,8 +23,9 @@ devolveram nesta execução) e confere a instrução contra isso:
    de mérito é trilha indevida e a instrução é recusada.
 4. Recomendação, números e exceção derivados das consultas (Aula 04, Seção 8,
    ancoragem numérica). A exceção de urgência do art. 5º, § 1º, é reconhecida
-   pelo código, pelas hipóteses que a norma lista, afirmadas e sem sinal
-   contrário, e não pela marcação do modelo. Com antecedência insuficiente e
+   pelo código, pelas hipóteses que a norma lista, com contexto afirmativo de
+   situação emergencial em curso e sem sinal contrário, e não pela marcação do
+   modelo. Com antecedência insuficiente e
    urgência ambígua, a instrução é recusada e o conferente decide.
 5. Alertas montados pelo código. O conferente só vê alertas de categorias
    que o código verifica no pedido: dados pessoais mascarados, ordem dirigida
@@ -72,10 +73,13 @@ def bloqueada(consulta: dict) -> bool:
 
 # Art. 5º, § 1º: as hipóteses de urgência que a norma lista. A leitura é
 # conservadora (desenho.md, Seção 8): o código só reconhece as hipóteses
-# listadas, e uma palavra isolada não basta. A menção precisa ser afirmativa e
-# a justificativa não pode trazer sinal contrário (menção negada, atividade
-# programada, autorização verbal, ordem dirigida ao sistema). Com sinal
-# contrário, a urgência é ambígua e a avaliação fica com o conferente: a
+# listadas, e a menção não basta. É preciso contexto afirmativo de situação
+# emergencial imprevisível que justifique o deslocamento, na mesma frase da
+# menção (combate, em curso, focos ativos, rompimento, prazo judicial...), e a
+# justificativa não pode trazer sinal contrário: menção negada, ocorrência
+# encerrada, contexto passado, finalidade de rotina, atividade programada,
+# autorização verbal ou ordem dirigida ao sistema. Menção isolada ou com sinal
+# contrário torna a urgência ambígua, e a avaliação fica com o conferente: a
 # instrução é recusada e o pedido vai à análise manual.
 HIPOTESES_URGENCIA = ("incendio", "desastre ambiental", "infracao ambiental em curso",
                       "determinacao judicial")
@@ -86,7 +90,15 @@ NOMES_URGENCIA = {"incendio": "incêndio", "desastre ambiental": "desastre ambie
                   "infracao ambiental em curso": "infração ambiental em curso",
                   "determinacao judicial": "determinação judicial"}
 NEGACAO = re.compile(r"\b(?:nao|nem|sem|nenhum|nenhuma|inexist\w*|ausencia de|descartad\w*)\b")
+# Situação emergencial em curso, na frase da menção.
+CONTEXTO_AFIRMATIVO = re.compile(
+    r"\bcombate|em curso|em andamento|\bativ[oa]s?\b|\bfocos?\b|alastr|propag|emergenc|"
+    r"imprevis|rompimento|derramamento|vazamento|contencao|\bprazo\b|ocorrendo|atingindo")
 SINAIS_CONTRARIOS = {
+    "ocorrência encerrada": r"extint|controlad|debelad|encerrad|apagad|cessad|\bcontid[oa]|"
+                            r"finalizad",
+    "contexto passado": r"\bapos\b|\bpos-|ano passado|mes passado|ocorrid|\bhouve\b",
+    "finalidade de rotina": r"rotina|periodic|habitual|\banual",
     "atividade programada": r"capacita|treinamento|curso de|programad|planejad|cronograma|"
                             r"reuniao|oficina|seminario|palestra|evento",
     "autorização verbal": r"verbal",
@@ -96,7 +108,6 @@ SINAIS_CONTRARIOS = {
 # Etapa 1): quem escreve no pedido fala com a máquina, e não com o conferente.
 ORDEM_EMBUTIDA = re.compile(r"\bsistema\b|\bassistente\b|inteligencia artificial|\bignore\b|"
                             r"\bdesconsidere\b")
-
 MESES = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6,
          "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12}
 
@@ -116,15 +127,25 @@ def _sem_acento(texto: str) -> str:
 def ler_urgencia(pedido: dict) -> tuple[str, str]:
     """("legitima", hipótese), ("ausente", "") ou ("ambigua", motivo), pelo art. 5º, § 1º."""
     texto = _sem_acento(pedido.get("justificativa") or "")
-    afirmadas, negadas = [], []
+    afirmadas, negadas, isoladas = [], [], []
     for h in HIPOTESES_URGENCIA:
         for achado in re.finditer(h, texto):
             # A negação vale dentro da mesma oração, antes da menção.
             oracao = re.split(r"[.;:!?]", texto[:achado.start()])[-1]
-            (negadas if NEGACAO.search(oracao[-40:]) else afirmadas).append(h)
-    if not afirmadas and not negadas:
+            if NEGACAO.search(oracao[-40:]):
+                negadas.append(h)
+                continue
+            # O contexto afirmativo vale na frase inteira da menção.
+            inicio = max(texto.rfind(p, 0, achado.start()) for p in ".;!?") + 1
+            fins = [f for f in (texto.find(p, achado.end()) for p in ".;!?") if f >= 0]
+            frase = texto[inicio:min(fins) if fins else len(texto)]
+            (afirmadas if CONTEXTO_AFIRMATIVO.search(frase) else isoladas).append(h)
+    if not (afirmadas or negadas or isoladas):
         return "ausente", ""
     contrarios = [nome for nome, padrao in SINAIS_CONTRARIOS.items() if re.search(padrao, texto)]
+    if isoladas and not afirmadas:
+        contrarios.insert(0, f"menção isolada a {NOMES_URGENCIA[isoladas[0]]}, sem situação "
+                             f"emergencial em curso descrita")
     if negadas:
         contrarios.insert(0, f"menção negada a {NOMES_URGENCIA[negadas[0]]}")
     if contrarios:

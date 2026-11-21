@@ -21,6 +21,7 @@ import json
 import pathlib
 
 from instrutor import apagar_banco, construir_agente, instruir
+from medir import versao_do_codigo
 
 BASE = pathlib.Path(__file__).parent
 RESULTADOS = BASE / "resultados"
@@ -84,6 +85,7 @@ def main() -> None:
     linhas = ["# Custo da memória por turno (Etapa 4)", "",
               "Entrada em tokens. T1 = turno do pedido; T2 = turno da complementação, "
               "na mesma sessão.", "",
+              f"Versão do código executada: `{versao_do_codigo()}` · provedor real (OpenAI).", "",
               "| Configuração | Pedido | T1 1ª chamada | T1 total | T2 1ª chamada | T2 total "
               "| T2 recomendação | Aplicada ao pedido certo | US$ T1+T2 |",
               "|---|---|---:|---:|---:|---:|---|---|---:|"]

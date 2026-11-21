@@ -38,6 +38,20 @@ import unicodedata
 
 from instrutor import apagar_banco, construir_agente, instruir
 
+
+def versao_do_codigo() -> str:
+    """Commit do código que a medição executou, para a evidência dizer de que versão é."""
+    import subprocess
+    pasta = pathlib.Path(__file__).parent
+    try:
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=pasta, check=True,
+                                capture_output=True, text=True).stdout.strip()
+        alterados = subprocess.run(["git", "status", "--porcelain", "--", "*.py"], cwd=pasta,
+                                   capture_output=True, text=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "desconhecida (fora do repositório)"
+    return commit + (" com alterações locais nos .py" if alterados else "")
+
 BASE = pathlib.Path(__file__).parent
 RESULTADOS = BASE / "resultados"
 PEDIDOS = json.loads((BASE / "dados" / "pedidos.json").read_text("utf-8"))
@@ -338,6 +352,8 @@ def escrever_md(resumo: dict, itens: list[dict]) -> None:
     l = ["# Medição contra o gabarito", "",
          f"{RODADAS} rodadas × (12 pedidos + 2 complementações) por configuração, "
          "gpt-5.6-luna, banco novo a cada rodada.", "",
+         f"Versão do código executada: `{versao_do_codigo()}` · provedor real (OpenAI), sem "
+         "respostas roteirizadas.", "",
          "Critério de acerto: os cinco campos, as situações dos seis critérios, a trilha "
          "(argumentos no papel, sem consulta ausente nem fora da etapa), os dados factuais dos "
          "textos com fonte, o papel de cada dado (fundamento coerente com a situação; valor "

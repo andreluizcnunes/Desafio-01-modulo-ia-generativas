@@ -31,13 +31,15 @@ from agno.run.agent import RunInput
 
 from instrutor import (FILTRO_DADOS_PESSOAIS, INSTRUCAO, MENSAGEM_PADRAO, MODELO, Instrucao,
                        apagar_banco, construir_agente, instruir, texto_do_pedido)
+from medir import versao_do_codigo
 
 BASE = pathlib.Path(__file__).parent
 RESULTADOS = BASE / "resultados"
 POR_NUMERO = {p["numero"]: p for p in json.loads((BASE / "dados" / "pedidos.json").read_text("utf-8"))}
 GAB = {g["numero_pedido"]: g for g in json.loads((BASE / "gabarito.json").read_text("utf-8"))["pedidos"]}
 REPETICOES = 3
-md: list[str] = ["# Falhas provocadas", ""]
+md: list[str] = ["# Falhas provocadas", "",
+                 f"Versão do código executada: `{versao_do_codigo()}` · provedor real (OpenAI).", ""]
 
 
 def log(texto: str = "") -> None:

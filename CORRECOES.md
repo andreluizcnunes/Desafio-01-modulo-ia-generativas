@@ -1,5 +1,37 @@
 # Correções das revisões
 
+## Auditoria final (base `d2c4cf7`): bloqueadores B1 e B2
+
+### B1 — Data cancelada na complementação
+
+**Causa raiz.** Cada oração era lida isoladamente. Uma oração afirmativa
+(«O retorno está previsto para 2026-11-20») virava candidata, e o cancelamento na
+oração seguinte só a invalidava se repetisse o rótulo do campo ou a palavra "data".
+Uma referência anafórica («Essa previsão foi cancelada», «Ela foi cancelada») não
+alcançava a candidata. A guarda das ferramentas e a barreira conferem contra o mesmo
+pedido vigente, e por isso as duas liberavam a data cancelada.
+
+**Correção.** `barreira.ler_complementacao` lê as orações em ordem e mantém a situação
+de cada campo: confirmada, substituída, cancelada, negada, condicional, indefinida ou
+conflitante. Uma oração se liga a um campo pelo rótulo, pelo valor citado ou por
+referência anafórica, que recai sobre os campos da última oração que tratou de algum
+campo. Só a data confirmada e a substituída preenchem o campo. Sem substituição
+confirmada, o campo fica pendente, e o pedido segue em diligência, com as consultas de
+mérito barradas antes de executar. Uma ressalva que não se consegue atribuir a um
+campo vai para a análise manual. Na diligência, a pendência diz que a complementação
+deixou a data cancelada, negada, condicional ou indefinida (`desenho.md`, Seção 2).
+
+| Critério de encerramento | Evidência |
+|---|---|
+| A data cancelada fica fora das consultas de mérito, dos fundamentos e da minuta | `teste_bloqueio.py`, parte 6: com o Agno real e as requisições ao modelo interceptadas, a frase do achado e mais três variantes (cancelada por anáfora, negada e condicional), nos dois modos. A aptidão com a data do texto é recusada. Só `consultar_servidor` executa, as três funções de mérito são barradas, e nem as mensagens ao modelo nem o SQLite recebem dado de mérito. A diligência é entregue sem a data nos fundamentos, nas pendências e na minuta. Com a `barreira.py` de `d2c4cf7`, o mesmo cenário executa as quatro funções. |
+| Reprodução pela tela | `teste_app.py`, passo A3b, com a frase do achado. O comando de reprodução de `AUDITORIA_FINAL.md` agora mostra só a mensagem padrão, sem «Apto», 3,5 diárias ou R$ 980,00. Com a resposta de diligência, a tela mostra quantidade e valor nulos e a minuta com «retorno não informado». |
+| Construções positivas e negativas | `teste_barreira.py`, parte 6: 41 construções com situação definida. Positivas: 7 confirmadas e 7 substituídas. Negativas: 11 canceladas, 2 negadas, 5 condicionais e 9 indefinidas. Somam-se uma data sem campo, duas ressalvas sem campo (análise manual), o cancelamento da partida original e o cancelamento da matrícula corrigida do 0112. |
+| Complementações legítimas do 0111 e do 0112 | `teste_barreira.py`, parte 6; `teste_bloqueio.py`, parte 2 (mesma sessão, nos dois modos); `teste_app.py`, passo A3; e a medição real (B2). |
+
+### B2 — Medições reais
+
+Ver a seção seguinte, acrescentada depois da medição.
+
 ## Quarta revisão (base `067e97b`)
 
 | Falha | Causa estrutural | Correção e evidência |

@@ -43,9 +43,23 @@
     eventos, variante 1: 4 tentativas barradas e 4 consultas válidas entregues.
     eventos, variante 2: 4 tentativas barradas e 4 consultas válidas entregues.
 
-[6] Complementação negada pela entrada normal do agente
-    direto: data negada mantida pendente; tentativa de mérito barrada e diligência regular entregue.
-    eventos: data negada mantida pendente; tentativa de mérito barrada e diligência regular entregue.
+[6] Complementações com data cancelada, negada ou condicional, pela entrada normal
+    direto, data cancelada: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, data cancelada: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, data cancelada: O retorno está previsto para 2026-11-20. Ela foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, data cancelada: O retorno está previsto para 2026-11-20. Ela foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, data negada: O retorno não será em 2026-11-20. A data ainda será informada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, data negada: O retorno não será em 2026-11-20. A data ainda será informada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, data condicional: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, data condicional: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
 
 [7] Cobertura local de 12 pedidos e duas complementações, sem uso do provedor
     paralelas desligadas, rodada 1: 14/14.

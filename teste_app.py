@@ -217,22 +217,29 @@ def parte_a() -> None:
     assert "após complementação" in textos(at)
     log(f"    recomendação após a complementação: {[m.value for m in at.metric][:3]}")
 
-    log("[A3b] Complementação com data negada mantém a diligência")
-    instruir_pela_tela(at, "DIA-2026-0111")
-    texto_negado = "O retorno não será em 2026-11-20. A data ainda será informada."
-    campo = next(t for t in at.text_area if t.label == "Texto da complementação")
-    campo.set_value(texto_negado)
-    botao(at, "Enviar complementação").click().run()
-    so_mensagem_padrao(at, "modelo tentou aptidão com a data negada", ["Apto para autorização"])
-    AGENTE.cena = "data_indefinida"
-    instruir_pela_tela(at, "DIA-2026-0111")
-    campo = next(t for t in at.text_area if t.label == "Texto da complementação")
-    campo.set_value(texto_negado)
-    botao(at, "Enviar complementação").click().run()
-    assert not at.exception and [m.value for m in at.metric][:3] == ["Diligência", "-", "-"]
-    minuta = next(t.value for t in at.text_area if "Minuta" in t.label)
-    assert "retorno não informado" in minuta and "2026-11-20" not in minuta
-    log("    diligência exibida sem data confirmada, quantidade ou valor")
+    log("[A3b] Complementação com data negada ou cancelada mantém a diligência")
+    for texto_sem_data in ("O retorno não será em 2026-11-20. A data ainda será informada.",
+                           # Achado B1 da auditoria final, reproduzido pela tela.
+                           "O retorno está previsto para 2026-11-20. Essa previsão foi cancelada."):
+        AGENTE.cena = "normal"
+        instruir_pela_tela(at, "DIA-2026-0111")
+        assert [m.value for m in at.metric][0] == "Diligência"
+        campo = next(t for t in at.text_area if t.label == "Texto da complementação")
+        campo.set_value(texto_sem_data)
+        botao(at, "Enviar complementação").click().run()
+        so_mensagem_padrao(at, f"modelo tentou aptidão com «{texto_sem_data}»",
+                           ["Apto para autorização", "980,00", "3,5"])
+        AGENTE.cena = "data_indefinida"
+        instruir_pela_tela(at, "DIA-2026-0111")
+        campo = next(t for t in at.text_area if t.label == "Texto da complementação")
+        campo.set_value(texto_sem_data)
+        botao(at, "Enviar complementação").click().run()
+        assert not at.exception and [m.value for m in at.metric][:3] == ["Diligência", "-", "-"]
+        minuta = next(t.value for t in at.text_area if "Minuta" in t.label)
+        # O campo de entrada ainda guarda o texto digitado; fora dele, a data não aparece.
+        exibido = textos(at).replace(texto_sem_data, "")
+        assert "retorno não informado" in minuta and "2026-11-20" not in exibido, exibido
+        log(f"    «{texto_sem_data}»: diligência exibida sem a data, quantidade ou valor")
     AGENTE.cena = "normal"
 
     log("[A4] Falhas: só a mensagem padrão, nada da execução recusada")

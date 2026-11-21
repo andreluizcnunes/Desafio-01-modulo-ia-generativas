@@ -206,61 +206,214 @@ _DATA_CONFIRMADA = re.compile(
     r"(?:e|em|para|sera (?:em|no dia)|ocorrera em|ficou para|"
     r"(?:esta |foi )?(?:previst[oa]|confirmad[oa]|(?:re)?marcad[oa]|alterad[oa]) para)\s+)"
     r"(?P<data>\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})")
-_ROTULO_NO_INICIO = re.compile(rf"{_INICIO_CORRECAO}(?P<rotulo>{_ROTULOS_DATA})\b")
 _REFERENCIA_A_DATA = re.compile(rf"\b(?:{_ROTULOS_DATA})\b")
 _MATRICULA_CONFIRMADA = re.compile(
     r"(?:^|,\s*(?:e\s+)?)(?:a\s+)?(?:minha\s+)?matricula(?:\s+correta)?"
     r"(?:\s*[:=]\s*|\s+e\s+)(\d{6})$")
-_DATA_INDEFINIDA = re.compile(
-    r"\b(?:nao|a definir|indefinid\w*|sem (?:data|previsao|confirmacao)|"
-    r"ainda|aguard\w*|pendente|sujeit[oa]|talvez|se|depois|posteriormente|mais tarde|a confirmar|"
+# Política de leitura da complementação (art. 9º). Uma data só entra no pedido
+# vigente com confirmação inequívoca do valor. As orações são lidas em ordem, e
+# cada uma muda a situação dos campos a que se refere: pelo rótulo, pelo valor
+# citado ou por referência anafórica ("essa previsão", "ela", "isso", "a data
+# acima"), que aponta para os campos da última oração que tratou de algum campo.
+#   confirmada   atribuição afirmativa ao campo ("o retorno está previsto para X")
+#   substituida  nova data afirmada no lugar de outra ("remarcado para Y", ou Y
+#                depois de X cancelada ou negada por valor)
+#   cancelada    "essa previsão foi cancelada", "desconsiderem a data", "sem efeito"
+#   negada       "o retorno não será em X", "não confirmo a data"
+#   condicional  "se houver transporte", "isso depende do veículo", "sujeita a"
+#   indefinida   "a definir", "será informada", "a previsão mudou" sem nova data,
+#                data inexistente, ou afirmação genérica depois de uma ressalva
+#   conflitante  dois valores afirmados para o mesmo campo, sem substituição
+# Só confirmada e substituida preenchem o campo. As demais o deixam pendente
+# (diligência). Uma ressalva que não se consegue atribuir a um campo, havendo
+# dado informado, vira problema (análise manual), e não palpite.
+SITUACOES_USAVEIS = ("confirmada", "substituida")
+_SUBSTITUICAO = re.compile(r"\b(?:remarcad[oa]|alterad[oa]|ficou para|nova data|"
+                           r"passa(?:ra)? a ser|corrigid[oa])\b")
+_CANCELAMENTO = re.compile(
+    r"\b(?:cancel\w*|desmarc\w*|sem efeito|revog\w*|anulad\w*|suspens\w*|descartad\w*|"
+    r"desconsider\w*|retirad\w*|retiro|invalid\w*|nao vale\w*|deixou de valer|"
+    r"nao (?:vai|ira) (?:mais )?(?:ocorrer|acontecer)|nao ocorrera|equivocad\w*|"
+    r"errad[oa]s?|incorret[oa]s?)\b")
+_CONDICAO = re.compile(
+    r"(?<!-)\b(?:se|caso|desde que|contanto que|depend\w*|condiciona\w*|sujeit[oa]s?|talvez|"
+    r"provavel\w*|possivel\w*|eventual\w*|estimad[oa])\b")
+_NEGACAO_DATA = re.compile(r"\b(?:nao|nem|nunca|jamais)\b")
+_INDEFINICAO = re.compile(
+    r"\b(?:a definir|indefinid\w*|sem (?:data|previsao|confirmacao)|em aberto|ainda|aguard\w*|"
+    r"pendente|a confirmar|depois|posteriormente|mais tarde|"
     r"sera (?:informad\w*|definid\w*|confirmad\w*)|informarei|definirei|confirmarei|"
-    r"cancelad\w*|descartad\w*|suspens\w*)\b")
+    r"mud\w*|adiad\w*|antecipad\w*|remarcad\w*|alterad\w*)\b")
+_ANAFORA = re.compile(r"\b(?:ess[ae]s?|dess[ae]s?|ness[ae]s?|tal|referid[oa]|mencionad[oa]|acima|"
+                      r"isso|isto|ela|a mesma|o mesmo|data|previsao|prazo|informacao)\b")
+_ANTERIOR = re.compile(r"\b(?:anterior|antig[oa]|original|inicial|primeir[oa])\b")
+_VALOR_DE_DATA = re.compile(r"\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4}")
+
+
+def _data_normalizada(valor: str) -> str | None:
+    try:
+        return (datetime.strptime(valor, "%d/%m/%Y").date() if "/" in valor
+                else date.fromisoformat(valor)).isoformat()
+    except ValueError:
+        return None
+
+
+# "A partida não muda" mantém o valor: a negação de uma mudança não é ressalva.
+_MANUTENCAO = re.compile(r"\b(?:nao|nem)\s+(?:se\s+)?(?:(?:foi|sera|vai ser|e)\s+)?"
+                         r"(?:mud\w*|alter\w*|modific\w*)")
+
+
+def _marca_da_oracao(oracao: str) -> str | None:
+    oracao = _MANUTENCAO.sub(" ", oracao)
+    for situacao, padrao in (("cancelada", _CANCELAMENTO), ("condicional", _CONDICAO),
+                             ("negada", _NEGACAO_DATA), ("indefinida", _INDEFINICAO)):
+        if padrao.search(oracao):
+            return situacao
+    return None
+
+
+def ler_complementacao(texto: str, pedido: dict) -> tuple[dict, list[str]]:
+    """Situação de cada campo que a complementação toca, pela política acima.
+
+    Devolve ({campo: {"situacao", "valor", "motivo"}}, problemas).
+    """
+    estado: dict[str, dict] = {}
+    problemas: list[str] = []
+    foco: list[str] = []
+    ressalva_sem_campo = data_generica = False
+    texto = re.sub(r"^\s*complementacao ao pedido(?: em diligencia)?\s*:\s*", "", _sem_acento(texto))
+
+    def marcar(campo, situacao, motivo, valor=None, descartados=()):
+        anterior = estado.get(campo, {})
+        estado[campo] = {"situacao": situacao, "valor": valor, "motivo": motivo,
+                         "descartados": set(anterior.get("descartados", ())) | set(descartados),
+                         "anteriores": set(anterior.get("anteriores", ()))}
+
+    def afirmar(campo, valor, substitui, oracao):
+        atual = estado.get(campo)
+        if valor is None:
+            return marcar(campo, "indefinida", "data inexistente")
+        if atual is None:
+            return marcar(campo, "substituida" if substitui else "confirmada", oracao, valor)
+        if atual["situacao"] in SITUACOES_USAVEIS:
+            if atual["valor"] == valor:
+                return
+            if substitui:
+                marcar(campo, "substituida", oracao, valor)
+                estado[campo]["anteriores"].add(atual["valor"])
+                return
+            problemas.append(f"complementação com valores conflitantes para {campo}")
+            return marcar(campo, "conflitante", "valores conflitantes")
+        if atual["situacao"] == "conflitante":
+            return
+        if (atual["situacao"] in ("cancelada", "negada") and valor not in atual["descartados"]
+                and (substitui or atual["descartados"])):
+            return marcar(campo, "substituida", oracao, valor)
+        marcar(campo, "indefinida", f"afirmação depois de ressalva ({atual['situacao']})")
+
+    for oracao in re.split(r"[.;!?\n]+", texto):
+        oracao = oracao.strip()
+        if not oracao:
+            continue
+        if confirmado := _DATA_CONFIRMADA.fullmatch(oracao):
+            campo = _CAMPO_POR_ROTULO[confirmado["rotulo"]]
+            afirmar(campo, _data_normalizada(confirmado["data"]),
+                    bool(_SUBSTITUICAO.search(oracao)), oracao)
+            foco = [campo]
+            continue
+        if matricula := _MATRICULA_CONFIRMADA.search(oracao):
+            afirmar("matricula", matricula[1], False, oracao)
+            foco = ["matricula"]
+            continue
+
+        # Oração que não é atribuição: a que campos se refere e com que ressalva.
+        marca = _marca_da_oracao(oracao)
+        rotulados = {_CAMPO_POR_ROTULO[r] for r in _REFERENCIA_A_DATA.findall(oracao)}
+        if re.search(r"\bmatricula\b", oracao):
+            rotulados.add("matricula")
+        valores = [_data_normalizada(v) for v in _VALOR_DE_DATA.findall(oracao)]
+        refere_anterior = bool(_ANTERIOR.search(oracao))
+        alvos, substituidos, soltos = set(rotulados), set(), []
+        for v in valores:
+            donos = {c for c, e in estado.items() if v is not None and e["valor"] == v}
+            donos |= {c for c in CAMPOS_DATA
+                      if v is not None and c not in estado and _texto(pedido.get(c)) == v}
+            if donos:
+                alvos |= donos
+            elif any(v in e["anteriores"] for e in estado.values()):
+                substituidos.add(v)
+            else:
+                soltos.append(v)
+        # Referência anafórica ("essa previsão", "ela", "isso") ou cancelamento
+        # elíptico ("Cancelado.", "A viagem foi cancelada.") recaem sobre os campos
+        # da última oração que tratou de algum campo. Uma data citada que não é
+        # de nenhum campo não é anáfora: é ressalva sem campo identificado.
+        if (not alvos and foco and not soltos and not substituidos
+                and (_ANAFORA.search(oracao) or marca == "cancelada")):
+            alvos = set(foco)
+
+        if marca is None:
+            # Data citada sob rótulo, fora da forma de atribuição: não é confirmação.
+            if valores and rotulados:
+                for campo in rotulados:
+                    marcar(campo, "indefinida", "data citada fora de uma atribuição inequívoca")
+            if alvos:
+                foco = sorted(alvos)
+            continue
+
+        if refere_anterior:
+            # "A data anterior foi cancelada": vale para o valor substituído, não
+            # para a nova data; sem substituição, cancela o valor que havia.
+            alvos = {c for c in (alvos or set(foco))
+                     if estado.get(c, {}).get("situacao") != "substituida"}
+            if not alvos and (substituidos or soltos or foco):
+                continue
+        if alvos:
+            for campo in alvos:
+                atual = estado.get(campo, {})
+                descartados = {v for v in valores if v} | ({atual["valor"]} if atual.get("valor")
+                                                           else set())
+                if campo in CAMPOS_DATA and not atual and _texto(pedido.get(campo)):
+                    descartados.add(_texto(pedido.get(campo)))
+                marcar(campo, marca, oracao, descartados=descartados)
+            foco = sorted(alvos)
+        elif soltos or substituidos:
+            problemas.append("a complementação faz ressalva a uma data que não se consegue "
+                             "atribuir a um campo do pedido")
+        elif re.search(r"\b(?:data|previsao|prazo)\b", oracao) and not foco:
+            data_generica = True
+        else:
+            ressalva_sem_campo = True
+
+    if data_generica:
+        mencionadas = {c for c in estado if c in CAMPOS_DATA}
+        if not mencionadas:
+            mencionadas = {c for c in CAMPOS_DATA if not _texto(pedido.get(c))}
+        if len(mencionadas) != 1:
+            problemas.append("a complementação declara uma data indefinida sem identificar o campo")
+        for campo in mencionadas:
+            marcar(campo, "indefinida", "data indefinida sem campo identificado")
+    if ressalva_sem_campo and any(e["situacao"] in SITUACOES_USAVEIS for e in estado.values()):
+        problemas.append("a complementação traz uma ressalva que não se consegue atribuir a um "
+                         "campo do pedido")
+    return estado, problemas
+
+
+SITUACAO_NA_PENDENCIA = {"cancelada": "cancelada, sem nova data confirmada",
+                         "negada": "negada, sem nova data confirmada",
+                         "condicional": "condicionada a um evento futuro",
+                         "indefinida": "indefinida"}
 
 
 def _correcoes_da_complementacao(texto: str, pedido: dict) -> tuple[dict, list[str]]:
-    """Reconhece atribuições afirmativas de campos e invalida datas contraditórias."""
-    candidatos: dict[str, set[str]] = {}
-    indefinidas = set()
-    data_generica_indefinida = False
-    texto = re.sub(r"^\s*complementacao ao pedido(?: em diligencia)?\s*:\s*", "", _sem_acento(texto))
-    for oracao in re.split(r"[.;!?\n]+", texto):
-        oracao = oracao.strip()
-        if confirmado := _DATA_CONFIRMADA.fullmatch(oracao):
-            campo = _CAMPO_POR_ROTULO[confirmado["rotulo"]]
-            valor = confirmado["data"]
-            try:
-                valor = (datetime.strptime(valor, "%d/%m/%Y").date() if "/" in valor
-                         else date.fromisoformat(valor)).isoformat()
-            except ValueError:
-                indefinidas.add(campo)
-            else:
-                candidatos.setdefault(campo, set()).add(valor)
-        elif rotulo := _ROTULO_NO_INICIO.match(oracao):
-            if _DATA_INDEFINIDA.search(oracao) or re.search(r"\d{2}[-/]\d{2}", oracao):
-                indefinidas.add(_CAMPO_POR_ROTULO[rotulo["rotulo"]])
-        elif matricula := _MATRICULA_CONFIRMADA.search(oracao):
-            candidatos.setdefault("matricula", set()).add(matricula[1])
-        elif _DATA_INDEFINIDA.search(oracao):
-            referencias = _REFERENCIA_A_DATA.findall(oracao)
-            indefinidas.update(_CAMPO_POR_ROTULO[r] for r in referencias)
-            if not referencias and re.search(r"\bdata\b", oracao):
-                data_generica_indefinida = True
-
-    problemas = []
-    if data_generica_indefinida:
-        datas_mencionadas = (set(candidatos) & set(CAMPOS_DATA)) | indefinidas
-        if not datas_mencionadas:
-            datas_mencionadas = {c for c in CAMPOS_DATA if not _texto(pedido.get(c))}
-        if len(datas_mencionadas) != 1:
-            problemas.append("a complementação declara uma data indefinida sem identificar o campo")
-        indefinidas.update(datas_mencionadas)
-    correcoes = dict.fromkeys(indefinidas)
-    for campo, valores in candidatos.items():
-        if len(valores) > 1:
-            problemas.append(f"complementação com valores conflitantes para {campo}")
-        elif campo not in indefinidas:
-            correcoes[campo] = next(iter(valores))
+    """Só datas confirmadas ou substituídas preenchem o campo; as demais o deixam pendente."""
+    estado, problemas = ler_complementacao(texto, pedido)
+    correcoes = {}
+    for campo, e in estado.items():
+        if e["situacao"] in SITUACOES_USAVEIS:
+            correcoes[campo] = e["valor"]
+        elif e["situacao"] != "conflitante":
+            correcoes[campo] = None
     return correcoes, problemas
 
 
@@ -624,9 +777,15 @@ def redigir(pedido: dict, vigente: dict, complemento: dict | None, evidencias: d
 
     # Pendências do solicitante e impedimentos.
     pendencias, impedimentos = [], []
+    leitura = (ler_complementacao(complemento.get("texto") or "", pedido)[0]
+               if complemento and complemento.get("numero") == pedido["numero"] else {})
     for c in faltantes:
-        pendencias.append(f"Informar a {ROTULOS_CAMPOS[c]} (art. 9º)." if c.startswith("data")
-                          else f"Informar {ROTULOS_CAMPOS[c]} (art. 9º).")
+        pendencia = (f"Informar a {ROTULOS_CAMPOS[c]} (art. 9º)" if c.startswith("data")
+                     else f"Informar {ROTULOS_CAMPOS[c]} (art. 9º)")
+        if c in leitura and leitura[c]["situacao"] in SITUACAO_NA_PENDENCIA:
+            pendencia += (f": a complementação deixou a informação "
+                          f"{SITUACAO_NA_PENDENCIA[leitura[c]['situacao']]}")
+        pendencias.append(pendencia + ".")
     if sit["cadastro"] == "nao_atende":
         if "não localizada" in (evidencias["servidor"] or ""):
             pendencias.append(f"Informar a matrícula correta: a matrícula {vigente['matricula']} "

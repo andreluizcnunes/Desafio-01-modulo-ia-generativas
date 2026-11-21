@@ -323,10 +323,21 @@ def cenario_argumentos(progresso: bool, variacao: int) -> None:
     apagar_banco(banco)
 
 
-def cenario_complementacao_negada(progresso: bool) -> None:
+# Complementações em que a data aparece no texto sem confirmação do valor
+# vigente (barreira.ler_complementacao). A primeira é o achado B1 da auditoria
+# final: a data afirmada e cancelada na frase seguinte, sem repetir o campo.
+COMPLEMENTACOES_SEM_DATA_VIGENTE = (
+    ("cancelada", "O retorno está previsto para 2026-11-20. Essa previsão foi cancelada."),
+    ("cancelada", "O retorno está previsto para 2026-11-20. Ela foi cancelada."),
+    ("negada", "O retorno não será em 2026-11-20. A data ainda será informada."),
+    ("condicional", "O retorno está previsto para 2026-11-20. Isso depende da liberação "
+                    "do veículo."),
+)
+
+
+def cenario_complementacao_negada(progresso: bool, situacao: str, texto: str) -> None:
     numero = "DIA-2026-0111"
-    complemento = dict(COMPLEMENTOS[numero],
-                       texto="O retorno não será em 2026-11-20. A data ainda será informada.")
+    complemento = dict(COMPLEMENTOS[numero], texto=texto)
     banco = pathlib.Path(tempfile.mkdtemp(prefix="complementacao_")) / "agente.db"
     modelo = ModeloRoteirizado()
     agente = agente_interceptado(banco, modelo)
@@ -349,8 +360,12 @@ def cenario_complementacao_negada(progresso: bool) -> None:
                             trilha(numero) + [final(numero)], progresso, complemento=complemento)
     assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
     assert executadas == ["consultar_servidor"] and r.instrucao.valor_total is None
-    log(f"    {'eventos' if progresso else 'direto'}: data negada mantida pendente; "
-        "tentativa de mérito barrada e diligência regular entregue.")
+    textos = " ".join([*(v.detalhe for v in r.instrucao.verificacoes), *r.instrucao.pendencias,
+                       r.instrucao.minuta_despacho])
+    assert "2026-11-20" not in textos and "Informar a data de retorno" in textos, textos
+    log(f"    {'eventos' if progresso else 'direto'}, data {situacao}: {texto}")
+    log("        aptidão com a data do texto: recusada, só consultar_servidor executou, "
+        "mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.")
     apagar_banco(banco)
 
 
@@ -463,9 +478,10 @@ def main() -> None:
     for progresso in (False, True):
         for variacao in (0, 1):
             cenario_argumentos(progresso, variacao)
-    log("\n[6] Complementação negada pela entrada normal do agente")
-    for progresso in (False, True):
-        cenario_complementacao_negada(progresso)
+    log("\n[6] Complementações com data cancelada, negada ou condicional, pela entrada normal")
+    for situacao, texto in COMPLEMENTACOES_SEM_DATA_VIGENTE:
+        for progresso in (False, True):
+            cenario_complementacao_negada(progresso, situacao, texto)
     cenario_acervo()
     cenario_falhas_controladas()
     log("\nTodas as verificações da guarda das ferramentas passaram.")

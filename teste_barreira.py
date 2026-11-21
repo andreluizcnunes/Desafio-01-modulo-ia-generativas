@@ -23,7 +23,8 @@ Saída: resultados/teste_barreira.txt
 import json
 import pathlib
 
-from barreira import CONSULTA_BLOQUEADA, conferir, ler_urgencia, ordem_dirigida_ao_agente, pedido_vigente
+from barreira import (CONSULTA_BLOQUEADA, conferir, ler_complementacao, ler_urgencia,
+                      ordem_dirigida_ao_agente, pedido_vigente)
 from instrutor import instruir
 from medir import classificar
 from simulacao import (AgenteSimulado, alterar, consulta, consultas_corretas, esperado,
@@ -385,30 +386,89 @@ def parte3_gabarito_isolado() -> None:
 
 
 def parte_complementacoes_e_ordens() -> None:
-    log("\n[6] Complementações: somente atribuições afirmativas ao campo correto")
+    log("\n[6] Complementações: a data só vale com confirmação inequívoca do valor vigente")
     numero = "DIA-2026-0111"
     pedido, original = PEDIDOS[numero], COMPLEMENTOS[numero]
+    # (texto, retorno vigente esperado, situação do retorno na leitura).
+    # Positivos: confirmada e substituída. Negativos: cancelada, negada,
+    # condicional e indefinida, com construções diretas, anafóricas e elípticas.
     exemplos = (
-        (original["texto"], "2026-11-20"),
-        ("Data do retorno: 20/11/2026.", "2026-11-20"),
-        ("A volta foi remarcada para 2026-11-21.", "2026-11-21"),
-        ("Confirmo o retorno para 2026-11-21.", "2026-11-21"),
-        ("O retorno não será em 2026-11-20. A data ainda será informada.", None),
-        ("Não confirmo a data de retorno. Retorno: 2026-11-20.", None),
-        ("O retorno será em 2026-11-20, se houver transporte.", None),
-        ("O retorno será em 2026-11-20. A data está sujeita a confirmação.", None),
-        ("O retorno será em 2026-11-20. Confirmarei a data mais tarde.", None),
-        ("A data será informada depois.", None),
-        ("O ofício foi emitido em 2026-11-20. Retorno a definir.", None),
-        ("Retorno previsto para 2026-02-30.", None),
-        ("2026-11-20.", None),
-        ("Retorno: 2026-11-20. Retorno: 20/11/2026.", "2026-11-20"),
+        (original["texto"], "2026-11-20", "confirmada"),
+        ("Data do retorno: 20/11/2026.", "2026-11-20", "confirmada"),
+        ("Confirmo o retorno para 2026-11-21.", "2026-11-21", "confirmada"),
+        ("Retorno: 2026-11-20. Retorno: 20/11/2026.", "2026-11-20", "confirmada"),
+        ("O retorno está previsto para 2026-11-20. Essa data está confirmada.", "2026-11-20",
+         "confirmada"),
+        ("O retorno está previsto para 2026-11-20. A viagem segue o roteiro do ofício.",
+         "2026-11-20", "confirmada"),
+        ("O retorno está previsto para 2026-11-20. A data de partida não muda.", "2026-11-20",
+         "confirmada"),
+        ("A volta foi remarcada para 2026-11-21.", "2026-11-21", "substituida"),
+        ("O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-22.",
+         "2026-11-22", "substituida"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. "
+         "O retorno foi remarcado para 2026-11-22.", "2026-11-22", "substituida"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. "
+         "Retorno: 2026-11-22.", "2026-11-22", "substituida"),
+        ("O retorno foi alterado para 2026-11-21. A data anterior, 2026-11-20, foi cancelada.",
+         "2026-11-21", "substituida"),
+        ("O retorno foi alterado para 2026-11-21. A data anterior foi cancelada.", "2026-11-21",
+         "substituida"),
+        ("O retorno não será em 2026-11-20. O retorno será em 2026-11-21.", "2026-11-21",
+         "substituida"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. Ela foi cancelada.", None, "cancelada"),
+        ("Retorno: 2026-11-20. Desconsiderem essa data.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. A previsão ficou sem efeito.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. Isso não vale mais.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. A data informada acima foi cancelada.", None,
+         "cancelada"),
+        ("O retorno está previsto para 2026-11-20, mas foi cancelado.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. Cancelado.", None, "cancelada"),
+        ("O retorno está previsto para 2026-11-20. A viagem de volta foi cancelada.", None,
+         "cancelada"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão foi revogada pela chefia.", None,
+         "cancelada"),
+        ("O retorno foi alterado para 2026-11-21. Essa data foi cancelada.", None, "cancelada"),
+        ("O retorno não está previsto para 2026-11-20.", None, "negada"),
+        ("Retorno: 2026-11-20. Não confirmo essa data.", None, "negada"),
+        ("O retorno será em 2026-11-20, se houver transporte.", None, "condicional"),
+        ("O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.", None,
+         "condicional"),
+        ("Retorno: 2026-11-20. Caso o voo atrase, a volta muda.", None, "condicional"),
+        ("O retorno está previsto para 2026-11-20, desde que a vistoria termine.", None,
+         "condicional"),
+        ("O retorno será em 2026-11-20. A data está sujeita a confirmação.", None, "condicional"),
+        ("O retorno não será em 2026-11-20. A data ainda será informada.", None, "indefinida"),
+        ("Não confirmo a data de retorno. Retorno: 2026-11-20.", None, "indefinida"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. "
+         "Retorno: 2026-11-20.", None, "indefinida"),
+        ("O retorno será em 2026-11-20. Confirmarei a data mais tarde.", None, "indefinida"),
+        ("O retorno está previsto para 2026-11-20. Essa previsão mudou.", None, "indefinida"),
+        ("O retorno está previsto para 2026-11-20. Retorno a definir.", None, "indefinida"),
+        ("A data será informada depois.", None, "indefinida"),
+        ("O ofício foi emitido em 2026-11-20. Retorno a definir.", None, "indefinida"),
+        ("Retorno previsto para 2026-02-30.", None, "indefinida"),
+        ("2026-11-20.", None, None),
     )
-    for texto, retorno in exemplos:
+    for texto, retorno, situacao in exemplos:
         vigente, problemas = pedido_vigente(pedido, dict(original, texto=texto))
-        assert not problemas and vigente["data_retorno"] == retorno, (texto, vigente, problemas)
+        leitura, _ = ler_complementacao(texto, pedido)
+        lida = leitura.get("data_retorno", {}).get("situacao")
+        assert not problemas and vigente["data_retorno"] == retorno and lida == situacao, (
+            texto, vigente["data_retorno"], lida, problemas)
         assert vigente["data_partida"] == pedido["data_partida"]
-        log(f"    {texto} -> retorno {retorno or 'pendente'}")
+        log(f"    {situacao or 'sem data':11} -> {retorno or 'pendente':10} | {texto}")
+    # Ressalvas que não se consegue atribuir a um campo: análise manual.
+    for texto in ("O retorno está previsto para 2026-11-20. A data 2026-11-19 foi cancelada.",
+                  "O retorno está previsto para 2026-11-20. Não há outras alterações."):
+        _, problemas = pedido_vigente(pedido, dict(original, texto=texto))
+        assert problemas, texto
+        log(f"    ressalva sem campo -> análise manual | {texto}")
+    vigente, problemas = pedido_vigente(pedido, dict(original, texto="A partida em 2026-11-17 foi "
+                                                                     "cancelada."))
+    assert not problemas and vigente["data_partida"] is None
+    log("    cancelada   -> partida pendente | A partida em 2026-11-17 foi cancelada.")
     vigente, problemas = pedido_vigente(pedido, dict(original,
         texto="Data da partida: 17/11/2026; data de retorno: 21/11/2026."))
     assert not problemas and vigente["data_partida"] == "2026-11-17"
@@ -427,6 +487,9 @@ def parte_complementacoes_e_ordens() -> None:
     vigente, problemas = pedido_vigente(PEDIDOS[numero], dict(COMPLEMENTOS[numero],
                                                             texto="A referência do ofício é 207418."))
     assert not problemas and vigente["matricula"] == PEDIDOS[numero]["matricula"]
+    vigente, problemas = pedido_vigente(PEDIDOS[numero], dict(COMPLEMENTOS[numero],
+        texto="A minha matrícula correta é 207418. Essa informação está errada."))
+    assert not problemas and vigente["matricula"] is None
     log("    conflitos, cancelamento e número de referência não viram correções do pedido.")
 
     log("\n[7] Ordens ao agente e referências descritivas")

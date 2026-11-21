@@ -51,6 +51,23 @@ modelo, ao banco nem ao formulário, e a barreira (passo 7) ainda recusa a instr
 Na diligência, a complementação é enviada **na mesma sessão** (`session_id` = número do
 pedido) e o agente recupera o caso pelo histórico (Aula 07, 2).
 
+O código lê a complementação antes de qualquer consulta (`barreira.ler_complementacao`),
+e a guarda e a barreira usam a mesma leitura. Uma data só preenche o campo com
+**confirmação inequívoca do valor vigente**. As orações são lidas em ordem, e cada uma
+muda a situação do campo a que se refere pelo rótulo, pelo valor citado ou por
+referência anafórica ("essa previsão", "ela", "isso"). Valem duas situações: a data
+**confirmada** ("o retorno está previsto para 2026-11-20") e a **substituída** (nova data
+afirmada no lugar de outra cancelada ou negada). As demais deixam o campo pendente, e o
+pedido segue em diligência, sem consulta de mérito (art. 9º):
+
+- **cancelada:** "Essa previsão foi cancelada.";
+- **negada:** "O retorno não será em 2026-11-20.";
+- **condicional:** "Isso depende da liberação do veículo.";
+- **indefinida:** "a definir", ou uma mudança anunciada sem a nova data.
+
+Dois valores afirmados para o mesmo campo, sem substituição, ou uma ressalva que não
+se consegue atribuir a um campo vão para a análise manual.
+
 O modelo **não calcula nada**: antecedência, quantidade, valor, soma do mês, prazo da
 prestação e comparação com o saldo saem prontos das ferramentas (Aula 06, 1: "falta de
 habilidade para cálculos precisos"; Aula 03, problema da abertura).

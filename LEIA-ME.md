@@ -20,6 +20,7 @@ cp .env.example .env          # e preencha OPENAI_API_KEY
 | `python teste_ferramentas.py` | Testa as quatro ferramentas com casos dos pedidos (Etapa 2) | Não |
 | `python gabarito.py` | Gera o `gabarito.json` aplicando a norma por código | Não |
 | `python teste_barreira.py` | Barreira e medição com respostas controladas: 50 casos, 14 falhas do fluxo, controles do vínculo com a execução e a leitura da urgência | Não |
+| `python teste_complementacao.py` | Contrato de confirmação dos campos da complementação: casos por categoria, 9.072 complementações geradas, 1.944 controles e a guarda do cálculo em cada uma | Não |
 | `python teste_bloqueio.py` | Guarda das consultas de mérito com o Agno real e o modelo interceptado localmente: funções executadas, mensagens ao modelo e banco | Não |
 | `python teste_eliminacao.py` | Eliminação em SQLite temporário: nome em minúsculas, matrícula parcial, tabela ilegível | Não |
 | `python verificar_etapa3.py` | Filtro de dados pessoais e barreira; instrui o 0104 e varre o banco (Etapa 3) | Sim, na parte 3 |

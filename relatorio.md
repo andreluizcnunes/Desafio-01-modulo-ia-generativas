@@ -21,6 +21,13 @@ acurácia do modelo, tokens, latência ou custo. A Seção 9 diz o que foi medid
 modelo real. A medição anterior, da versão `067e97b`, está em
 `resultados/historico/medicao_067e97b.md`.
 
+Depois da medição, a reauditoria do B1 levou a leitura da complementação a um contrato
+de confirmação dos campos: confirmado, pendente ou ambíguo, com falha fechada
+(`CORRECOES.md`, primeira seção). As complementações oficiais têm a mesma leitura e a
+mesma mensagem ao modelo, e por isso a medição real de `6f4d2fa` não foi refeita. A
+mudança foi verificada sem o provedor: barreira, guarda, Agno com HTTP interceptado,
+SQLite e formulário (parte A).
+
 Na auditoria, a tentativa de controle terminou em `Connection error` no ambiente do
 auditor. Neste ambiente, com a mesma configuração, a chave estava presente, sem URL
 base nem proxy alterados. O DNS de `api.openai.com` resolveu, `GET /v1/models` respondeu

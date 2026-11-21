@@ -1,5 +1,84 @@
 # Correções das revisões
 
+## Reauditoria do B1 (base `519f1f9`): contrato de confirmação dos campos
+
+**Caso reprovado.** «O retorno foi remarcado para 2026-11-20. Essa nova data foi
+cancelada por causa de um compromisso anterior.» Nesse caso, a data cancelada
+alimentou as quatro ferramentas e a minuta.
+
+**Causa raiz.** A leitura falhava aberta. Quando uma ressalva não podia ser resolvida
+com segurança, ela era **descartada**, e a data afirmada continuava valendo. No caso
+reprovado, a palavra «anterior», que descrevia o compromisso, foi tomada como
+referência ao valor substituído. O ramo correspondente descartava a ressalva porque o
+campo vinha de uma remarcação. O mesmo defeito estrutural aparecia por outra via:
+uma oração sobre a data com verbo fora do vocabulário («Essa nova data caiu.») era
+tratada como neutra. O vocabulário decidia o que **invalidava** a data, e o que ele
+não reconhecia deixava a data confirmada.
+
+**Desenho da solução** (`barreira.ler_complementacao`, comentário do contrato):
+
+1. **Contrato explícito.** Cada campo tocado termina CONFIRMADO, PENDENTE ou AMBÍGUO,
+   com o valor vigente só no primeiro. `pedido_vigente` preenche o campo CONFIRMADO,
+   esvazia o PENDENTE (diligência) e esvazia o AMBÍGUO e o registra como problema
+   (análise manual). A guarda das ferramentas e a barreira usam esse pedido vigente,
+   e o cálculo, o histórico e o saldo só executam com um campo CONFIRMADO.
+2. **Complementação inteira.** O estado de cada campo só é lido depois de todas as
+   orações. Uma oração posterior pode cancelar, substituir ou tornar ambíguo o que
+   veio antes. AMBÍGUO não volta a CONFIRMADO pelo texto.
+3. **Falha fechada.** Uma oração ligada ao campo (pelo rótulo, valor, expressão
+   referencial, nome que abrange as datas ou elipse) que não seja atribuição,
+   ressalva ou reafirmação reconhecida deixa o campo AMBÍGUO. O vocabulário só
+   escolhe entre PENDENTE e CONFIRMADO, e o que ele não reconhece nunca confirma.
+4. **Antecedentes, e não palavras.** Uma ressalva sem valor recai sobre os
+   antecedentes do texto: os valores citados para o campo e o valor anterior que um
+   verbo de substituição pressupõe. Com um antecedente, o campo fica PENDENTE; com
+   mais de um, AMBÍGUO. A palavra «anterior» deixou de ter efeito. Uma ressalva com
+   valor vale para aquele valor.
+5. **Outro evento.** Uma oração sem vínculo com os campos («A reunião com a
+   prefeitura foi cancelada», «O compromisso anterior foi desmarcado») não muda a data.
+6. **Confirmação explícita do campo.** Para o que o texto livre não resolve, o
+   formulário da complementação aceita o campo e o valor confirmados, enviados junto
+   com o texto, no mesmo fluxo e na mesma sessão. O modelo recebe o campo na
+   mensagem. O valor explícito não vale se o texto o cancelou, o deixou ambíguo ou
+   confirmou outro.
+
+| Critério de aceite | Evidência |
+|---|---|
+| O caso reprovado fica fora das ferramentas de mérito, dos fundamentos e da minuta | `teste_bloqueio.py`, parte 6, com o Agno real e as requisições interceptadas, nos dois modos: só `consultar_servidor` executa; as três funções de mérito são barradas; nem as mensagens nem o SQLite recebem dado de mérito; o resultado vai à análise manual, também com a resposta de diligência. `teste_app.py`, passos A3b e A3d: mensagem padrão na tela, com a resposta simulada e com o Agno interceptado. O comando de reprodução de `AUDITORIA_FINAL.md` mostra só a mensagem padrão, sem métricas nem minuta. |
+| Regra geral, além dos exemplos conhecidos | `teste_complementacao.py`, parte 2: 9.072 complementações geradas (6 formas de atribuição × 14 formas de referência × 18 predicados, 8 deles fora do vocabulário do detector, × 6 complementos de frase, entre eles «por causa de um compromisso anterior»). Nenhuma termina com a data confirmada (3.600 pendentes, 5.472 ambíguas). A guarda barrou `calcular_diarias` com a data antes de executar nas 9.072. |
+| Data afirmada e depois cancelada; remarcada e depois cancelada; referência indireta; negada ou condicional | `teste_complementacao.py`, parte 1, por categoria; `teste_bloqueio.py`, parte 6 (sete complementações, nos dois modos) |
+| Substituição por outra data confirmada | `teste_complementacao.py`, partes 1 e 3: seis formas confirmam só a nova data, e a guarda aceita a nova e barra a antiga. `teste_bloqueio.py`, parte 6b: com o Agno real, as quatro consultas executam com 2026-11-21, e a instrução sai apta com 4,5 diárias e R$ 1.260,00, sem 2026-11-20 nos textos. Com 2026-11-20 nos argumentos, o cálculo é barrado. |
+| Cancelamento de outro evento sem invalidar o retorno | `teste_complementacao.py`, parte 3: 1.944 complementações com outro evento cancelado, negado, condicionado ou com predicado fora do vocabulário mantêm o retorno confirmado. |
+| Complementações oficiais | `teste_complementacao.py`, parte 1 (0111 e 0112); `teste_barreira.py`, parte 6; `teste_bloqueio.py`, partes 2 e 7 (acervo em seis rodadas roteirizadas, 42/42 por configuração); `teste_app.py`, passo A3. As complementações oficiais não mudam de leitura, e a mensagem ao modelo só ganha a linha da confirmação explícita quando ela é informada. |
+| Confirmação explícita | `teste_complementacao.py`, parte 4; `teste_app.py`, passo A3c, pela tela: o texto sem confirmação, com o campo informado, resulta em apto. O campo explícito com a data que o texto deixou ambígua vai à análise manual. |
+
+**Limites do reconhecimento textual.** A leitura é conservadora por construção. O que
+ela não entende vai à diligência ou à análise manual, e não ao cálculo. O preço é
+devolver alguns textos legítimos:
+
+- «O retorno foi alterado para 2026-11-21. A data anterior foi cancelada.» fica
+  AMBÍGUO, porque «a data» tem dois antecedentes possíveis. Citar o valor antigo («A
+  data anterior, 2026-11-20, foi cancelada») ou usar a confirmação explícita resolve.
+- «Essa nova data foi cancelada», depois de uma remarcação, vai à análise manual, e
+  não à diligência: a leitura não usa «nova» para escolher o antecedente.
+- Uma frase curta sem conteúdo reconhecível depois de uma data («Caiu.», «Obrigada.»)
+  deixa a data AMBÍGUA.
+- Uma oração que cita o campo sem ser atribuição, ressalva ou reafirmação reconhecida
+  («Na volta, a servidora passará por Sinop») deixa o campo AMBÍGUO.
+- Um cancelamento da «viagem» deixa todas as datas pendentes.
+- Uma oração sobre outro evento que não cite o campo, uma data dele ou uma expressão
+  referencial não muda a data. Uma ressalva sobre o campo escrita sem nenhum desses
+  vínculos, com um sujeito que o detector não liga às datas, também não muda a data.
+  É o limite que resta da leitura de texto livre, e por isso a conferência humana de
+  toda instrução continua (`relatorio.md`, Seção 8).
+- As medições reais (B2, versão `6f4d2fa`) não foram refeitas. As complementações
+  oficiais têm a mesma leitura, e a mensagem ao modelo não muda para elas.
+
+As evidências simuladas desta correção estão em `resultados/teste_complementacao.txt`,
+`resultados/teste_bloqueio.txt`, `resultados/teste_barreira.txt` e
+`resultados/etapa5_formulario_b1.txt` (parte A do formulário, sem o modelo real). O
+`resultados/etapa5_formulario.txt` continua sendo a evidência real da versão `6f4d2fa`.
+
 ## Auditoria final (base `d2c4cf7`): bloqueadores B1 e B2
 
 ### B1 — Data cancelada na complementação

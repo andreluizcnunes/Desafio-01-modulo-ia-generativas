@@ -1,0 +1,80 @@
+[1] Casos nomeados: estado do retorno, valor vigente e guarda do cálculo
+  Complementação oficial
+    confirmado -> mérito com 2026-11-20  | Complementação ao pedido em diligência: o retorno está previsto para 2026-11-20.
+  Data afirmada e depois cancelada
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+    pendente   -> diligência             | Retorno: 2026-11-20. Desconsiderem essa data.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20, mas foi cancelado.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. Cancelado.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. A viagem foi cancelada.
+  Data remarcada e depois cancelada
+    ambiguo    -> análise manual         | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+    ambiguo    -> análise manual         | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada.
+    ambiguo    -> análise manual         | A volta foi alterada para 2026-11-20. Ela foi cancelada.
+    pendente   -> diligência             | O retorno foi remarcado para 2026-11-20. O retorno em 2026-11-20 foi cancelado.
+    pendente   -> diligência             | O retorno foi remarcado para 2026-11-20. A data 2026-11-20 foi cancelada.
+  Cancelamento por referência indireta
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. Ela foi cancelada.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. Isso não vale mais.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. A data informada acima ficou sem efeito.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. A referida previsão foi revogada pela chefia.
+    ambiguo    -> análise manual         | O retorno está previsto para 2026-11-20. Essa nova data caiu.
+    ambiguo    -> análise manual         | O retorno está previsto para 2026-11-20. Caiu.
+  Data negada ou condicional
+    pendente   -> diligência             | O retorno não será em 2026-11-20. A data ainda será informada.
+    pendente   -> diligência             | Retorno: 2026-11-20. Não será nessa data.
+    pendente   -> diligência             | O retorno não está previsto para 2026-11-20.
+    pendente   -> diligência             | O retorno será em 2026-11-20, se houver transporte.
+    pendente   -> diligência             | Retorno: 2026-11-20. Isso só vale desde que haja veículo.
+    pendente   -> diligência             | O retorno está previsto para 2026-11-20. Essa previsão mudou.
+    ambiguo    -> análise manual         | Não confirmo a data de retorno. Retorno: 2026-11-20.
+  Data substituída por outra confirmada
+    confirmado -> mérito com 2026-11-22  | O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-22.
+    confirmado -> mérito com 2026-11-22  | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. O retorno foi remarcado para 2026-11-22.
+    confirmado -> mérito com 2026-11-22  | Retorno: 2026-11-20. Essa data foi cancelada. Retorno: 2026-11-22.
+    confirmado -> mérito com 2026-11-22  | O retorno não será em 2026-11-20. O retorno será em 2026-11-22.
+    confirmado -> mérito com 2026-11-22  | O retorno foi alterado para 2026-11-22. A data anterior, 2026-11-20, foi cancelada.
+    confirmado -> mérito com 2026-11-22  | A volta foi remarcada para 2026-11-22.
+  Cancelamento de outro evento, sem invalidar o retorno
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. A reunião com a prefeitura foi cancelada.
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. O compromisso anterior foi desmarcado.
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. A vistoria de 2026-11-18 foi suspensa.
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. Não há outras alterações.
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. Essa data está confirmada.
+    confirmado -> mérito com 2026-11-20  | O retorno está previsto para 2026-11-20. A data de partida não muda.
+  Conflito e valor inválido
+    ambiguo    -> análise manual         | Retorno: 2026-11-20; retorno: 2026-11-21.
+    ambiguo    -> análise manual         | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. Retorno: 2026-11-20.
+    ambiguo    -> análise manual         | O retorno está previsto para 2026-11-20. A data 2026-11-19 foi cancelada.
+    pendente   -> diligência             | Retorno previsto para 2026-02-30.
+  Complementação oficial do 0112 e variantes
+    confirmado -> matrícula 207418   | Complementação ao pedido em diligência: houve erro de digitação, e a minha matrícula correta é 207418.
+    pendente   -> matrícula None     | A minha matrícula correta é 207418. Essa informação está errada.
+    None       -> matrícula 207481   | A referência do ofício é 207418.
+
+[2] Regra geral: a data citada depois de afirmada nunca fica confirmada
+    9072 complementações = 6 atribuições × 14 referências × 18 predicados (8 fora do vocabulário) × 6 complementos da frase
+    pendente (diligência): 3600 · ambíguo (análise manual): 5472 · confirmado: 0
+    guarda: calcular_diarias com 2026-11-20 barrado antes de executar em 9072 de 9072
+    predicados fora do vocabulário (caiu, foi trocada, perdeu a validade, deixou de existir, virou outra, foi derrubada, furou, já era): ambíguo em todas as combinações
+
+[3] Controles: outro evento não invalida o retorno; substituição confirma a nova data
+    1944 complementações com outro evento cancelado, negado, condicionado ou com predicado fora do vocabulário: retorno confirmado em 2026-11-20 em todas
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-22.
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada. O retorno foi remarcado para 2026-11-22.
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | O retorno está previsto para 2026-11-20. Ela foi cancelada. Retorno: 2026-11-22.
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | O retorno não será em 2026-11-20. O retorno será em 2026-11-22.
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | O retorno foi alterado para 2026-11-22. A data anterior, 2026-11-20, foi cancelada.
+    substituída -> 2026-11-22; guarda aceita 2026-11-22 e barra 2026-11-20 | Retorno: 2026-11-20. Essa data foi cancelada. Retorno: 2026-11-22.
+
+[4] Confirmação explícita do campo, informada com a complementação
+    confirmado -> 2026-11-22 | campo 2026-11-22 | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+    confirmado -> 2026-11-22 | campo 22/11/2026 | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+    ambiguo    -> None       | campo 2026-11-20 | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+    ambiguo    -> None       | campo 2026-11-20 | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+    confirmado -> 2026-11-22 | campo 2026-11-22 | O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+    confirmado -> 2026-11-20 | campo 2026-11-20 | Complementação ao pedido em diligência: o retorno está previsto para 2026-11-20.
+    ambiguo    -> None       | campo 2026-11-22 | Complementação ao pedido em diligência: o retorno está previsto para 2026-11-20.
+    ambiguo    -> None       | campo 2026-02-30 | O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+
+Todas as verificações do contrato de confirmação passaram.

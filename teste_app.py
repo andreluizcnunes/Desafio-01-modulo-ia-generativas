@@ -217,10 +217,14 @@ def parte_a() -> None:
     assert "após complementação" in textos(at)
     log(f"    recomendação após a complementação: {[m.value for m in at.metric][:3]}")
 
-    log("[A3b] Complementação com data negada ou cancelada mantém a diligência")
-    for texto_sem_data in ("O retorno não será em 2026-11-20. A data ainda será informada.",
-                           # Achado B1 da auditoria final, reproduzido pela tela.
-                           "O retorno está previsto para 2026-11-20. Essa previsão foi cancelada."):
+    log("[A3b] Complementação sem data vigente: diligência (pendente) ou análise manual (ambígua)")
+    remarcada_cancelada = ("O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada "
+                           "por causa de um compromisso anterior.")
+    for texto_sem_data, estado in (
+            ("O retorno não será em 2026-11-20. A data ainda será informada.", "pendente"),
+            # Achados B1 da auditoria final, reproduzidos pela tela.
+            ("O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.", "pendente"),
+            (remarcada_cancelada, "ambiguo")):
         AGENTE.cena = "normal"
         instruir_pela_tela(at, "DIA-2026-0111")
         assert [m.value for m in at.metric][0] == "Diligência"
@@ -228,18 +232,69 @@ def parte_a() -> None:
         campo.set_value(texto_sem_data)
         botao(at, "Enviar complementação").click().run()
         so_mensagem_padrao(at, f"modelo tentou aptidão com «{texto_sem_data}»",
-                           ["Apto para autorização", "980,00", "3,5"])
+                           ["Apto para autorização", "980,00", "3,5", "retorno em 2026-11-20"])
         AGENTE.cena = "data_indefinida"
         instruir_pela_tela(at, "DIA-2026-0111")
         campo = next(t for t in at.text_area if t.label == "Texto da complementação")
         campo.set_value(texto_sem_data)
         botao(at, "Enviar complementação").click().run()
+        if estado == "ambiguo":
+            so_mensagem_padrao(at, "resposta de diligência com o retorno ambíguo",
+                               ["Apto para autorização", "retorno em 2026-11-20"])
+            log(f"    «{texto_sem_data}»: análise manual nas duas respostas")
+            continue
         assert not at.exception and [m.value for m in at.metric][:3] == ["Diligência", "-", "-"]
         minuta = next(t.value for t in at.text_area if "Minuta" in t.label)
         # O campo de entrada ainda guarda o texto digitado; fora dele, a data não aparece.
         exibido = textos(at).replace(texto_sem_data, "")
         assert "retorno não informado" in minuta and "2026-11-20" not in exibido, exibido
         log(f"    «{texto_sem_data}»: diligência exibida sem a data, quantidade ou valor")
+
+    log("[A3c] Confirmação explícita do campo, quando o texto livre não confirma a data")
+    AGENTE.cena = "normal"
+    for texto_livre, valor, espera_apto in (
+            ("O retorno foi remarcado; confirmo a data no campo próprio.", "2026-11-20", True),
+            (remarcada_cancelada, "2026-11-20", False)):
+        instruir_pela_tela(at, "DIA-2026-0111")
+        campo = next(t for t in at.text_area if t.label == "Texto da complementação")
+        campo.set_value(texto_livre)
+        next(x for x in at.selectbox if x.label == "Confirmar um campo (opcional)").set_value(
+            "data_retorno")
+        next(x for x in at.text_input if x.label == "Valor confirmado do campo").set_value(valor)
+        botao(at, "Enviar complementação").click().run()
+        if espera_apto:
+            assert [m.value for m in at.metric][:3] == ["Apto para autorização", "3.5",
+                                                         "R$ 980,00"], textos(at)
+            log(f"    «{texto_livre}» + campo data de retorno = {valor}: apto, 3,5 diárias")
+        else:
+            so_mensagem_padrao(at, "campo explícito com a data que o texto deixou ambígua",
+                               ["Apto para autorização"])
+            log(f"    «{texto_livre[:48]}…» + campo = {valor}: continua ambíguo, análise manual")
+
+    log("[A3d] Data remarcada e cancelada, com o Agno real e o modelo interceptado")
+    import teste_bloqueio as tb
+    AGENTE.cena = "interceptado"
+    AGENTE._alvo()
+    AGENTE.roteirizado.passos = tb.trilha("DIA-2026-0111") + [tb.final("DIA-2026-0111")]
+    instruir_pela_tela(at, "DIA-2026-0111")
+    assert [m.value for m in at.metric][0] == "Diligência"
+    # A resposta do modelo vai sem textos de mérito, para que a busca no banco
+    # distinga resultados das ferramentas do que o modelo escreveu.
+    resposta = json.loads(tb.final("DIA-2026-0111", True)[1])
+    for verificacao in resposta["verificacoes"]:
+        verificacao["detalhe"] = ""
+    resposta["minuta_despacho"] = ""
+    AGENTE.roteirizado.passos = (tb.trilha("DIA-2026-0111", True)
+                                 + [("final", json.dumps(resposta))])
+    inicio = len(tb.EXECUTADAS)
+    campo = next(t for t in at.text_area if t.label == "Texto da complementação")
+    campo.set_value(remarcada_cancelada)
+    botao(at, "Enviar complementação").click().run()
+    assert tb.EXECUTADAS[inicio:] == ["consultar_servidor"], tb.EXECUTADAS[inicio:]
+    so_mensagem_padrao(at, "Agno real tentou o mérito com a data cancelada",
+                       ["Apto para autorização", "Valor unitário", "retorno em 2026-11-20"])
+    assert not tb.com_merito(tb.conteudo_do_banco(PASTA / "interceptado.db"))
+    log(f"    funções executadas: {tb.EXECUTADAS[inicio:]}; SQLite sem dado de mérito")
     AGENTE.cena = "normal"
 
     log("[A4] Falhas: só a mensagem padrão, nada da execução recusada")

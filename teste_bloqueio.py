@@ -22,6 +22,7 @@ regular DIA-2026-0101 como controle, com as quatro ferramentas executando.
 Execução: python teste_bloqueio.py
 Saída: resultados/teste_bloqueio.txt
 """
+import copy
 import functools
 import json
 import pathlib
@@ -324,18 +325,24 @@ def cenario_argumentos(progresso: bool, variacao: int) -> None:
 
 
 # Complementações em que a data aparece no texto sem confirmação do valor
-# vigente (barreira.ler_complementacao). A primeira é o achado B1 da auditoria
-# final: a data afirmada e cancelada na frase seguinte, sem repetir o campo.
+# vigente (barreira.ler_complementacao). Estado do retorno: PENDENTE mantém a
+# diligência; AMBÍGUO vai à análise manual. A segunda reaudição do B1 é a
+# "nova data" remarcada e cancelada em seguida.
 COMPLEMENTACOES_SEM_DATA_VIGENTE = (
-    ("cancelada", "O retorno está previsto para 2026-11-20. Essa previsão foi cancelada."),
-    ("cancelada", "O retorno está previsto para 2026-11-20. Ela foi cancelada."),
-    ("negada", "O retorno não será em 2026-11-20. A data ainda será informada."),
-    ("condicional", "O retorno está previsto para 2026-11-20. Isso depende da liberação "
-                    "do veículo."),
+    ("pendente", "O retorno está previsto para 2026-11-20. Essa previsão foi cancelada."),
+    ("pendente", "O retorno está previsto para 2026-11-20. Ela foi cancelada."),
+    ("pendente", "O retorno não será em 2026-11-20. A data ainda será informada."),
+    ("pendente", "O retorno está previsto para 2026-11-20. Isso depende da liberação "
+                 "do veículo."),
+    ("ambiguo", "O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por "
+                "causa de um compromisso anterior."),
+    ("pendente", "O retorno foi remarcado para 2026-11-20. O retorno em 2026-11-20 foi "
+                 "cancelado."),
+    ("ambiguo", "O retorno está previsto para 2026-11-20. Essa nova data caiu."),
 )
 
 
-def cenario_complementacao_negada(progresso: bool, situacao: str, texto: str) -> None:
+def cenario_complementacao_negada(progresso: bool, estado: str, texto: str) -> None:
     numero = "DIA-2026-0111"
     complemento = dict(COMPLEMENTOS[numero], texto=texto)
     banco = pathlib.Path(tempfile.mkdtemp(prefix="complementacao_")) / "agente.db"
@@ -344,28 +351,82 @@ def cenario_complementacao_negada(progresso: bool, situacao: str, texto: str) ->
     r, _, _ = rodar("diligência inicial", banco, modelo, agente, numero,
                     trilha(numero) + [final(numero)], progresso)
     assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
-    # O modelo tenta entregar aptidão sem redigir valores, para que a busca no
-    # banco distinga resultados das ferramentas do texto que o modelo escreveu.
+    # O modelo tenta entregar aptidão com a data do texto, sem redigir valores,
+    # para que a busca no banco distinga resultados das ferramentas do texto que
+    # o modelo escreveu.
     resposta = json.loads(final(numero, True)[1])
     for verificacao in resposta["verificacoes"]:
         verificacao["detalhe"] = ""
     resposta["minuta_despacho"] = ""
-    r, executadas, mensagens = rodar("complementação negada", banco, modelo, agente, numero,
-                                    trilha(numero, True) + [("final", json.dumps(resposta))], progresso,
-                                    complemento=complemento)
+    r, executadas, mensagens = rodar("complementação sem data vigente", banco, modelo, agente,
+                                    numero, trilha(numero, True) + [("final", json.dumps(resposta))],
+                                    progresso, complemento=complemento)
     assert r.situacao == "recusada" and executadas == ["consultar_servidor"], (r.motivo, executadas)
     assert r.consultas_bloqueadas == list(MERITO) and not any(com_merito(m) for m in mensagens)
     assert not com_merito(conteudo_do_banco(banco))
-    r, executadas, _ = rodar("diligência mantida", banco, modelo, agente, numero,
+    r, executadas, _ = rodar("diligência", banco, modelo, agente, numero,
                             trilha(numero) + [final(numero)], progresso, complemento=complemento)
-    assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
-    assert executadas == ["consultar_servidor"] and r.instrucao.valor_total is None
-    textos = " ".join([*(v.detalhe for v in r.instrucao.verificacoes), *r.instrucao.pendencias,
-                       r.instrucao.minuta_despacho])
-    assert "2026-11-20" not in textos and "Informar a data de retorno" in textos, textos
-    log(f"    {'eventos' if progresso else 'direto'}, data {situacao}: {texto}")
-    log("        aptidão com a data do texto: recusada, só consultar_servidor executou, "
-        "mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.")
+    assert executadas == ["consultar_servidor"], executadas
+    if estado == "pendente":
+        assert r.situacao == "entregue" and r.instrucao.recomendacao == "diligencia"
+        assert r.instrucao.valor_total is None
+        textos = " ".join([*(v.detalhe for v in r.instrucao.verificacoes), *r.instrucao.pendencias,
+                           r.instrucao.minuta_despacho])
+        assert "2026-11-20" not in textos and "Informar a data de retorno" in textos, textos
+        destino = "diligência entregue sem a data nos fundamentos, pendências e minuta"
+    else:
+        assert r.situacao == "recusada", r.situacao
+        assert any("ambígua" in m for m in r.motivo), r.motivo
+        destino = "análise manual (mensagem padrão), também com a resposta de diligência"
+    assert not com_merito(conteudo_do_banco(banco))
+    log(f"    {'eventos' if progresso else 'direto'}, retorno {estado}: {texto}")
+    log(f"        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito "
+        f"barrado, SQLite sem dado de mérito; {destino}.")
+    apagar_banco(banco)
+
+
+def _item_substituido() -> dict:
+    """O 0111 com o retorno substituído por 2026-11-21, conferido pelas ferramentas reais."""
+    item = copy.deepcopy(esperado("DIA-2026-0111", True))
+    item.update(quantidade_diarias=4.5, valor_total=1260.0)
+    item["trilha"]["calcular_diarias"]["data_retorno"] = "2026-11-21"
+    item["trilha"]["consultar_historico_diarias"]["quantidade_pedida"] = 4.5
+    item["trilha"]["consultar_saldo_diarias"]["valor"] = 1260.0
+    return item
+
+
+def cenario_substituicao_legitima(progresso: bool) -> None:
+    """Controle: data cancelada e substituída por outra confirmada segue para o mérito."""
+    numero = "DIA-2026-0111"
+    texto = "O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-21."
+    complemento = dict(COMPLEMENTOS[numero], texto=texto)
+    banco = pathlib.Path(tempfile.mkdtemp(prefix="substituicao_")) / "agente.db"
+    modelo = ModeloRoteirizado()
+    agente = agente_interceptado(banco, modelo)
+    rodar("diligência inicial", banco, modelo, agente, numero,
+          trilha(numero) + [final(numero)], progresso)
+    item = _item_substituido()
+    ordem = ("consultar_servidor", "calcular_diarias", "consultar_historico_diarias",
+             "consultar_saldo_diarias")
+    passos = [("ferramentas", [(f, item["trilha"][f])]) for f in ordem]
+    passos.append(("final", instrucao_correta(item, consultas_corretas(item)).model_dump_json()))
+    r, executadas, _ = rodar("substituição legítima", banco, modelo, agente, numero, passos,
+                            progresso, complemento=complemento)
+    assert r.situacao == "entregue" and executadas == list(ordem), (r.motivo, executadas)
+    assert (r.instrucao.recomendacao, r.instrucao.quantidade_diarias, r.instrucao.valor_total) == (
+        "apto_para_autorizacao", 4.5, 1260.0)
+    textos = " ".join([*(v.detalhe for v in r.instrucao.verificacoes), r.instrucao.minuta_despacho])
+    assert "2026-11-21" in textos and "2026-11-20" not in textos, textos
+    # A mesma substituição com a data cancelada nos argumentos é barrada.
+    rodar("diligência inicial", banco, modelo, agente, numero,
+          trilha(numero) + [final(numero)], progresso)
+    r, executadas, _ = rodar("data cancelada nos argumentos", banco, modelo, agente, numero,
+                            trilha(numero, True) + [final(numero, True)], progresso,
+                            complemento=complemento)
+    assert r.situacao == "recusada" and "calcular_diarias" not in executadas, executadas
+    log(f"    {'eventos' if progresso else 'direto'}: «{texto}»")
+    log("        quatro consultas com 2026-11-21, apto com 4,5 diárias e R$ 1.260,00, sem "
+        "2026-11-20 nos textos; com 2026-11-20 nos argumentos, o cálculo é barrado.")
     apagar_banco(banco)
 
 
@@ -478,10 +539,13 @@ def main() -> None:
     for progresso in (False, True):
         for variacao in (0, 1):
             cenario_argumentos(progresso, variacao)
-    log("\n[6] Complementações com data cancelada, negada ou condicional, pela entrada normal")
-    for situacao, texto in COMPLEMENTACOES_SEM_DATA_VIGENTE:
+    log("\n[6] Complementações sem data vigente (pendente ou ambígua), pela entrada normal")
+    for estado, texto in COMPLEMENTACOES_SEM_DATA_VIGENTE:
         for progresso in (False, True):
-            cenario_complementacao_negada(progresso, situacao, texto)
+            cenario_complementacao_negada(progresso, estado, texto)
+    log("\n[6b] Controle: data substituída por outra confirmada")
+    for progresso in (False, True):
+        cenario_substituicao_legitima(progresso)
     cenario_acervo()
     cenario_falhas_controladas()
     log("\nTodas as verificações da guarda das ferramentas passaram.")

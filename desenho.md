@@ -51,22 +51,34 @@ modelo, ao banco nem ao formulário, e a barreira (passo 7) ainda recusa a instr
 Na diligência, a complementação é enviada **na mesma sessão** (`session_id` = número do
 pedido) e o agente recupera o caso pelo histórico (Aula 07, 2).
 
-O código lê a complementação antes de qualquer consulta (`barreira.ler_complementacao`),
-e a guarda e a barreira usam a mesma leitura. Uma data só preenche o campo com
-**confirmação inequívoca do valor vigente**. As orações são lidas em ordem, e cada uma
-muda a situação do campo a que se refere pelo rótulo, pelo valor citado ou por
-referência anafórica ("essa previsão", "ela", "isso"). Valem duas situações: a data
-**confirmada** ("o retorno está previsto para 2026-11-20") e a **substituída** (nova data
-afirmada no lugar de outra cancelada ou negada). As demais deixam o campo pendente, e o
-pedido segue em diligência, sem consulta de mérito (art. 9º):
+O código lê a complementação inteira antes de qualquer consulta
+(`barreira.ler_complementacao`), e a guarda das ferramentas e a barreira usam a mesma
+leitura. Cada campo tocado termina em um de três estados:
 
-- **cancelada:** "Essa previsão foi cancelada.";
-- **negada:** "O retorno não será em 2026-11-20.";
-- **condicional:** "Isso depende da liberação do veículo.";
-- **indefinida:** "a definir", ou uma mudança anunciada sem a nova data.
+- **CONFIRMADO:** valor afirmado de forma reconhecida, que nenhuma outra oração cancela,
+  nega, condiciona ou torna ambíguo. Só esse valor entra no pedido vigente e alimenta o
+  cálculo, o histórico e o saldo.
+- **PENDENTE:** cancelado, negado, condicionado ou indefinido, sem novo valor
+  confirmado. O pedido segue em diligência, sem consulta de mérito (art. 9º).
+- **AMBÍGUO:** o texto não permite decidir o valor vigente, e o pedido vai à análise
+  manual.
 
-Dois valores afirmados para o mesmo campo, sem substituição, ou uma ressalva que não
-se consegue atribuir a um campo vão para a análise manual.
+A leitura **falha fechada**. O vocabulário reconhecido só decide entre PENDENTE e
+CONFIRMADO, e uma oração que menciona o campo sem ser entendida deixa-o AMBÍGUO. Uma
+oração se liga ao campo pelo rótulo, pelo valor citado, por expressão referencial
+("essa", "ela", "isso", "a data"), por um nome que abrange as datas ("viagem") ou por
+elipse. Uma ressalva sem valor recai sobre os antecedentes que o texto oferece:
+
+- **um antecedente:** o campo fica PENDENTE;
+- **mais de um:** fica AMBÍGUO. A data "remarcada" pressupõe a anterior, e por isso
+  «Essa nova data foi cancelada» tem dois antecedentes possíveis.
+
+Nenhuma palavra solta escolhe o antecedente. Uma oração sem vínculo com os campos trata
+de outro assunto («A reunião com a prefeitura foi cancelada») e não invalida a data.
+Quando o texto livre não basta, o formulário aceita uma **confirmação explícita do
+campo** junto com a complementação. Ela vale se o texto não tiver cancelado aquele
+valor, nem o deixado ambíguo, nem confirmado outro. As regras completas e os limites
+estão no comentário de `barreira.ler_complementacao` e no `CORRECOES.md`.
 
 O modelo **não calcula nada**: antecedência, quantidade, valor, soma do mês, prazo da
 prestação e comparação com o saldo saem prontos das ferramentas (Aula 06, 1: "falta de

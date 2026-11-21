@@ -43,23 +43,41 @@
     eventos, variante 1: 4 tentativas barradas e 4 consultas válidas entregues.
     eventos, variante 2: 4 tentativas barradas e 4 consultas válidas entregues.
 
-[6] Complementações com data cancelada, negada ou condicional, pela entrada normal
-    direto, data cancelada: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    eventos, data cancelada: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    direto, data cancelada: O retorno está previsto para 2026-11-20. Ela foi cancelada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    eventos, data cancelada: O retorno está previsto para 2026-11-20. Ela foi cancelada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    direto, data negada: O retorno não será em 2026-11-20. A data ainda será informada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    eventos, data negada: O retorno não será em 2026-11-20. A data ainda será informada.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    direto, data condicional: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
-    eventos, data condicional: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
-        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado; diligência entregue sem a data nos fundamentos, pendências e minuta.
+[6] Complementações sem data vigente (pendente ou ambígua), pela entrada normal
+    direto, retorno pendente: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, retorno pendente: O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, retorno pendente: O retorno está previsto para 2026-11-20. Ela foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, retorno pendente: O retorno está previsto para 2026-11-20. Ela foi cancelada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, retorno pendente: O retorno não será em 2026-11-20. A data ainda será informada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, retorno pendente: O retorno não será em 2026-11-20. A data ainda será informada.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, retorno pendente: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, retorno pendente: O retorno está previsto para 2026-11-20. Isso depende da liberação do veículo.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, retorno ambiguo: O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; análise manual (mensagem padrão), também com a resposta de diligência.
+    eventos, retorno ambiguo: O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; análise manual (mensagem padrão), também com a resposta de diligência.
+    direto, retorno pendente: O retorno foi remarcado para 2026-11-20. O retorno em 2026-11-20 foi cancelado.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    eventos, retorno pendente: O retorno foi remarcado para 2026-11-20. O retorno em 2026-11-20 foi cancelado.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; diligência entregue sem a data nos fundamentos, pendências e minuta.
+    direto, retorno ambiguo: O retorno está previsto para 2026-11-20. Essa nova data caiu.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; análise manual (mensagem padrão), também com a resposta de diligência.
+    eventos, retorno ambiguo: O retorno está previsto para 2026-11-20. Essa nova data caiu.
+        aptidão com a data do texto: recusada, só consultar_servidor executou, mérito barrado, SQLite sem dado de mérito; análise manual (mensagem padrão), também com a resposta de diligência.
+
+[6b] Controle: data substituída por outra confirmada
+    direto: «O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-21.»
+        quatro consultas com 2026-11-21, apto com 4,5 diárias e R$ 1.260,00, sem 2026-11-20 nos textos; com 2026-11-20 nos argumentos, o cálculo é barrado.
+    eventos: «O retorno em 2026-11-20 foi cancelado. O retorno foi remarcado para 2026-11-21.»
+        quatro consultas com 2026-11-21, apto com 4,5 diárias e R$ 1.260,00, sem 2026-11-20 nos textos; com 2026-11-20 nos argumentos, o cálculo é barrado.
 
 [7] Cobertura local de 12 pedidos e duas complementações, sem uso do provedor
     paralelas desligadas, rodada 1: 14/14.

@@ -31,6 +31,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from barreira import CAMPOS_CONFIRMAVEIS, ROTULOS_CAMPOS
 from eliminacao import eliminar_titular, validar_titular
 from instrutor import BANCO_PADRAO, MENSAGEM_PADRAO, Resultado, construir_agente, instruir
 
@@ -200,9 +201,21 @@ with aba_instrucao:
                     texto = st.text_area("Texto da complementação", value=sugerido.get("texto", ""))
                     data = st.text_input("Data de recebimento (AAAA-MM-DD)",
                                          value=sugerido.get("data", ""))
+                    # Confirmação explícita do campo (barreira.ler_complementacao,
+                    # regra 6): para quando o texto livre não confirma o valor sem
+                    # ambiguidade. O texto continua sendo a complementação enviada.
+                    col_campo, col_valor = st.columns(2)
+                    campo_confirmado = col_campo.selectbox(
+                        "Confirmar um campo (opcional)", ["—", *CAMPOS_CONFIRMAVEIS],
+                        format_func=lambda c: ROTULOS_CAMPOS.get(c, c))
+                    valor_confirmado = col_valor.text_input(
+                        "Valor confirmado do campo", placeholder="AAAA-MM-DD ou matrícula")
                     enviar = st.form_submit_button("Enviar complementação", type="primary")
                 if enviar and texto.strip():
-                    executar(pedido, {"numero": pedido["numero"], "data": data, "texto": texto})
+                    complemento = {"numero": pedido["numero"], "data": data, "texto": texto}
+                    if campo_confirmado != "—" and valor_confirmado.strip():
+                        complemento["campos"] = {campo_confirmado: valor_confirmado.strip()}
+                    executar(pedido, complemento)
                     st.rerun()
 
         m = resultado.medidas

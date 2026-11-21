@@ -302,8 +302,11 @@ def texto_do_pedido(pedido: dict) -> str:
 
 
 def texto_da_complementacao(complemento: dict) -> str:
+    campos = "".join(f"Campo confirmado explicitamente pelo solicitante: "
+                     f"{ROTULOS_CAMPOS.get(c, c)} = {v}.\n"
+                     for c, v in (complemento.get("campos") or {}).items())
     return (f"Complementação ao pedido {complemento['numero']}, recebida em "
-            f"{complemento['data']}: \"{complemento['texto']}\"\n"
+            f"{complemento['data']}: \"{complemento['texto']}\"\n{campos}"
             f"Refaça a instrução completa do pedido {complemento['numero']} com esta correção.")
 
 

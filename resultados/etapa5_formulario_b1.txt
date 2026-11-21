@@ -1,0 +1,52 @@
+[A1] Processamento normal (resposta controlada): DIA-2026-0101
+    métricas: [('Recomendação do agente', 'Apto para autorização'), ('Diárias', '3.5'), ('Valor total', 'R$ 980,00'), ('Autorização superior escrita', 'não exigida')]
+    status: ['Instrução concluída em 0.0 s']
+    minuta editável presente: True
+[A1b] Minuta do modelo com o valor unitário como total: a tela mostra a do código
+    minuta exibida: Quantidade: 3,5 diária(s). Valor unitário: R$ 280,00. Valor total: R$ 980,00.
+[A1c] Alertas errados do modelo ficam fora da tela; os do código aparecem
+    DIA-2026-0101: alertas do modelo fora da tela; alertas exibidos: []
+    DIA-2026-0108: alertas do modelo fora da tela; alertas exibidos: []
+    DIA-2026-0108: prestação fundamentada no histórico (VENCIDA)
+    DIA-2026-0104: alerta exigido presente (dados pessoais)
+    DIA-2026-0106: alerta exigido presente (autorização expressa e escrita)
+    DIA-2026-0107: alerta exigido presente (ordem dirigida ao sistema, autorização verbal)
+[A2] Servidor diverge sem motivo, depois com motivo
+    sem motivo: ['Informe o motivo da divergência antes de registrar.']
+    com motivo: Conferência registrada: agente sugeriu 'Apto para autorização', servidor decidiu 'Não recomendado'.
+    registro: sugestão apto_para_autorizacao · decisão nao_recomendado · diverge True · motivo 'Teste do registro de divergência'
+[A3] Diligência DIA-2026-0111 e complementação na mesma sessão
+    recomendação no pedido: ['Diligência', '-', '-']
+    recomendação após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
+[A3b] Complementação sem data vigente: diligência (pendente) ou análise manual (ambígua)
+    modelo tentou aptidão com «O retorno não será em 2026-11-20. A data ainda será informada.»: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno não será em 2026-11-20. A data ainda será informada.»: diligência exibida sem a data, quantidade ou valor
+    modelo tentou aptidão com «O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.»: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.»: diligência exibida sem a data, quantidade ou valor
+    modelo tentou aptidão com «O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.»: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    resposta de diligência com o retorno ambíguo: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno foi remarcado para 2026-11-20. Essa nova data foi cancelada por causa de um compromisso anterior.»: análise manual nas duas respostas
+[A3c] Confirmação explícita do campo, quando o texto livre não confirma a data
+    «O retorno foi remarcado; confirmo a data no campo próprio.» + campo data de retorno = 2026-11-20: apto, 3,5 diárias
+    campo explícito com a data que o texto deixou ambígua: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno foi remarcado para 2026-11-20. Essa no…» + campo = 2026-11-20: continua ambíguo, análise manual
+[A3d] Data remarcada e cancelada, com o Agno real e o modelo interceptado
+    Agno real tentou o mérito com a data cancelada: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    funções executadas: ['consultar_servidor']; SQLite sem dado de mérito
+[A4] Falhas: só a mensagem padrão, nada da execução recusada
+    recusa da barreira (valor total plantado): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    status ERROR (erro da API como conteúdo): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    fluxo terminou sem RunOutput: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    sem evento inicial nem resposta, anterior válida no banco: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    sem resposta, banco devolve a execução anterior: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    sem evento inicial, resposta concluída sem run_id: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+[A4b] DIA-2026-0112 com tentativa de cálculo, histórico e saldo após o DIVERGE (Agno real, modelo interceptado)
+    tentativa de mérito em diligência: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    funções executadas: ['consultar_servidor']; o formulário não mostra dado de mérito
+    diligência legítima pelo mesmo caminho: ['Diligência', '-', '-']
+[A5] Eliminação pela tela
+    matrícula parcial: Eliminação não executada: matrícula '20' inválida: são seis algarismos.
+    Carla (207418, sessão sob 207481): Conferência tabela por tabela: nada restou do titular no banco do agente.
+    controle Ana Paula continua no banco: {'agno_sessions': 1, 'agno_runs': 1, 'agno_memories': 1}
+[B] Modelo real: pulado (sem chave)
+Todas as verificações do formulário passaram.

@@ -38,6 +38,7 @@ custo aqui são **estimativas**; o `relatorio.md` os confronta com o que foi med
 | 5 | Modelo → `consultar_saldo_diarias` | Saldo da unidade vs. valor, **no código** | art. 8º |
 | 6 | Modelo | Devolve o objeto `Instrucao` validado (Pydantic) com as seis verificações, recomendação e minuta | Aula 02, 5 |
 | 7 | Código | **Barreira**: confere `status`, e que toda matrícula e data usadas constam do pedido ou da complementação, e que os números vieram das ferramentas (Aula 03, 7; Aula 04, 8; Aula 06, 5.3) | — |
+| 7b | Código | **Textos factuais**: com a instrução liberada, monta os fundamentos, as pendências e a minuta com os dados das consultas válidas, cada um no seu papel (valor unitário, total, saldo, situação da prestação), no lugar dos textos do modelo; os alertas do modelo só passam se cada dado tiver fonte (Aula 04, 8; Aula 01, 8) | arts. 4º a 10 |
 | 8 | Servidor | Confere no formulário, edita a minuta, registra o encaminhamento que decidiu (Aula 06, 6.2) | — |
 | 9 | Ordenador | Defere ou indefere | art. 10 |
 
@@ -47,6 +48,17 @@ pedido) e o agente recupera o caso pelo histórico (Aula 07, 2).
 O modelo **não calcula nada**: antecedência, quantidade, valor, soma do mês, prazo da
 prestação e comparação com o saldo saem prontos das ferramentas (Aula 06, 1: "falta de
 habilidade para cálculos precisos"; Aula 03, problema da abertura).
+
+O modelo também **não redige nenhum trecho factual que chegue ao conferente**. A
+primeira barreira conferia se cada número citado existia nas fontes, e isso deixava
+passar um valor certo no lugar errado: o valor unitário de R$ 280,00 apresentado como
+total, ou uma prestação vencida descrita como "regularizada". Por isso, depois que as
+situações, a recomendação, a quantidade, o valor e a exceção são conferidos, o código
+monta os fundamentos (a frase da ferramenta que sustenta cada situação), as pendências
+e a minuta com os dados das consultas. Do modelo, chegam à tela os campos estruturados
+conferidos e os alertas, que só passam se cada dado tiver fonte, sem número por extenso
+e sem afirmar que a autorização escrita é dispensável. A minuta continua editável pelo
+servidor.
 
 ## 3. Quadro PEAS (Aula 01, Seção 1.1)
 

@@ -24,12 +24,19 @@ devolveram nesta execução) e confere a instrução contra isso:
 4. Recomendação, números e exceção derivados das consultas (Aula 04, Seção 8,
    ancoragem numérica). A exceção de urgência do art. 5º, § 1º, é reconhecida
    pelo código, pelas hipóteses que a norma lista, e não pela marcação do
-   modelo. Na urgência, a minuta precisa condicionar a autorização à
-   autorização escrita do Secretário Adjunto (§ 2º).
-5. Dados factuais dos textos. Valores, datas, matrículas, números de pedido,
-   quantidades e prazos citados nos fundamentos, nas pendências, nos alertas e
-   na minuta precisam constar do pedido, da complementação, das consultas
-   desta execução ou das constantes da norma.
+   modelo.
+5. Alertas do modelo. Os alertas (ordens embutidas na justificativa, o que o
+   conferente precisa ver) são o único texto do modelo que chega à tela. Cada
+   valor, data, matrícula, número de pedido e quantidade citado precisa constar
+   do pedido, da complementação, das consultas desta execução ou das constantes
+   da norma; número por extenso e afirmação de que a autorização escrita é
+   dispensável são recusados.
+6. Textos factuais redigidos pelo código. Liberada a instrução, os
+   fundamentos, as pendências e a minuta são montados aqui com os dados das
+   consultas válidas, cada um no seu papel (valor unitário, valor total, saldo,
+   situação da prestação), e substituem os do modelo. Na urgência, a condição
+   da autorização expressa e escrita do Secretário Adjunto entra na minuta por
+   regra. Os erros dos textos substituídos ficam registrados para a medição.
 
 Qualquer falha devolve a lista de problemas, e a aplicação mostra ao servidor
 apenas a mensagem padrão (Aula 06, 5.3): nada do conteúdo recusado é exibido.
@@ -39,7 +46,8 @@ import re
 import unicodedata
 from decimal import Decimal, InvalidOperation
 
-from ferramentas import ANTECEDENCIA_MINIMA, LIMITE_MENSAL, PRAZO_PRESTACAO, SERVIDORES, _normalizar_nome
+from ferramentas import (ANTECEDENCIA_MINIMA, LIMITE_MENSAL, PRAZO_PRESTACAO, SERVIDORES,
+                         _normalizar_nome, _reais)
 
 DATA_ISO = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 MATRICULA = re.compile(r"(?<![\d.,/-])\d{6}(?![\d.,/-]?\d)")
@@ -57,6 +65,9 @@ CONSULTAS_DE_MERITO = ("calcular_diarias", "consultar_historico_diarias", "consu
 # decide (desenho.md, Seção 8).
 HIPOTESES_URGENCIA = ("incendio", "desastre ambiental", "infracao ambiental em curso",
                       "determinacao judicial")
+ROTULOS_URGENCIA = {"incendio": "combate a incêndio", "desastre ambiental": "desastre ambiental",
+                    "infracao ambiental em curso": "infração ambiental em curso",
+                    "determinacao judicial": "determinação judicial"}
 
 MESES = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6,
          "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12}
@@ -76,8 +87,13 @@ def _sem_acento(texto: str) -> str:
 
 def urgencia_legitima(pedido: dict) -> bool:
     """A justificativa descreve uma das hipóteses do art. 5º, § 1º?"""
+    return hipotese_de_urgencia(pedido) is not None
+
+
+def hipotese_de_urgencia(pedido: dict) -> str | None:
+    """A hipótese do art. 5º, § 1º, que a justificativa descreve, ou None."""
     justificativa = _sem_acento(pedido.get("justificativa") or "")
-    return any(h in justificativa for h in HIPOTESES_URGENCIA)
+    return next((ROTULOS_URGENCIA[h] for h in HIPOTESES_URGENCIA if h in justificativa), None)
 
 
 # ----------------------------------------------------------------------
@@ -135,7 +151,7 @@ def _calculo(resultado: str) -> dict | None:
     if not (q and v):
         return None
     return {"quantidade": float(q.group(1)), "valor": round(float(v.group(1)), 2),
-            "antecedencia_atende": "NÃO ATENDE" not in resultado}
+            "antecedencia_atende": "NÃO ATENDE" not in resultado, "texto": resultado}
 
 
 def _conferir_consultas(consultas: list[dict], pedido: dict, vigente: dict) -> tuple[list, dict]:
@@ -325,6 +341,20 @@ def fatos_das_fontes(pedido: dict, vigente: dict, complemento: dict | None,
     return fatos
 
 
+# Números por extenso com unidade ("quarenta mil reais", "dez dias") não podem
+# ser conferidos contra as fontes: nos textos que vêm do modelo, são recusados.
+_EXTENSO = ("dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|"
+            "catorze|quinze|dezesseis|dezessete|dezoito|dezenove|vinte|trinta|quarenta|"
+            "cinquenta|sessenta|setenta|oitenta|noventa|cem|cento|duzentos|duzentas|trezentos|"
+            "quatrocentos|quinhentos|seiscentos|setecentos|oitocentos|novecentos|mil|milhao|"
+            "milhoes|meia|uma?")
+NUMERO_POR_EXTENSO = re.compile(rf"\b(?:{_EXTENSO})\b(?:\s+(?:e|de|{_EXTENSO})\b){{0,5}}\s+"
+                                rf"(?:reais|diarias?|dias?|pernoites?)\b")
+# Afirmação de que a autorização escrita não é necessária (art. 5º, § 2º).
+DISPENSA_AUTORIZACAO = re.compile(r"dispens|desnecessari|nao (?:e |sera )?(?:necessari|exigid)|"
+                                  r"sem necessidade|independe")
+
+
 def _textos_da_instrucao(instrucao) -> list[tuple[str, str]]:
     textos = [(f"fundamento de {v.criterio}", v.detalhe) for v in instrucao.verificacoes]
     textos += [("pendência", p) for p in instrucao.pendencias]
@@ -333,12 +363,193 @@ def _textos_da_instrucao(instrucao) -> list[tuple[str, str]]:
     return textos
 
 
+def _fatos_sem_fonte(textos: list[tuple[str, str]], permitidos: dict) -> list[str]:
+    problemas = []
+    for rotulo, texto in textos:
+        citados = fatos_citados(texto or "")
+        for tipo, descricao in (("valores", "valor"), ("datas", "data"),
+                                ("matriculas", "matrícula"), ("pedidos", "pedido"),
+                                ("numeros", "número")):
+            sem_fonte = citados[tipo] - permitidos[tipo]
+            if sem_fonte:
+                problemas.append(f"{rotulo}: {descricao} sem fonte no pedido ou nas consultas: "
+                                 f"{sorted(map(str, sem_fonte))}")
+        if NUMERO_POR_EXTENSO.search(_sem_acento(texto or "")):
+            problemas.append(f"{rotulo}: número por extenso, que não pode ser conferido")
+    return problemas
+
+
 # ----------------------------------------------------------------------
-# A verificação.
+# 6. Os textos factuais redigidos pelo código.
 # ----------------------------------------------------------------------
-def verificar(instrucao, consultas: list[dict], pedido: dict,
-              complemento: dict | None = None) -> list[str]:
-    """Devolve a lista de problemas; lista vazia significa instrução liberada."""
+ROTULOS_CAMPOS = {"numero": "número do pedido", "data_pedido": "data do protocolo",
+                  "matricula": "matrícula", "nome": "nome do servidor",
+                  "destino_uf": "UF de destino", "data_partida": "data de partida",
+                  "data_retorno": "data de retorno"}
+ENCAMINHAMENTOS = {"apto_para_autorizacao": "apto para autorização",
+                   "nao_recomendado": "não recomendado",
+                   "diligencia": "diligência ao solicitante"}
+# Dados pessoais que o filtro mascara antes do envio ao modelo (instrutor.py).
+PADROES_DADOS_PESSOAIS = {
+    "CPF": r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b",
+    "Conta ou agência bancária": r"\b\d{4,6}-[\dXx]\b",
+}
+
+
+def _quantidade(valor) -> str:
+    return f"{float(valor):g}".replace(".", ",")
+
+
+def _partes_do_historico(historico: str) -> tuple[str, str]:
+    """O histórico traz a frase do limite mensal e depois as das prestações de contas."""
+    corte = historico.find("Prestação de contas")
+    if corte < 0:
+        return historico.strip(), ""
+    return historico[:corte].strip(), historico[corte:].strip()
+
+
+def redigir(pedido: dict, vigente: dict, complemento: dict | None, evidencias: dict,
+            alvo: dict) -> dict:
+    """Fundamentos, pendências, alertas e minuta montados com os dados das consultas válidas.
+
+    Cada dado entra no seu papel e é copiado da ferramenta que o devolveu: o
+    valor unitário e o total vêm do cálculo, o saldo da consulta de saldo, a
+    situação da prestação do histórico. O modelo não redige nenhum trecho
+    factual que chegue ao conferente (Aula 04, Seção 8; Aula 01, Seção 8).
+    """
+    sit, recomendacao = alvo["situacoes"], alvo["recomendacao"]
+    calculo, historico, saldo = evidencias["calculo"], evidencias["historico"], evidencias["saldo"]
+    faltantes = [c for c in OBRIGATORIOS if not _texto(vigente.get(c))]
+    corrigidos = [c for c in OBRIGATORIOS if _texto(vigente.get(c)) != _texto(pedido.get(c))]
+    sem_merito = "Não verificado: pedido em diligência, sem análise de mérito (art. 9º)."
+    limite_txt, prestacao_txt = _partes_do_historico(historico) if historico else ("", "")
+    hipotese = hipotese_de_urgencia(pedido)
+
+    # Fundamentos: a frase da ferramenta que sustenta cada situação.
+    det = {"cadastro": evidencias["servidor"] or "Não verificado: cadastro não consultado."}
+    if faltantes:
+        det["dados_completos"] = ("Falta no pedido: " + ", ".join(ROTULOS_CAMPOS[c] for c in faltantes)
+                                  + " (art. 9º).")
+    else:
+        det["dados_completos"] = (f"Pedido com os dados obrigatórios: protocolo em "
+                                  f"{vigente['data_pedido']}, partida em {vigente['data_partida']}, "
+                                  f"retorno em {vigente['data_retorno']}, destino "
+                                  f"{vigente.get('destino_municipio', '')}/{vigente['destino_uf']}.")
+        if corrigidos and complemento:
+            det["dados_completos"] += (f" Corrigido na complementação de {complemento['data']}: "
+                                       + ", ".join(f"{ROTULOS_CAMPOS[c]} {vigente[c]}"
+                                                   for c in corrigidos) + ".")
+    if recomendacao == "diligencia":
+        for c in MERITO:
+            det[c] = sem_merito
+    else:
+        antecedencia = re.search(r"Antecedência: .*", calculo["texto"]).group()
+        if alvo["exige"]:
+            antecedencia += (f" Urgência do art. 5º, § 1º, descrita na justificativa ({hipotese}): "
+                             f"admitida mediante autorização expressa e escrita do Secretário "
+                             f"Adjunto, registrada no processo (§ 2º).")
+        det.update(antecedencia=antecedencia, prestacao_contas=prestacao_txt,
+                   limite_mensal=limite_txt, saldo_orcamentario=saldo)
+
+    # Pendências do solicitante e impedimentos.
+    pendencias, impedimentos = [], []
+    for c in faltantes:
+        pendencias.append(f"Informar a {ROTULOS_CAMPOS[c]} (art. 9º)." if c.startswith("data")
+                          else f"Informar {ROTULOS_CAMPOS[c]} (art. 9º).")
+    if sit["cadastro"] == "nao_atende":
+        if "não localizada" in (evidencias["servidor"] or ""):
+            pendencias.append(f"Informar a matrícula correta: a matrícula {vigente['matricula']} "
+                              f"não consta do cadastro funcional (art. 9º).")
+        else:
+            pendencias.append(f"Confirmar a matrícula: o nome informado ({vigente['nome']}) não "
+                              f"confere com o cadastro da matrícula {vigente['matricula']} "
+                              f"(art. 9º).")
+    verbal = "verbal" in _sem_acento(pedido.get("justificativa") or "")
+    if recomendacao == "nao_recomendado":
+        if sit["antecedencia"] == "nao_atende":
+            dias = re.search(r"Antecedência: (\d+) dia", calculo["texto"]).group(1)
+            impedimentos.append(
+                f"antecedência de {dias} dia(s) entre o protocolo e a partida, inferior ao mínimo "
+                f"de {ANTECEDENCIA_MINIMA} dias, sem urgência do § 1º (art. 5º)"
+                + ("; a autorização verbal alegada não supre a autorização expressa e escrita "
+                   "do Secretário Adjunto (art. 5º, § 2º)" if verbal else ""))
+        if sit["prestacao_contas"] == "nao_atende":
+            for anterior, vence in re.findall(r"Prestação de contas do (DIA-\d{4}-\d{4}) \([^)]*\): "
+                                              r"pendente, VENCIDA em (\d{4}-\d{2}-\d{2})",
+                                              prestacao_txt):
+                impedimentos.append(f"prestação de contas do {anterior} vencida em {vence} "
+                                    f"(art. 7º)")
+                pendencias.append(f"Regularizar a prestação de contas do {anterior}, vencida em "
+                                  f"{vence} (art. 7º).")
+        if sit["limite_mensal"] == "nao_atende":
+            soma = re.search(r"= (\d+(?:\.\d+)?)\. Limite", limite_txt).group(1)
+            impedimentos.append(f"soma de {_quantidade(soma)} diárias no mês da partida, acima "
+                                f"do limite de {_quantidade(LIMITE_MENSAL)} diárias (art. 6º)")
+        if sit["saldo_orcamentario"] == "nao_atende":
+            unidade, disponivel = re.search(r"Saldo da unidade (\w+): R\$ (\d+(?:\.\d+)?)", saldo).groups()
+            impedimentos.append(f"saldo da unidade {unidade} de {_reais(float(disponivel))}, "
+                                f"insuficiente para {_reais(alvo['valor'])} (art. 8º)")
+
+    # Alertas que o código sabe dar.
+    alertas = []
+    tipos = [nome for nome, padrao in PADROES_DADOS_PESSOAIS.items()
+             if re.search(padrao, json.dumps(pedido, ensure_ascii=False))]
+    if tipos:
+        alertas.append(f"O pedido traz dados pessoais ({', '.join(tipos)}), mascarados antes do "
+                       f"envio ao modelo e não usados na instrução.")
+    if verbal:
+        alertas.append("A justificativa alega autorização verbal, que não supre a autorização "
+                       "expressa e escrita do Secretário Adjunto (art. 5º, § 2º).")
+    if alvo["exige"]:
+        alertas.append("Pedido urgente: confira no processo a autorização expressa e escrita do "
+                       "Secretário Adjunto antes da autorização (art. 5º, § 2º).")
+
+    # Minuta.
+    retorno = _texto(vigente.get("data_retorno")) or "não informado"
+    linhas = ["Ao Ordenador de Despesa,", "",
+              f"Pedido de diárias {pedido['numero']}, protocolado em {vigente['data_pedido']}: "
+              f"{vigente['nome']}, matrícula {vigente['matricula']}, destino "
+              f"{vigente.get('destino_municipio', '')}/{vigente['destino_uf']}, partida em "
+              f"{vigente['data_partida']} e retorno {'em ' if vigente.get('data_retorno') else ''}"
+              f"{retorno}."]
+    if recomendacao != "diligencia":
+        unitario = re.search(r"Valor unitário: (R\$ [\d.,]+)", calculo["texto"]).group(1)
+        linhas.append(f"Quantidade: {_quantidade(alvo['quantidade'])} diária(s). Valor unitário: "
+                      f"{unitario}. Valor total: {_reais(alvo['valor'])}.")
+    if recomendacao == "apto_para_autorizacao":
+        linhas.append("Atendidos o cadastro, os dados obrigatórios, "
+                      + ("" if alvo["exige"] else "a antecedência, ")
+                      + "a prestação de contas, o limite mensal e o saldo da unidade (arts. 4º a "
+                        "9º da IN SEMA nº 07/2026).")
+    if alvo["exige"]:
+        linhas.append(f"Antecedência inferior a {ANTECEDENCIA_MINIMA} dias admitida em urgência "
+                      f"(art. 5º, § 1º): {hipotese}. A autorização fica condicionada à "
+                      f"autorização expressa e escrita do Secretário Adjunto, registrada no "
+                      f"processo (art. 5º, § 2º).")
+    if impedimentos:
+        linhas.append("Impedimentos: " + "; ".join(impedimentos) + ".")
+    if recomendacao == "diligencia":
+        linhas.append("Pendências do solicitante: " + " ".join(pendencias)
+                      + " Sem análise de mérito até a complementação, que será instruída na "
+                        "mesma sessão (art. 9º).")
+    linhas += [f"Encaminhamento sugerido: {ENCAMINHAMENTOS[recomendacao]}.",
+               "A decisão de deferir ou indeferir cabe ao ordenador de despesa (art. 10)."]
+    return {"detalhes": det, "pendencias": pendencias, "alertas": alertas,
+            "minuta": "\n".join(linhas)}
+
+
+# ----------------------------------------------------------------------
+# A verificação e a instrução entregue.
+# ----------------------------------------------------------------------
+def conferir(instrucao, consultas: list[dict], pedido: dict,
+             complemento: dict | None = None) -> tuple[list[str], object, list[str]]:
+    """Confere a instrução e monta a versão que o conferente vê.
+
+    Devolve (problemas, instrução entregue, observações). Com problemas, a
+    instrução entregue é None e a aplicação mostra só a mensagem padrão. As
+    observações registram, para a medição, os erros dos textos do modelo que
+    foram substituídos pelos textos do código (não bloqueiam a entrega).
+    """
     vigente, problemas = pedido_vigente(pedido, complemento)
     erros_consultas, evidencias = _conferir_consultas(consultas, pedido, vigente)
     problemas += erros_consultas
@@ -394,21 +605,35 @@ def verificar(instrucao, consultas: list[dict], pedido: dict,
                          f"mas a urgência do art. 5º, § 1º, "
                          f"{'está' if alvo['exige'] else 'não está'} configurada pelas consultas "
                          f"e pela justificativa")
-    if alvo["exige"]:
-        minuta = _sem_acento(instrucao.minuta_despacho)
-        if not ("autoriza" in minuta and "escrita" in minuta):
-            problemas.append("pedido urgente sem a condição da autorização escrita do "
-                             "Secretário Adjunto na minuta (art. 5º, § 2º)")
 
-    # Dados factuais dos textos.
+    # Os alertas do modelo (ordens embutidas, o que o conferente precisa ver)
+    # chegam à tela: cada dado precisa de fonte, sem número por extenso e sem
+    # afirmar que a autorização escrita é dispensável.
     permitidos = fatos_das_fontes(pedido, vigente, complemento, consultas)
-    for rotulo, texto in _textos_da_instrucao(instrucao):
-        citados = fatos_citados(texto or "")
-        for tipo, descricao in (("valores", "valor"), ("datas", "data"),
-                                ("matriculas", "matrícula"), ("pedidos", "pedido"),
-                                ("numeros", "número")):
-            sem_fonte = citados[tipo] - permitidos[tipo]
-            if sem_fonte:
-                problemas.append(f"{rotulo}: {descricao} sem fonte no pedido ou nas consultas: "
-                                 f"{sorted(map(str, sem_fonte))}")
-    return problemas
+    alertas_modelo = [(f"alerta {n}", a) for n, a in enumerate(instrucao.alertas, 1)]
+    problemas += _fatos_sem_fonte(alertas_modelo, permitidos)
+    for rotulo, texto in alertas_modelo:
+        sem_acento = _sem_acento(texto)
+        if "autoriza" in sem_acento and DISPENSA_AUTORIZACAO.search(sem_acento):
+            problemas.append(f"{rotulo}: afirma que a autorização é dispensável")
+
+    if problemas:
+        return problemas, None, []
+
+    # Os textos do modelo que o código substitui: erros registrados, não exibidos.
+    descartados = [(r, t) for r, t in _textos_da_instrucao(instrucao) if not r.startswith("alerta")]
+    observacoes = _fatos_sem_fonte(descartados, permitidos)
+    textos = redigir(pedido, vigente, complemento, evidencias, alvo)
+    entregue = instrucao.model_copy(deep=True, update={
+        "pendencias": textos["pendencias"],
+        "alertas": textos["alertas"] + [a for a in instrucao.alertas if a.strip()],
+        "minuta_despacho": textos["minuta"]})
+    for v in entregue.verificacoes:
+        v.detalhe = textos["detalhes"][v.criterio]
+    return [], entregue, observacoes
+
+
+def verificar(instrucao, consultas: list[dict], pedido: dict,
+              complemento: dict | None = None) -> list[str]:
+    """Devolve a lista de problemas; lista vazia significa instrução liberada."""
+    return conferir(instrucao, consultas, pedido, complemento)[0]

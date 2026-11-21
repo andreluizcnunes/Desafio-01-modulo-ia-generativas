@@ -5,11 +5,12 @@ usaria. O banco do agente e o registro de conferências ficam numa pasta
 temporária: o teste nunca toca o agente.db do formulário em uso.
 
 Parte A (sem chave): o agente é substituído por respostas controladas
-(simulacao.py), com as ferramentas reais. Cobre o processamento normal, o
-registro da divergência humana, a diligência com complementação na mesma
-sessão, a recusa da barreira, o status ERROR, o fluxo que termina sem resposta
-(inclusive sem evento inicial, com uma instrução válida anterior no banco) e a
-eliminação (válida e com identidade inválida).
+(simulacao.py), com as ferramentas reais. Cobre o processamento normal, a
+minuta errada do modelo substituída pela do código, o registro da divergência
+humana, a diligência com complementação na mesma sessão, a recusa da barreira,
+o status ERROR, o fluxo que termina sem resposta (inclusive sem evento
+inicial, com uma instrução válida anterior no banco) e a eliminação (válida e
+com identidade inválida).
 
 Parte B (com chave): o pedido regular e a diligência com complementação pelo
 modelo real, para mostrar o fluxo de ponta a ponta.
@@ -58,9 +59,14 @@ class AgenteComutavel:
         consultas = consultas_corretas(item)
         instrucao = instrucao_correta(item, consultas)
         if self.cena == "recusa":
-            # Valor inventado na minuta: a barreira recusa.
-            instrucao = alterar(instrucao, minuta_despacho=instrucao.minuta_despacho
-                                + " Valor de referência: R$ 1.200,00 (valor plantado).")
+            # Valor inventado num alerta, que iria à tela como veio: a barreira recusa.
+            instrucao = alterar(instrucao, alertas=["Valor de referência: R$ 1.200,00 "
+                                                    "(valor plantado)."])
+        if self.cena == "texto_errado":
+            # Minuta do modelo com o valor unitário no lugar do total: o código
+            # refaz a minuta com os dados do cálculo.
+            instrucao = alterar(instrucao, minuta_despacho="Pedido DIA-2026-0101: valor total "
+                                                           "de R$ 280,00. Apto.")
         modo = self.cena if self.cena in ("erro", "sem_saida", "sem_inicio", "anterior") \
             else "normal"
         return {"modo": modo, "instrucao": instrucao, "consultas": consultas}
@@ -131,6 +137,15 @@ def parte_a() -> None:
     log(f"    status: {[s.label for s in at.status]}")
     log(f"    minuta editável presente: {any('Minuta' in t.label for t in at.text_area)}")
 
+    log("[A1b] Minuta do modelo com o valor unitário como total: a tela mostra a do código")
+    AGENTE.cena = "texto_errado"
+    instruir_pela_tela(at, "DIA-2026-0101")
+    minuta = next(t.value for t in at.text_area if "Minuta" in t.label)
+    assert "valor total de R$ 280,00" not in textos(at) and "Valor total: R$ 980,00" in minuta, minuta
+    log(f"    minuta exibida: {' / '.join(l for l in minuta.splitlines() if 'Valor' in l)}")
+    AGENTE.cena = "normal"
+    instruir_pela_tela(at, "DIA-2026-0101")
+
     log("[A2] Servidor diverge sem motivo, depois com motivo")
     at.radio[0].set_value("nao_recomendado")
     botao(at, "Registrar conferência").click()
@@ -161,7 +176,7 @@ def parte_a() -> None:
 
     log("[A4] Falhas: só a mensagem padrão, nada da execução recusada")
     for cena, rotulo, proibidos in (
-            ("recusa", "recusa da barreira (valor plantado na minuta)", ["1.200", "plantado"]),
+            ("recusa", "recusa da barreira (valor plantado num alerta)", ["1.200", "plantado"]),
             ("erro", "status ERROR (erro da API como conteúdo)", ["Error code"]),
             ("sem_saida", "fluxo terminou sem RunOutput", []),
             ("sem_inicio", "sem evento inicial nem resposta, anterior válida no banco", []),

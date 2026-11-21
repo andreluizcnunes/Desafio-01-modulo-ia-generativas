@@ -23,7 +23,7 @@ Saída: resultados/teste_barreira.txt
 import json
 import pathlib
 
-from barreira import verificar
+from barreira import conferir
 from instrutor import instruir
 from medir import classificar
 from simulacao import (AgenteSimulado, alterar, consulta, consultas_corretas, esperado,
@@ -49,7 +49,12 @@ def caso_correto(numero: str, complementacao: bool = False):
 
 
 def montar_casos() -> list[tuple]:
-    """(rótulo, pedido, complemento, consultas, instrução, deve_recusar, gabarito)."""
+    """(rótulo, pedido, complemento, consultas, instrução, desfecho, gabarito, trecho).
+
+    desfecho: "recusa" (mensagem padrão), "libera" (entregue como veio) ou
+    "corrige" (entregue com os textos factuais refeitos pelo código; `trecho`
+    é o texto errado do modelo, que não pode aparecer na instrução entregue).
+    """
     casos = []
     p101, p106, p107, p108 = (PEDIDOS[n] for n in ("DIA-2026-0101", "DIA-2026-0106",
                                                    "DIA-2026-0107", "DIA-2026-0108"))
@@ -58,7 +63,15 @@ def montar_casos() -> list[tuple]:
 
     # Controle positivo.
     g, k, i = caso_correto("DIA-2026-0101")
-    casos.append(("0101 regular, instrução correta (controle positivo)", p101, None, k, i, False, g))
+    casos.append(("0101 regular, instrução correta (controle positivo)", p101, None, k, i, "libera", g, None))
+    # Controle positivo amplo: a instrução correta de cada pedido e de cada
+    # complementação passa, inclusive nos impedimentos (antecedência, prestação,
+    # limite e saldo), cuja minuta o código monta com os números das consultas.
+    for numero in PEDIDOS:
+        if numero != "DIA-2026-0101":
+            g2, k2, i2 = caso_correto(numero)
+            casos.append((f"{numero[-4:]} correto ({g2['recomendacao']})", PEDIDOS[numero], None,
+                          k2, i2, "libera", g2, None))
 
     # Datas trocadas de papel.
     trocadas = [k[0],
@@ -68,20 +81,42 @@ def montar_casos() -> list[tuple]:
                          data_partida="2026-10-08", quantidade_pedida=35.5),
                 consulta("consultar_saldo_diarias", unidade="CFF", valor=9940.0)]
     casos.append(("0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)", p101, None,
-                  trocadas, alterar(i, quantidade_diarias=35.5, valor_total=9940.0), True, g))
+                  trocadas, alterar(i, quantidade_diarias=35.5, valor_total=9940.0), "recusa", g, None))
     so_historico = [k[0], k[1],
                     consulta("consultar_historico_diarias", matricula="204317",
                              data_partida="2026-10-08", quantidade_pedida=3.5), k[3]]
     casos.append(("0101 com a data de protocolo no lugar da partida, só no histórico", p101, None,
-                  so_historico, i, True, g))
+                  so_historico, i, "recusa", g, None))
 
-    # Fatos inventados nos textos, com os números principais certos.
+    # Textos do modelo com dados errados e os campos estruturados certos: o
+    # código refaz fundamentos, pendências e minuta com as consultas, e o
+    # trecho errado não chega ao conferente.
     inventado = alterar(i)
     inventado.verificacoes[-1].detalhe = "Saldo da unidade CFF: R$ 50.000,00, suficiente."
-    casos.append(("0101 com saldo inventado no fundamento", p101, None, k, inventado, True, g))
+    casos.append(("0101 com saldo inventado no fundamento", p101, None, k, inventado,
+                  "corrige", g, "50.000,00"))
     casos.append(("0101 com valor inventado na minuta", p101, None, k,
                   alterar(i, minuta_despacho=i.minuta_despacho + " Valor de referência: "
-                                                                  "R$ 1.200,00."), True, g))
+                                                                  "R$ 1.200,00."),
+                  "corrige", g, "1.200,00"))
+    casos.append(("0101 com o valor unitário como total na minuta (R$ 280,00)", p101, None, k,
+                  alterar(i, minuta_despacho="Ao ordenador de despesa. Pedido DIA-2026-0101: "
+                                             "3,5 diárias, valor total de R$ 280,00. "
+                                             "Encaminhamento sugerido: apto para autorização."),
+                  "corrige", g, "valor total de R$ 280,00"))
+    casos.append(("0101 com valor por extenso na minuta (quarenta mil reais)", p101, None, k,
+                  alterar(i, minuta_despacho=i.minuta_despacho + " Valor estimado da operação: "
+                                                                  "quarenta mil reais."),
+                  "corrige", g, "quarenta mil reais"))
+    # Os alertas vão à tela como o modelo escreve: são conferidos e recusados.
+    casos.append(("0101 com alerta citando saldo inventado", p101, None, k,
+                  alterar(i, alertas=["Saldo da unidade CFF: R$ 50.000,00."]), "recusa", g, None))
+    casos.append(("0101 com alerta citando valor por extenso", p101, None, k,
+                  alterar(i, alertas=["A viagem custará quarenta mil reais."]), "recusa", g,
+                  None))
+    casos.append(("0101 com alerta legítimo (sem dado sem fonte)", p101, None, k,
+                  alterar(i, alertas=["Conferir a escala da equipe de vistoria."]), "libera", g,
+                  None))
 
     # Consulta obrigatória omitida.
     g, k, i = caso_correto("DIA-2026-0108")
@@ -89,41 +124,53 @@ def montar_casos() -> list[tuple]:
     apto = alterar(i, recomendacao="apto_para_autorizacao",
                    situacoes={"prestacao_contas": "atende"})
     casos.append(("0108 sem a consulta de histórico, marcado apto", p108, None, sem_historico,
-                  apto, True, g))
+                  apto, "recusa", g, None))
     casos.append(("0108 com todas as consultas, marcado apto apesar da VENCIDA", p108, None, k,
-                  apto, True, g))
-    casos.append(("0108 correto: não recomendado pela prestação vencida", p108, None, k, i, False, g))
+                  apto, "recusa", g, None))
+    casos.append(("0108 correto: não recomendado pela prestação vencida", p108, None, k, i, "libera", g, None))
+    regularizada = alterar(i)
+    for v in regularizada.verificacoes:
+        if v.criterio == "prestacao_contas":
+            v.detalhe = "Prestação de contas regularizada e aprovada."
+    casos.append(("0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'",
+                  p108, None, k, regularizada, "corrige", g, "regularizada e aprovada"))
 
     # A exceção de urgência não vem da marcação do modelo.
     g, k, i = caso_correto("DIA-2026-0107")
     casos.append(("0107 com autorização verbal, marcado apto com exige_autorizacao_superior",
                   p107, None, k,
                   alterar(i, recomendacao="apto_para_autorizacao", exige_autorizacao_superior=True,
-                          situacoes={"antecedencia": "atende"}), True, g))
+                          situacoes={"antecedencia": "atende"}), "recusa", g, None))
     casos.append(("0107 não recomendado, mas com exige_autorizacao_superior=true", p107, None, k,
-                  alterar(i, exige_autorizacao_superior=True), True, g))
-    casos.append(("0107 correto: não recomendado, sem exceção", p107, None, k, i, False, g))
+                  alterar(i, exige_autorizacao_superior=True), "recusa", g, None))
+    casos.append(("0107 correto: não recomendado, sem exceção", p107, None, k, i, "libera", g, None))
     g, k, i = caso_correto("DIA-2026-0106")
     casos.append(("0106 urgente correto: apto, autorização escrita na minuta", p106, None, k, i,
-                  False, g))
-    casos.append(("0106 urgente sem a condição da autorização escrita na minuta", p106, None, k,
+                  "libera", g, None))
+    casos.append(("0106 urgente com minuta que dispensa a autorização escrita", p106, None, k,
                   alterar(i, minuta_despacho="Ao ordenador de despesa. Pedido DIA-2026-0106: "
-                                             "apto para autorização."), True, g))
+                                             "apto para autorização; dispensada a autorização "
+                                             "escrita do Secretário Adjunto."),
+                  "corrige", g, "dispensada"))
+    casos.append(("0106 urgente com alerta dizendo que a autorização escrita é dispensável",
+                  p106, None, k,
+                  alterar(i, alertas=["Em incêndio, a autorização escrita é dispensável."]),
+                  "recusa", g, None))
     casos.append(("0106 urgente marcado não recomendado", p106, None, k,
                   alterar(i, recomendacao="nao_recomendado", exige_autorizacao_superior=False,
-                          situacoes={"antecedencia": "nao_atende"}), True, g))
+                          situacoes={"antecedencia": "nao_atende"}), "recusa", g, None))
 
     # Diligências.
     g, k, i = caso_correto("DIA-2026-0111")
-    casos.append(("0111 diligência correta (falta o retorno)", p111, None, k, i, False, g))
+    casos.append(("0111 diligência correta (falta o retorno)", p111, None, k, i, "libera", g, None))
     casos.append(("0111 diligência com quantidade e valor", p111, None, k,
-                  alterar(i, quantidade_diarias=4.5, valor_total=1260.0), True, g))
+                  alterar(i, quantidade_diarias=4.5, valor_total=1260.0), "recusa", g, None))
     casos.append(("0111 diligência correta, mas com tentativa de cálculo sem retorno", p111, None,
                   k + [consulta("calcular_diarias", grupo="A", destino_uf="MT",
                                 data_pedido="2026-10-09", data_partida="2026-11-17",
-                                data_retorno=None)], i, True, g))
+                                data_retorno=None)], i, "recusa", g, None))
     g, k, i = caso_correto("DIA-2026-0112")
-    casos.append(("0112 diligência correta (nome diverge do cadastro)", p112, None, k, i, False, g))
+    casos.append(("0112 diligência correta (nome diverge do cadastro)", p112, None, k, i, "libera", g, None))
     merito_207481 = [consulta("calcular_diarias", grupo="B", destino_uf="MT",
                               data_pedido="2026-10-09", data_partida="2026-11-24",
                               data_retorno="2026-11-27"),
@@ -131,60 +178,79 @@ def montar_casos() -> list[tuple]:
                               data_partida="2026-11-24", quantidade_pedida=3.5),
                      consulta("consultar_saldo_diarias", unidade="CFA", valor=980.0)]
     casos.append(("0112 diligência correta, mas com cálculo, histórico e saldo de 207481", p112,
-                  None, k + merito_207481, i, True, g))
+                  None, k + merito_207481, i, "recusa", g, None))
     casos.append(("0112 calculado para o servidor da matrícula digitada", p112, None,
                   k + merito_207481[:1],
                   alterar(i, recomendacao="apto_para_autorizacao", quantidade_diarias=3.5,
-                          valor_total=980.0), True, g))
+                          valor_total=980.0), "recusa", g, None))
 
     # Complementações.
     g, k, i = caso_correto("DIA-2026-0111", complementacao=True)
-    casos.append(("0111 complementação correta (retorno 2026-11-20)", p111, c111, k, i, False, g))
-    casos.append(("complementação do 0111 aplicada ao 0112", p112, c111, k, i, True,
-                  esperado("DIA-2026-0112")))
+    casos.append(("0111 complementação correta (retorno 2026-11-20)", p111, c111, k, i, "libera", g, None))
+    casos.append(("complementação do 0111 aplicada ao 0112", p112, c111, k, i, "recusa",
+                  esperado("DIA-2026-0112"), None))
     g, k, i = caso_correto("DIA-2026-0112", complementacao=True)
-    casos.append(("0112 complementação correta (matrícula 207418)", p112, c112, k, i, False, g))
+    casos.append(("0112 complementação correta (matrícula 207418)", p112, c112, k, i, "libera", g, None))
     historico_errado = [c if c["ferramenta"] != "consultar_historico_diarias" else
                         consulta("consultar_historico_diarias", matricula="207481",
                                  data_partida="2026-11-24", quantidade_pedida=3.5) for c in k]
     casos.append(("0112 complementação com o histórico da matrícula digitada 207481", p112, c112,
-                  historico_errado, i, True, g))
+                  historico_errado, i, "recusa", g, None))
     return casos
+
+
+def _textos(instrucao) -> str:
+    return "\n".join([v.detalhe for v in instrucao.verificacoes] + instrucao.pendencias
+                     + instrucao.alertas + [instrucao.minuta_despacho])
 
 
 def parte1_barreira(casos) -> None:
     log("[1] Barreira com respostas controladas (ferramentas reais, modelo simulado)")
-    for rotulo, pedido, compl, consultas, instrucao, deve_recusar, _ in casos:
-        problemas = verificar(instrucao, consultas, pedido, compl)
-        assert bool(problemas) == deve_recusar, (rotulo, problemas)
-        log(f"    {rotulo:78} -> {'RECUSADA' if problemas else 'liberada'}")
+    for rotulo, pedido, compl, consultas, instrucao, desfecho, _, trecho in casos:
+        problemas, entregue, substituidos = conferir(instrucao, consultas, pedido, compl)
+        assert bool(problemas) == (desfecho == "recusa"), (rotulo, problemas)
+        if desfecho == "corrige":
+            assert trecho in _textos(instrucao) and trecho not in _textos(entregue), rotulo
+        if entregue is not None and trecho is None:
+            assert not substituidos, (rotulo, substituidos)
+        rotulo_saida = {"recusa": "RECUSADA", "libera": "liberada",
+                        "corrige": "liberada com os textos do código"}[desfecho]
+        log(f"    {rotulo:78} -> {rotulo_saida}")
         for p in problemas:
             log(f"        · {p}")
+        if desfecho == "corrige":
+            log(f"        · trecho do modelo fora da instrução entregue: {trecho!r}"
+                + (f"; registrado: {substituidos[0]}" if substituidos else ""))
 
 
 def parte2_instruir_e_medir(casos) -> None:
     log("\n[2] Os mesmos casos por instruir() e pelo classificador da medição")
-    for rotulo, pedido, compl, consultas, instrucao, deve_recusar, gab in casos:
+    for rotulo, pedido, compl, consultas, instrucao, desfecho, gab, trecho in casos:
         agente = AgenteSimulado(lambda *_: {"modo": "normal", "instrucao": instrucao,
                                             "consultas": consultas})
         r = instruir(pedido, agente, complemento=compl)
         classe, diferencas = classificar(r, gab)
-        assert r.situacao == ("recusada" if deve_recusar else "entregue"), (rotulo, r.motivo)
-        if deve_recusar:
+        assert r.situacao == ("recusada" if desfecho == "recusa" else "entregue"), (rotulo, r.motivo)
+        if desfecho == "recusa":
             assert classe == "recusado", (rotulo, classe)
         elif compl is None or pedido["numero"] == compl["numero"]:
             assert classe == "acerto", (rotulo, diferencas)
+        if trecho:
+            assert trecho not in _textos(r.instrucao), rotulo
         log(f"    {rotulo:78} -> {r.situacao:9} · medição: {classe}")
 
-    log("\n[2b] Medição independente: os casos de recusa entregues sem barreira não são acerto")
+    log("\n[2b] Medição independente: as instruções erradas, entregues como o modelo as "
+        "escreveu (sem a barreira), nunca contam como acerto")
     from instrutor import Resultado
-    for rotulo, pedido, compl, consultas, instrucao, deve_recusar, gab in casos:
-        if not deve_recusar or (compl and compl["numero"] != pedido["numero"]):
+    for rotulo, pedido, compl, consultas, instrucao, desfecho, gab, trecho in casos:
+        if compl and compl["numero"] != pedido["numero"]:
             continue
         classe, diferencas = classificar(Resultado("entregue", instrucao=instrucao,
                                                    consultas=consultas), gab)
-        assert classe == "entregue_errado", (rotulo, classe)
-        log(f"    {rotulo:78} -> {classe} · {diferencas[0][:60]}")
+        # Controle: as instruções corretas, entregues como vieram, são acerto.
+        assert classe == ("acerto" if desfecho == "libera" else "entregue_errado"), \
+            (rotulo, classe, diferencas)
+        log(f"    {rotulo:78} -> {classe}" + (f" · {diferencas[0][:70]}" if diferencas else ""))
 
     log("\n[3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução")
     g, k, i = caso_correto("DIA-2026-0101")

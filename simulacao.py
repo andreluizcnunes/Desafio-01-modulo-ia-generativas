@@ -56,17 +56,21 @@ def instrucao_correta(item: dict, consultas: list[dict]) -> Instrucao:
             detalhe = ("Pedido com todos os dados e datas." if situacao == "atende"
                        else "Falta a data de retorno (art. 9º).")
         else:
-            detalhe = resultados.get(FONTE_DO_CRITERIO[criterio], "Não consultado.")
+            detalhe = resultados.get(FONTE_DO_CRITERIO[criterio],
+                                     "Não verificado: diligência, sem análise de mérito (art. 9º).")
         verificacoes.append(Verificacao(criterio=criterio, situacao=situacao, detalhe=detalhe))
     numero, matricula = item["numero_pedido"], item["matricula"]
+    encaminhamento = {"apto_para_autorizacao": "apto para autorização",
+                      "nao_recomendado": "não recomendado",
+                      "diligencia": "diligência ao solicitante (art. 9º)"}[item["recomendacao"]]
     if item["recomendacao"] == "diligencia":
-        minuta = (f"Ao ordenador de despesa. Pedido {numero}, matrícula {matricula}: "
-                  f"sugere-se diligência ao solicitante para correção (art. 9º).")
+        minuta = (f"Ao ordenador de despesa. Pedido {numero}, matrícula {matricula}. "
+                  f"Encaminhamento sugerido: {encaminhamento}.")
     else:
         minuta = (f"Ao ordenador de despesa. Pedido {numero}, matrícula {matricula}: "
-                  f"{item['quantidade_diarias']} diária(s), valor total "
-                  f"{_reais(item['valor_total'])}. Encaminhamento sugerido: "
-                  f"{item['recomendacao'].replace('_', ' ')}.")
+                  f"{item['quantidade_diarias']} diária(s). Valor unitário: "
+                  f"{_reais(item['papeis']['valor_unitario'])}. Valor total: "
+                  f"{_reais(item['valor_total'])}. Encaminhamento sugerido: {encaminhamento}.")
         if item["exige_autorizacao_superior"]:
             minuta += (" Pedido urgente (art. 5º, § 1º): a autorização fica condicionada à "
                        "autorização expressa e escrita do Secretário Adjunto, registrada no "

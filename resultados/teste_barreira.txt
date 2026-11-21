@@ -1,5 +1,16 @@
 [1] Barreira com respostas controladas (ferramentas reais, modelo simulado)
     0101 regular, instrução correta (controle positivo)                            -> liberada
+    0102 correto (apto_para_autorizacao)                                           -> liberada
+    0103 correto (apto_para_autorizacao)                                           -> liberada
+    0104 correto (apto_para_autorizacao)                                           -> liberada
+    0105 correto (nao_recomendado)                                                 -> liberada
+    0106 correto (apto_para_autorizacao)                                           -> liberada
+    0107 correto (nao_recomendado)                                                 -> liberada
+    0108 correto (nao_recomendado)                                                 -> liberada
+    0109 correto (nao_recomendado)                                                 -> liberada
+    0110 correto (nao_recomendado)                                                 -> liberada
+    0111 correto (diligencia)                                                      -> liberada
+    0112 correto (diligencia)                                                      -> liberada
     0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> RECUSADA
         · calcular_diarias: data_pedido='2026-11-09' não é a data_pedido do pedido (2026-10-08)
         · calcular_diarias: data_partida='2026-10-08' não é a data_partida do pedido (2026-11-09)
@@ -8,30 +19,30 @@
         · consultar_saldo_diarias: valor 9940.0 não veio de um cálculo válido
         · consulta obrigatória ausente ou inválida para: antecedencia, prestacao_contas, limite_mensal, saldo_orcamentario
         · quantidade 35.5 e valor 9940.0 não são os do cálculo válido (None, None)
-        · fundamento de antecedencia: valor sem fonte no pedido ou nas consultas: ['980.00']
-        · fundamento de antecedencia: número sem fonte no pedido ou nas consultas: ['3.50']
-        · fundamento de saldo_orcamentario: valor sem fonte no pedido ou nas consultas: ['980.00']
-        · minuta: valor sem fonte no pedido ou nas consultas: ['980.00']
-        · minuta: número sem fonte no pedido ou nas consultas: ['3.50']
     0101 com a data de protocolo no lugar da partida, só no histórico              -> RECUSADA
         · consultar_historico_diarias: data_partida='2026-10-08' não é a data de partida do pedido (2026-11-09)
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
-    0101 com saldo inventado no fundamento                                         -> RECUSADA
-        · fundamento de saldo_orcamentario: valor sem fonte no pedido ou nas consultas: ['50000.00']
-    0101 com valor inventado na minuta                                             -> RECUSADA
-        · minuta: valor sem fonte no pedido ou nas consultas: ['1200.00']
+    0101 com saldo inventado no fundamento                                         -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: '50.000,00'; registrado: fundamento de saldo_orcamentario: valor sem fonte no pedido ou nas consultas: ['50000.00']
+    0101 com valor inventado na minuta                                             -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: '1.200,00'; registrado: minuta: valor sem fonte no pedido ou nas consultas: ['1200.00']
+    0101 com o valor unitário como total na minuta (R$ 280,00)                     -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'valor total de R$ 280,00'
+    0101 com valor por extenso na minuta (quarenta mil reais)                      -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'quarenta mil reais'; registrado: minuta: número por extenso, que não pode ser conferido
+    0101 com alerta citando saldo inventado                                        -> RECUSADA
+        · alerta 1: valor sem fonte no pedido ou nas consultas: ['50000.00']
+    0101 com alerta citando valor por extenso                                      -> RECUSADA
+        · alerta 1: número por extenso, que não pode ser conferido
+    0101 com alerta legítimo (sem dado sem fonte)                                  -> liberada
     0108 sem a consulta de histórico, marcado apto                                 -> RECUSADA
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
-        · fundamento de prestacao_contas: data sem fonte no pedido ou nas consultas: ['2026-09-18', '2026-09-25', '2026-10-09']
-        · fundamento de prestacao_contas: pedido sem fonte no pedido ou nas consultas: ['DIA-2026-0023']
-        · fundamento de prestacao_contas: número sem fonte no pedido ou nas consultas: ['0.00']
-        · fundamento de limite_mensal: data sem fonte no pedido ou nas consultas: ['2026-09-18', '2026-09-25', '2026-10-09']
-        · fundamento de limite_mensal: pedido sem fonte no pedido ou nas consultas: ['DIA-2026-0023']
-        · fundamento de limite_mensal: número sem fonte no pedido ou nas consultas: ['0.00']
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> RECUSADA
         · prestacao_contas: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
     0108 correto: não recomendado pela prestação vencida                           -> liberada
+    0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'regularizada e aprovada'
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> RECUSADA
         · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
@@ -40,8 +51,10 @@
         · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
     0107 correto: não recomendado, sem exceção                                     -> liberada
     0106 urgente correto: apto, autorização escrita na minuta                      -> liberada
-    0106 urgente sem a condição da autorização escrita na minuta                   -> RECUSADA
-        · pedido urgente sem a condição da autorização escrita do Secretário Adjunto na minuta (art. 5º, § 2º)
+    0106 urgente com minuta que dispensa a autorização escrita                     -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'dispensada'
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> RECUSADA
+        · alerta 1: afirma que a autorização é dispensável
     0106 urgente marcado não recomendado                                           -> RECUSADA
         · antecedencia: a instrução declara 'nao_atende', as consultas sustentam 'atende'
         · recomendação 'nao_recomendado', as consultas sustentam 'apto_para_autorizacao'
@@ -81,18 +94,36 @@
 
 [2] Os mesmos casos por instruir() e pelo classificador da medição
     0101 regular, instrução correta (controle positivo)                            -> entregue  · medição: acerto
+    0102 correto (apto_para_autorizacao)                                           -> entregue  · medição: acerto
+    0103 correto (apto_para_autorizacao)                                           -> entregue  · medição: acerto
+    0104 correto (apto_para_autorizacao)                                           -> entregue  · medição: acerto
+    0105 correto (nao_recomendado)                                                 -> entregue  · medição: acerto
+    0106 correto (apto_para_autorizacao)                                           -> entregue  · medição: acerto
+    0107 correto (nao_recomendado)                                                 -> entregue  · medição: acerto
+    0108 correto (nao_recomendado)                                                 -> entregue  · medição: acerto
+    0109 correto (nao_recomendado)                                                 -> entregue  · medição: acerto
+    0110 correto (nao_recomendado)                                                 -> entregue  · medição: acerto
+    0111 correto (diligencia)                                                      -> entregue  · medição: acerto
+    0112 correto (diligencia)                                                      -> entregue  · medição: acerto
     0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> recusada  · medição: recusado
     0101 com a data de protocolo no lugar da partida, só no histórico              -> recusada  · medição: recusado
-    0101 com saldo inventado no fundamento                                         -> recusada  · medição: recusado
-    0101 com valor inventado na minuta                                             -> recusada  · medição: recusado
+    0101 com saldo inventado no fundamento                                         -> entregue  · medição: acerto
+    0101 com valor inventado na minuta                                             -> entregue  · medição: acerto
+    0101 com o valor unitário como total na minuta (R$ 280,00)                     -> entregue  · medição: acerto
+    0101 com valor por extenso na minuta (quarenta mil reais)                      -> entregue  · medição: acerto
+    0101 com alerta citando saldo inventado                                        -> recusada  · medição: recusado
+    0101 com alerta citando valor por extenso                                      -> recusada  · medição: recusado
+    0101 com alerta legítimo (sem dado sem fonte)                                  -> entregue  · medição: acerto
     0108 sem a consulta de histórico, marcado apto                                 -> recusada  · medição: recusado
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> recusada  · medição: recusado
     0108 correto: não recomendado pela prestação vencida                           -> entregue  · medição: acerto
+    0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue  · medição: acerto
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> recusada  · medição: recusado
     0107 não recomendado, mas com exige_autorizacao_superior=true                  -> recusada  · medição: recusado
     0107 correto: não recomendado, sem exceção                                     -> entregue  · medição: acerto
     0106 urgente correto: apto, autorização escrita na minuta                      -> entregue  · medição: acerto
-    0106 urgente sem a condição da autorização escrita na minuta                   -> recusada  · medição: recusado
+    0106 urgente com minuta que dispensa a autorização escrita                     -> entregue  · medição: acerto
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> recusada  · medição: recusado
     0106 urgente marcado não recomendado                                           -> recusada  · medição: recusado
     0111 diligência correta (falta o retorno)                                      -> entregue  · medição: acerto
     0111 diligência com quantidade e valor                                         -> recusada  · medição: recusado
@@ -105,22 +136,48 @@
     0112 complementação correta (matrícula 207418)                                 -> entregue  · medição: acerto
     0112 complementação com o histórico da matrícula digitada 207481               -> recusada  · medição: recusado
 
-[2b] Medição independente: os casos de recusa entregues sem barreira não são acerto
+[2b] Medição independente: as instruções erradas, entregues como o modelo as escreveu (sem a barreira), nunca contam como acerto
+    0101 regular, instrução correta (controle positivo)                            -> acerto
+    0102 correto (apto_para_autorizacao)                                           -> acerto
+    0103 correto (apto_para_autorizacao)                                           -> acerto
+    0104 correto (apto_para_autorizacao)                                           -> acerto
+    0105 correto (nao_recomendado)                                                 -> acerto
+    0106 correto (apto_para_autorizacao)                                           -> acerto
+    0107 correto (nao_recomendado)                                                 -> acerto
+    0108 correto (nao_recomendado)                                                 -> acerto
+    0109 correto (nao_recomendado)                                                 -> acerto
+    0110 correto (nao_recomendado)                                                 -> acerto
+    0111 correto (diligencia)                                                      -> acerto
+    0112 correto (diligencia)                                                      -> acerto
     0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> entregue_errado · quantidade_diarias: 35.5 ≠ 3.5
-    0101 com a data de protocolo no lugar da partida, só no histórico              -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matric
+    0101 com a data de protocolo no lugar da partida, só no histórico              -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matricula': '204
     0101 com saldo inventado no fundamento                                         -> entregue_errado · texto cita valores sem fonte: ['50000.0']
     0101 com valor inventado na minuta                                             -> entregue_errado · texto cita valores sem fonte: ['1200.0']
+    0101 com o valor unitário como total na minuta (R$ 280,00)                     -> entregue_errado · minuta: valor total 280.0 ≠ 980.0
+    0101 com valor por extenso na minuta (quarenta mil reais)                      -> entregue_errado · texto com número por extenso: 'Ao ordenador de despesa. Pedido DIA-202
+    0101 com alerta citando saldo inventado                                        -> entregue_errado · texto cita valores sem fonte: ['50000.0']
+    0101 com alerta citando valor por extenso                                      -> entregue_errado · texto com número por extenso: 'A viagem custará quarenta mil reais.'
+    0101 com alerta legítimo (sem dado sem fonte)                                  -> acerto
     0108 sem a consulta de histórico, marcado apto                                 -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
+    0108 correto: não recomendado pela prestação vencida                           -> acerto
+    0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue_errado · fundamento de prestacao_contas: falta 'vencida'
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0107 não recomendado, mas com exige_autorizacao_superior=true                  -> entregue_errado · exige_autorizacao_superior: True ≠ False
-    0106 urgente sem a condição da autorização escrita na minuta                   -> entregue_errado · minuta do pedido urgente sem a condição da autorização expre
+    0107 correto: não recomendado, sem exceção                                     -> acerto
+    0106 urgente correto: apto, autorização escrita na minuta                      -> acerto
+    0106 urgente com minuta que dispensa a autorização escrita                     -> entregue_errado · minuta: valor total None ≠ 1260.0
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> entregue_errado · texto afirma que a autorização é dispensável: 'Em incêndio, a autoriza
     0106 urgente marcado não recomendado                                           -> entregue_errado · recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'
+    0111 diligência correta (falta o retorno)                                      -> acerto
     0111 diligência com quantidade e valor                                         -> entregue_errado · quantidade_diarias: 4.5 ≠ None
     0111 diligência correta, mas com tentativa de cálculo sem retorno              -> entregue_errado · trilha: consultas fora da etapa: calcular_diarias
-    0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> entregue_errado · trilha: consultas fora da etapa: calcular_diarias, consultar
+    0112 diligência correta (nome diverge do cadastro)                             -> acerto
+    0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> entregue_errado · trilha: consultas fora da etapa: calcular_diarias, consultar_historico
     0112 calculado para o servidor da matrícula digitada                           -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'diligencia'
-    0112 complementação com o histórico da matrícula digitada 207481               -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matric
+    0111 complementação correta (retorno 2026-11-20)                               -> acerto
+    0112 complementação correta (matrícula 207418)                                 -> acerto
+    0112 complementação com o histórico da matrícula digitada 207481               -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matricula': '207
 
 [3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução
     status ERROR (erro da API como conteúdo)                   (sem progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro 
@@ -142,4 +199,4 @@
     barreira.py      não lê o gabarito
     app.py           não lê o gabarito
 
-Todos os 24 casos controlados e as 12 falhas do fluxo passaram.
+Todos os 42 casos controlados e as 12 falhas do fluxo passaram.

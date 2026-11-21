@@ -15,6 +15,10 @@
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
       },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 18400.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "204317",
@@ -83,6 +87,10 @@
         "prestacao_contas": "atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 220.0,
+        "saldo": 18400.0
       },
       "trilha": {
         "consultar_servidor": {
@@ -155,6 +163,10 @@
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
       },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 7800.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "203156",
@@ -218,6 +230,10 @@
         "prestacao_contas": "atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 600.0,
+        "saldo": 12000.0
       },
       "trilha": {
         "consultar_servidor": {
@@ -287,6 +303,10 @@
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
       },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 9250.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "206230",
@@ -351,6 +371,10 @@
         "prestacao_contas": "atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 7800.0
       },
       "trilha": {
         "consultar_servidor": {
@@ -419,6 +443,10 @@
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
       },
+      "papeis": {
+        "valor_unitario": 220.0,
+        "saldo": 9250.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "207093",
@@ -485,6 +513,10 @@
         "prestacao_contas": "nao_atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 18400.0
       },
       "trilha": {
         "consultar_servidor": {
@@ -561,6 +593,10 @@
         "limite_mensal": "nao_atende",
         "saldo_orcamentario": "atende"
       },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 5300.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "208114",
@@ -636,6 +672,10 @@
         "limite_mensal": "atende",
         "saldo_orcamentario": "nao_atende"
       },
+      "papeis": {
+        "valor_unitario": 400.0,
+        "saldo": 640.0
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "205507",
@@ -704,6 +744,10 @@
         "limite_mensal": "nao_verificado",
         "saldo_orcamentario": "nao_verificado"
       },
+      "papeis": {
+        "valor_unitario": null,
+        "saldo": null
+      },
       "trilha": {
         "consultar_servidor": {
           "matricula": "206689",
@@ -745,6 +789,10 @@
         "prestacao_contas": "nao_verificado",
         "limite_mensal": "nao_verificado",
         "saldo_orcamentario": "nao_verificado"
+      },
+      "papeis": {
+        "valor_unitario": null,
+        "saldo": null
       },
       "trilha": {
         "consultar_servidor": {
@@ -788,6 +836,10 @@
         "prestacao_contas": "atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 280.0,
+        "saldo": 18400.0
       },
       "trilha": {
         "consultar_servidor": {
@@ -856,6 +908,10 @@
         "prestacao_contas": "atende",
         "limite_mensal": "atende",
         "saldo_orcamentario": "atende"
+      },
+      "papeis": {
+        "valor_unitario": 220.0,
+        "saldo": 7800.0
       },
       "trilha": {
         "consultar_servidor": {

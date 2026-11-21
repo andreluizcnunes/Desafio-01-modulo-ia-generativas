@@ -22,7 +22,7 @@ import sqlite3
 
 from agno.run.agent import RunInput
 
-from barreira import verificar
+from barreira import conferir
 from instrutor import (FILTRO_DADOS_PESSOAIS, apagar_banco, construir_agente, instruir,
                        texto_da_complementacao, texto_do_pedido)
 from teste_barreira import montar_casos
@@ -71,10 +71,13 @@ def parte1_filtro() -> None:
 def parte2_barreira() -> None:
     log("\n[2] Barreira em código, com respostas controladas, sem API")
     log("    (os casos estão em teste_barreira.py, que também os passa pela medição)")
-    for rotulo, pedido, compl, consultas, instrucao, deve_recusar, _ in montar_casos():
-        problemas = verificar(instrucao, consultas, pedido, compl)
-        assert bool(problemas) == deve_recusar, (rotulo, problemas)
-        log(f"    {rotulo:78} -> {'RECUSADA' if problemas else 'liberada'}")
+    for rotulo, pedido, compl, consultas, instrucao, desfecho, _, trecho in montar_casos():
+        problemas, entregue, _ = conferir(instrucao, consultas, pedido, compl)
+        assert bool(problemas) == (desfecho == "recusa"), (rotulo, problemas)
+        if trecho:  # texto errado do modelo: a instrução entregue traz o do código
+            assert trecho not in entregue.minuta_despacho + str(entregue.verificacoes), rotulo
+        log(f"    {rotulo:78} -> {'RECUSADA' if problemas else 'liberada'}"
+            + (" (textos refeitos pelo código)" if trecho else ""))
         for p in problemas:
             log(f"        · {p}")
 

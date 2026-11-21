@@ -62,8 +62,9 @@ def instruir(pedido: dict, dados, original: dict | None = None,
 
     Além da recomendação e dos números, registra o que a medição precisa para
     conferir a instrução inteira: a situação de cada critério, a trilha de
-    consultas que a instrução deveria ter feito (cada argumento no seu papel) e
-    os fatos que os textos podem citar.
+    consultas que a instrução deveria ter feito (cada argumento no seu papel),
+    os fatos que os textos podem citar e o papel dos valores (unitário e saldo,
+    além do total), para que um valor certo no lugar errado não passe.
     """
     tabela, unidades, _, _, servidores, historico = dados
     original = original or pedido
@@ -73,6 +74,7 @@ def instruir(pedido: dict, dados, original: dict | None = None,
                 "quantidade_diarias": None, "valor_total": None,
                 "exige_autorizacao_superior": False, "nao_atende": [],
                 "situacoes": dict.fromkeys(CRITERIOS, "nao_verificado"),
+                "papeis": {"valor_unitario": None, "saldo": None},
                 "trilha": {"consultar_servidor": {"matricula": pedido["matricula"],
                                                   "nome_informado": pedido["nome"]}}}
     fatos = {"valores": set(), "numeros": {10.0, 5.0},
@@ -124,6 +126,7 @@ def instruir(pedido: dict, dados, original: dict | None = None,
         "consultar_saldo_diarias": {"unidade": s["unidade"], "valor": valor}})
     saldo = unidades[s["unidade"]]["saldo_diarias"]
     fatos["valores"] |= {unitario, valor, saldo}
+    esperado["papeis"] = {"valor_unitario": unitario, "saldo": saldo}
 
     falhas = []
     # Art. 5º.

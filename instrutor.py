@@ -20,6 +20,10 @@ Decisões, cada uma com a aula de origem:
 - Memória: SqliteDb, histórico da sessão com teto; `session_id` = número do
   pedido e `user_id` = matrícula do pedido, informados em cada `run`, e não na
   construção (Aula 07, 2 e 7).
+- Os fundamentos, as pendências e a minuta que o conferente vê são redigidos
+  pelo código com os dados das consultas válidas, cada um no seu papel; do
+  modelo, chegam à tela as situações, os números e a recomendação conferidos
+  e os alertas conferidos (barreira.py, itens 5 e 6; Aula 04, 8).
 - Resposta ausente, de outra execução ou com status diferente de concluído é
   falha, conferida antes do conteúdo (Aula 06, 5.3). Sem o identificador da
   execução atual, nenhuma resposta é buscada no banco. A barreira em código de
@@ -43,7 +47,7 @@ from agno.run.base import RunStatus
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from barreira import verificar
+from barreira import PADROES_DADOS_PESSOAIS, conferir
 from ferramentas import FERRAMENTAS
 
 BASE = pathlib.Path(__file__).parent
@@ -136,12 +140,11 @@ Saída:
 - `matricula`: a matrícula efetivamente consultada (a corrigida, se houver complementação).
 - `pendencias`: o que o solicitante precisa corrigir. `alertas`: o que o conferente
   precisa ver, inclusive dados pessoais mascarados no pedido.
-- `minuta_despacho`: despacho curto ao ordenador de despesa, com o número do pedido, os
-  artigos aplicados e o encaminhamento sugerido, sem deferir nem indeferir.
-- Nos textos (`detalhe`, `pendencias`, `alertas`, `minuta_despacho`), cite valores, datas,
-  matrículas e quantidades exatamente como constam do pedido ou das ferramentas. Não faça
-  contas nos textos (como saldo remanescente ou diferença de dias): a aplicação recusa
-  número que não tenha vindo do pedido ou de uma ferramenta.
+- Os fundamentos, as pendências e a minuta que o conferente lê são montados pela
+  aplicação com os dados das ferramentas: em `detalhe` e em `minuta_despacho`, uma frase
+  curta basta. Os `alertas` vão à tela como você escreve: cite valores, datas, matrículas
+  e quantidades em algarismos, exatamente como constam do pedido ou das ferramentas, sem
+  contas e sem número por extenso; a aplicação recusa dado que não tenha fonte.
 
 Complementação: quando receber a complementação de um pedido em diligência, recupere o
 pedido do histórico desta conversa e aplique a correção. Depois refaça a instrução
@@ -159,10 +162,7 @@ mudado e nunca são reaproveitados de consultas anteriores."""
 FILTRO_DADOS_PESSOAIS = PIIDetectionGuardrail(
     mask_pii=True,
     enable_ssn_check=False, enable_credit_card_check=False, enable_phone_check=False,
-    custom_patterns={
-        "CPF": r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b",
-        "Conta ou agência bancária": r"\b\d{4,6}-[\dXx]\b",
-    },
+    custom_patterns=PADROES_DADOS_PESSOAIS,
 )
 
 
@@ -229,6 +229,8 @@ class Resultado:
     consultas: list[dict] = field(default_factory=list)
     medidas: dict = field(default_factory=dict)
     entrada_enviada: str = ""
+    # Erros dos textos do modelo que o código substituiu antes da entrega.
+    textos_substituidos: list[str] = field(default_factory=list)
 
 
 def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
@@ -300,16 +302,20 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
         return Resultado("erro", motivo=["a saída não satisfez o contrato Instrucao"],
                          consultas=consultas, medidas=medidas, entrada_enviada=entrada_enviada)
 
-    # 3. Barreira em código: identidade, papéis, evidências e fatos (barreira.py).
+    # 3. Barreira em código: identidade, papéis, evidências e alertas; depois,
+    # os textos factuais redigidos pelo código com as consultas válidas
+    # (barreira.py). O conferente recebe a instrução montada, não a do modelo.
     try:
-        problemas = verificar(resposta.content, consultas, pedido, complemento)
+        problemas, entregue, substituidos = conferir(resposta.content, consultas, pedido,
+                                                     complemento)
     except Exception as erro:  # argumento malformado: na dúvida, recusa
-        problemas = [f"barreira não conseguiu conferir: {type(erro).__name__}: {erro}"]
+        problemas, entregue, substituidos = (
+            [f"barreira não conseguiu conferir: {type(erro).__name__}: {erro}"], None, [])
     if problemas:
         return Resultado("recusada", instrucao=resposta.content, motivo=problemas,
                          consultas=consultas, medidas=medidas, entrada_enviada=entrada_enviada)
-    return Resultado("entregue", instrucao=resposta.content, consultas=consultas,
-                     medidas=medidas, entrada_enviada=entrada_enviada)
+    return Resultado("entregue", instrucao=entregue, consultas=consultas, medidas=medidas,
+                     entrada_enviada=entrada_enviada, textos_substituidos=substituidos)
 
 
 def medir(resposta, duracao: float) -> dict:

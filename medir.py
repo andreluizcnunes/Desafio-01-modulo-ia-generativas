@@ -9,7 +9,10 @@ Classificação de cada item, na ordem de gravidade do enunciado:
 - acerto: entregue ao conferente e igual ao gabarito em recomendação,
   matrícula, quantidade, valor e exigência de autorização superior, nas
   situações dos seis critérios, na trilha de consultas (cada argumento no seu
-  papel, sem consulta ausente nem fora da etapa) e nos dados factuais dos fundamentos, pendências, alertas e minuta;
+  papel, sem consulta ausente nem fora da etapa), nos dados factuais dos
+  fundamentos, pendências, alertas e minuta, no papel de cada dado (o
+  fundamento diz o que a situação diz; a minuta traz o valor total, o
+  unitário e o encaminhamento esperados) e sem número por extenso;
 - recusado: a barreira recusou e o servidor viu a mensagem padrão (erro visível);
 - erro de execução: status de erro ou saída fora do contrato (erro visível);
 - ENTREGUE ERRADO: chegou ao conferente diferente do gabarito (o que mais pesa).
@@ -112,11 +115,22 @@ def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
                 continue
             if not all(_igual(f.get(k), v) for k, v in args.items()):
                 dif.append(f"trilha: {ferramenta} chamada fora do papel com {f}")
+    # Papel de cada dado: o fundamento de cada critério diz o que a situação diz,
+    # e a minuta traz o valor total, o unitário e o encaminhamento esperados.
+    for v in instrucao.verificacoes:
+        dif += [f"fundamento de {v.criterio}: {d}"
+                for d in _fundamento_incoerente(v.criterio, esperado["situacoes"].get(v.criterio),
+                                                _plano(v.detalhe or ""))]
+    dif += _minuta_fora_do_papel(_plano(instrucao.minuta_despacho or ""), esperado)
     # Urgência: a minuta preserva a condição da autorização escrita (art. 5º, § 2º).
     minuta = _plano(instrucao.minuta_despacho or "")
     if esperado["exige_autorizacao_superior"] and not (
             "autorizacao expressa e escrita" in minuta and "dispens" not in minuta):
         dif.append("minuta do pedido urgente sem a condição da autorização expressa e escrita")
+    for texto in [instrucao.minuta_despacho] + list(instrucao.alertas):
+        plano = _plano(texto or "")
+        if "autoriza" in plano and re.search(r"dispens|desnecessari", plano):
+            dif.append(f"texto afirma que a autorização é dispensável: {texto[:60]!r}")
     # Fatos citados nos textos.
     permitidos = {k: set(v) for k, v in esperado["fatos"].items()}
     textos = [v.detalhe for v in instrucao.verificacoes] + list(instrucao.pendencias) + \
@@ -126,6 +140,58 @@ def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
             fora = {a for a in achados if a not in permitidos[tipo]}
             if fora:
                 dif.append(f"texto cita {tipo} sem fonte: {sorted(map(str, fora))}")
+        if POR_EXTENSO.search(_plano(texto or "")):
+            dif.append(f"texto com número por extenso: {texto[:60]!r}")
+    return dif
+
+
+# Palavras da norma que cada situação exige (+) ou proíbe (-) no fundamento.
+TERMOS = {
+    ("cadastro", "atende"): (["confere"], ["diverge", "nao localizada"]),
+    ("cadastro", "nao_atende"): (["diverge|nao localizada"], []),
+    ("dados_completos", "nao_atende"): (["falta|ausente|nao informad"], []),
+    ("antecedencia", "atende"): (["atende o minimo|urgencia"], []),
+    ("antecedencia", "nao_atende"): (["nao atende"], ["admitida"]),
+    ("prestacao_contas", "atende"): (["nenhuma pendente|no prazo"],
+                                     ["vencida", "regularizada", "aprovada"]),
+    ("prestacao_contas", "nao_atende"): (["vencida"],
+                                         ["nao (?:esta |ha |consta )?(?:prestacao )?vencida",
+                                          "regularizada", "aprovada", "nenhuma pendente"]),
+    ("limite_mensal", "atende"): (["atende"], ["excede"]),
+    ("limite_mensal", "nao_atende"): (["excede"], []),
+    ("saldo_orcamentario", "atende"): (["suficiente"], ["insuficiente"]),
+    ("saldo_orcamentario", "nao_atende"): (["insuficiente"], []),
+}
+POR_EXTENSO = re.compile(
+    r"\b(?:dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|quinze|vinte|trinta|"
+    r"quarenta|cinquenta|sessenta|setenta|oitenta|noventa|cem|cento|duzentos|trezentos|"
+    r"quinhentos|mil|milhao|milhoes|meia|uma?)\b(?:\s+\w+){0,4}?\s+(?:reais|diarias?|dias?)\b")
+
+
+def _fundamento_incoerente(criterio: str, situacao: str | None, texto: str) -> list[str]:
+    if situacao == "nao_verificado":
+        return [] if "nao verificado" in texto else ["critério não verificado sem dizê-lo"]
+    exige, proibe = TERMOS.get((criterio, situacao), ([], []))
+    falhas = [f"falta '{t}'" for t in exige if not re.search(t, texto)]
+    return falhas + [f"contradiz a situação com '{t}'" for t in proibe if re.search(t, texto)]
+
+
+def _minuta_fora_do_papel(minuta: str, esperado: dict) -> list[str]:
+    dif = []
+    rotulados = {rotulo: _num(v) for rotulo, v in
+                 re.findall(r"valor (total|unitario)[^r\n]{0,15}r\$\s*(\d+(?:[.,]\d+)*)", minuta)}
+    pares = (("total", esperado["valor_total"]), ("unitario", esperado["papeis"]["valor_unitario"]))
+    for rotulo, valor in pares:
+        if valor is None and rotulo in rotulados:
+            dif.append(f"minuta com valor {rotulo} em pedido sem análise de mérito")
+        elif valor is not None and rotulados.get(rotulo) != round(valor, 2):
+            dif.append(f"minuta: valor {rotulo} {rotulados.get(rotulo)} ≠ {valor}")
+    encaminhamento = {"apto_para_autorizacao": "apto para autorizacao",
+                      "nao_recomendado": "nao recomendado",
+                      "diligencia": "diligencia"}[esperado["recomendacao"]]
+    sugerido = re.search(r"encaminhamento sugerido: ([a-z ]+)", minuta)
+    if not sugerido or not sugerido.group(1).startswith(encaminhamento):
+        dif.append(f"minuta sem o encaminhamento '{encaminhamento}'")
     return dif
 
 

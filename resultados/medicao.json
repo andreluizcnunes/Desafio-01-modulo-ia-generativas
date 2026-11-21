@@ -3,30 +3,55 @@
     "paralelas desligadas": {
       "geral": {
         "itens": 42,
-        "acertos": 38,
+        "acertos": 41,
         "recusados": 1,
         "erros_execucao": 0,
-        "entregues_errados": 3,
+        "entregues_errados": 0,
         "execucoes_com_chamadas_simultaneas": 0,
         "chamadas_mediana": 5.0,
         "chamadas_max": 8,
-        "entrada_1a_chamada_media": 2460,
+        "entrada_1a_chamada_media": 2746,
         "acrescimo_por_passo_min_med_max": [
           72,
-          129,
+          128,
           219
         ],
-        "entrada_acumulada_media_5_passos": 13186,
-        "tokens_entrada": 531992,
-        "tokens_saida": 31496,
-        "custo_total": 0.14419,
-        "custo_mediana": 0.003544,
-        "custo_max": 0.006746,
-        "razao_cauda": 1.9,
-        "segundos_total": 361.1,
-        "segundos_mediana": 8.95
+        "entrada_acumulada_media_5_passos": 14616,
+        "tokens_entrada": 590297,
+        "tokens_saida": 33350,
+        "custo_total": 0.15808,
+        "custo_mediana": 0.003897,
+        "custo_max": 0.007182,
+        "razao_cauda": 1.84,
+        "segundos_total": 371.8,
+        "segundos_mediana": 9.149999999999999
       },
       "rodada_1": {
+        "itens": 14,
+        "acertos": 14,
+        "recusados": 0,
+        "erros_execucao": 0,
+        "entregues_errados": 0,
+        "execucoes_com_chamadas_simultaneas": 0,
+        "chamadas_mediana": 5.0,
+        "chamadas_max": 5,
+        "entrada_1a_chamada_media": 2748,
+        "acrescimo_por_passo_min_med_max": [
+          72,
+          128,
+          219
+        ],
+        "entrada_acumulada_media_5_passos": 14616,
+        "tokens_entrada": 192773,
+        "tokens_saida": 11049,
+        "custo_total": 0.05181,
+        "custo_mediana": 0.003895,
+        "custo_max": 0.004621,
+        "razao_cauda": 1.19,
+        "segundos_total": 123.1,
+        "segundos_mediana": 9.0
+      },
+      "rodada_2": {
         "itens": 14,
         "acertos": 13,
         "recusados": 1,
@@ -34,174 +59,149 @@
         "entregues_errados": 0,
         "execucoes_com_chamadas_simultaneas": 0,
         "chamadas_mediana": 5.0,
-        "chamadas_max": 5,
-        "entrada_1a_chamada_media": 2454,
-        "acrescimo_por_passo_min_med_max": [
-          72,
-          129,
-          219
-        ],
-        "entrada_acumulada_media_5_passos": 13186,
-        "tokens_entrada": 171434,
-        "tokens_saida": 10477,
-        "custo_total": 0.04686,
-        "custo_mediana": 0.003544,
-        "custo_max": 0.004191,
-        "razao_cauda": 1.18,
-        "segundos_total": 120.8,
-        "segundos_mediana": 9.1
-      },
-      "rodada_2": {
-        "itens": 14,
-        "acertos": 13,
-        "recusados": 0,
-        "erros_execucao": 0,
-        "entregues_errados": 1,
-        "execucoes_com_chamadas_simultaneas": 0,
-        "chamadas_mediana": 5.0,
-        "chamadas_max": 5,
-        "entrada_1a_chamada_media": 2462,
+        "chamadas_max": 8,
+        "entrada_1a_chamada_media": 2744,
         "acrescimo_por_passo_min_med_max": [
           72,
           128,
           219
         ],
-        "entrada_acumulada_media_5_passos": 13185,
-        "tokens_entrada": 174406,
-        "tokens_saida": 10390,
-        "custo_total": 0.04735,
-        "custo_mediana": 0.003553,
-        "custo_max": 0.0042,
-        "razao_cauda": 1.18,
-        "segundos_total": 119.5,
-        "segundos_mediana": 8.850000000000001
+        "entrada_acumulada_media_5_passos": 14615,
+        "tokens_entrada": 204845,
+        "tokens_saida": 11111,
+        "custo_total": 0.0543,
+        "custo_mediana": 0.003895,
+        "custo_max": 0.007182,
+        "razao_cauda": 1.84,
+        "segundos_total": 125.9,
+        "segundos_mediana": 9.149999999999999
       },
       "rodada_3": {
         "itens": 14,
-        "acertos": 12,
+        "acertos": 14,
         "recusados": 0,
         "erros_execucao": 0,
-        "entregues_errados": 2,
+        "entregues_errados": 0,
         "execucoes_com_chamadas_simultaneas": 0,
         "chamadas_mediana": 5.0,
-        "chamadas_max": 8,
-        "entrada_1a_chamada_media": 2465,
+        "chamadas_max": 5,
+        "entrada_1a_chamada_media": 2747,
         "acrescimo_por_passo_min_med_max": [
           72,
           128,
           219
         ],
-        "entrada_acumulada_media_5_passos": 13186,
-        "tokens_entrada": 186152,
-        "tokens_saida": 10629,
-        "custo_total": 0.04999,
-        "custo_mediana": 0.003535,
-        "custo_max": 0.006746,
-        "razao_cauda": 1.91,
-        "segundos_total": 120.8,
-        "segundos_mediana": 8.7
+        "entrada_acumulada_media_5_passos": 14616,
+        "tokens_entrada": 192679,
+        "tokens_saida": 11190,
+        "custo_total": 0.05196,
+        "custo_mediana": 0.003905,
+        "custo_max": 0.00453,
+        "razao_cauda": 1.16,
+        "segundos_total": 122.8,
+        "segundos_mediana": 9.1
       }
     },
     "paralelas ligadas": {
       "geral": {
         "itens": 42,
-        "acertos": 38,
+        "acertos": 42,
         "recusados": 0,
         "erros_execucao": 0,
-        "entregues_errados": 4,
+        "entregues_errados": 0,
         "execucoes_com_chamadas_simultaneas": 0,
         "chamadas_mediana": 5.0,
-        "chamadas_max": 6,
-        "entrada_1a_chamada_media": 2465,
+        "chamadas_max": 9,
+        "entrada_1a_chamada_media": 2743,
         "acrescimo_por_passo_min_med_max": [
           72,
           129,
           219
         ],
-        "entrada_acumulada_media_5_passos": 13184,
-        "tokens_entrada": 527170,
-        "tokens_saida": 31321,
-        "custo_total": 0.14302,
-        "custo_mediana": 0.003556,
-        "custo_max": 0.004452,
-        "razao_cauda": 1.25,
-        "segundos_total": 373.9,
-        "segundos_mediana": 9.1
+        "entrada_acumulada_media_5_passos": 14616,
+        "tokens_entrada": 598049,
+        "tokens_saida": 33113,
+        "custo_total": 0.15935,
+        "custo_mediana": 0.003923,
+        "custo_max": 0.006876,
+        "razao_cauda": 1.75,
+        "segundos_total": 445.1,
+        "segundos_mediana": 10.75
       },
       "rodada_1": {
         "itens": 14,
-        "acertos": 13,
+        "acertos": 14,
         "recusados": 0,
         "erros_execucao": 0,
-        "entregues_errados": 1,
+        "entregues_errados": 0,
         "execucoes_com_chamadas_simultaneas": 0,
         "chamadas_mediana": 5.0,
-        "chamadas_max": 5,
-        "entrada_1a_chamada_media": 2465,
-        "acrescimo_por_passo_min_med_max": [
-          72,
-          128,
-          219
-        ],
-        "entrada_acumulada_media_5_passos": 13185,
-        "tokens_entrada": 174626,
-        "tokens_saida": 10376,
-        "custo_total": 0.04738,
-        "custo_mediana": 0.003537,
-        "custo_max": 0.004261,
-        "razao_cauda": 1.2,
-        "segundos_total": 126.1,
-        "segundos_mediana": 9.2
-      },
-      "rodada_2": {
-        "itens": 14,
-        "acertos": 13,
-        "recusados": 0,
-        "erros_execucao": 0,
-        "entregues_errados": 1,
-        "execucoes_com_chamadas_simultaneas": 0,
-        "chamadas_mediana": 5.0,
-        "chamadas_max": 5,
-        "entrada_1a_chamada_media": 2466,
-        "acrescimo_por_passo_min_med_max": [
-          72,
-          128,
-          219
-        ],
-        "entrada_acumulada_media_5_passos": 13185,
-        "tokens_entrada": 174727,
-        "tokens_saida": 10403,
-        "custo_total": 0.04743,
-        "custo_mediana": 0.003547,
-        "custo_max": 0.004243,
-        "razao_cauda": 1.2,
-        "segundos_total": 120.4,
-        "segundos_mediana": 8.8
-      },
-      "rodada_3": {
-        "itens": 14,
-        "acertos": 12,
-        "recusados": 0,
-        "erros_execucao": 0,
-        "entregues_errados": 2,
-        "execucoes_com_chamadas_simultaneas": 0,
-        "chamadas_mediana": 5.0,
-        "chamadas_max": 6,
-        "entrada_1a_chamada_media": 2463,
+        "chamadas_max": 9,
+        "entrada_1a_chamada_media": 2740,
         "acrescimo_por_passo_min_med_max": [
           72,
           130,
           219
         ],
-        "entrada_acumulada_media_5_passos": 13182,
-        "tokens_entrada": 177817,
-        "tokens_saida": 10542,
-        "custo_total": 0.04821,
-        "custo_mediana": 0.003576,
-        "custo_max": 0.004452,
-        "razao_cauda": 1.24,
-        "segundos_total": 127.4,
-        "segundos_mediana": 9.5
+        "entrada_acumulada_media_5_passos": 14612,
+        "tokens_entrada": 209793,
+        "tokens_saida": 11221,
+        "custo_total": 0.05542,
+        "custo_mediana": 0.00392,
+        "custo_max": 0.006876,
+        "razao_cauda": 1.75,
+        "segundos_total": 149.9,
+        "segundos_mediana": 10.649999999999999
+      },
+      "rodada_2": {
+        "itens": 14,
+        "acertos": 14,
+        "recusados": 0,
+        "erros_execucao": 0,
+        "entregues_errados": 0,
+        "execucoes_com_chamadas_simultaneas": 0,
+        "chamadas_mediana": 5.0,
+        "chamadas_max": 6,
+        "entrada_1a_chamada_media": 2744,
+        "acrescimo_por_passo_min_med_max": [
+          72,
+          127,
+          219
+        ],
+        "entrada_acumulada_media_5_passos": 14621,
+        "tokens_entrada": 195712,
+        "tokens_saida": 11067,
+        "custo_total": 0.05242,
+        "custo_mediana": 0.003963,
+        "custo_max": 0.004574,
+        "razao_cauda": 1.15,
+        "segundos_total": 151.8,
+        "segundos_mediana": 11.7
+      },
+      "rodada_3": {
+        "itens": 14,
+        "acertos": 14,
+        "recusados": 0,
+        "erros_execucao": 0,
+        "entregues_errados": 0,
+        "execucoes_com_chamadas_simultaneas": 0,
+        "chamadas_mediana": 5.0,
+        "chamadas_max": 5,
+        "entrada_1a_chamada_media": 2745,
+        "acrescimo_por_passo_min_med_max": [
+          72,
+          128,
+          219
+        ],
+        "entrada_acumulada_media_5_passos": 14616,
+        "tokens_entrada": 192544,
+        "tokens_saida": 10825,
+        "custo_total": 0.0515,
+        "custo_mediana": 0.003923,
+        "custo_max": 0.004476,
+        "razao_cauda": 1.14,
+        "segundos_total": 143.4,
+        "segundos_mediana": 10.399999999999999
       }
     }
   },
@@ -218,17 +218,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2859
+        2652,
+        2749,
+        2930,
+        3070,
+        3145
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13116,
-      "tokens_saida": 663,
-      "custo": 0.0034188,
-      "segundos": 8.5
+      "tokens_entrada": 14546,
+      "tokens_saida": 734,
+      "custo": 0.00379,
+      "segundos": 8.7
     },
     {
       "rodada": 1,
@@ -242,17 +242,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2896
+        2645,
+        2739,
+        2920,
+        3107,
+        3182
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13163,
-      "tokens_saida": 763,
-      "custo": 0.0035482,
-      "segundos": 9.1
+      "tokens_entrada": 14593,
+      "tokens_saida": 766,
+      "custo": 0.0038378,
+      "segundos": 8.7
     },
     {
       "rodada": 1,
@@ -266,17 +266,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2855
+        2647,
+        2745,
+        2926,
+        3066,
+        3141
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13095,
-      "tokens_saida": 732,
-      "custo": 0.0034974000000000003,
-      "segundos": 8.6
+      "tokens_entrada": 14525,
+      "tokens_saida": 746,
+      "custo": 0.0038002,
+      "segundos": 8.8
     },
     {
       "rodada": 1,
@@ -290,17 +290,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2878
+        2660,
+        2764,
+        2947,
+        3087,
+        3164
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13192,
-      "tokens_saida": 722,
-      "custo": 0.0035048,
-      "segundos": 8.9
+      "tokens_entrada": 14622,
+      "tokens_saida": 807,
+      "custo": 0.0038928,
+      "segundos": 8.8
     },
     {
       "rodada": 1,
@@ -314,17 +314,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2815,
-        2887
+        2650,
+        2745,
+        2961,
+        3101,
+        3173
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13200,
-      "tokens_saida": 908,
-      "custo": 0.0037295999999999996,
-      "segundos": 9.9
+      "tokens_entrada": 14630,
+      "tokens_saida": 966,
+      "custo": 0.004085200000000001,
+      "segundos": 10.3
     },
     {
       "rodada": 1,
@@ -338,17 +338,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2906
+        2662,
+        2756,
+        2975,
+        3115,
+        3192
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13270,
-      "tokens_saida": 891,
-      "custo": 0.0037232000000000003,
-      "segundos": 10.2
+      "tokens_entrada": 14700,
+      "tokens_saida": 908,
+      "custo": 0.0040295999999999995,
+      "segundos": 9.5
     },
     {
       "rodada": 1,
@@ -362,17 +362,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2935
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13438,
-      "tokens_saida": 874,
-      "custo": 0.0037364,
-      "segundos": 9.2
+      "tokens_entrada": 14870,
+      "tokens_saida": 998,
+      "custo": 0.0041716,
+      "segundos": 11.3
     },
     {
       "rodada": 1,
@@ -386,17 +386,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2897
+        2640,
+        2733,
+        2914,
+        3110,
+        3185
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13150,
-      "tokens_saida": 851,
-      "custo": 0.0036512000000000003,
-      "segundos": 9.7
+      "tokens_entrada": 14582,
+      "tokens_saida": 860,
+      "custo": 0.0039483999999999995,
+      "segundos": 9.5
     },
     {
       "rodada": 1,
@@ -410,17 +410,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2865
+        2641,
+        2740,
+        2921,
+        3077,
+        3151
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13100,
-      "tokens_saida": 730,
-      "custo": 0.0034960000000000004,
-      "segundos": 9.0
+      "tokens_entrada": 14530,
+      "tokens_saida": 816,
+      "custo": 0.0038852,
+      "segundos": 9.2
     },
     {
       "rodada": 1,
@@ -434,39 +434,38 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2870
+        2647,
+        2749,
+        2935,
+        3075,
+        3156
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13132,
-      "tokens_saida": 762,
-      "custo": 0.0035408,
-      "segundos": 9.7
+      "tokens_entrada": 14562,
+      "tokens_saida": 820,
+      "custo": 0.0038964000000000004,
+      "segundos": 10.2
     },
     {
       "rodada": 1,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0111",
       "turno": "pedido",
-      "classe": "recusado",
+      "classe": "acerto",
       "diferencas": [],
-      "motivo_recusa": [
-        "matrícula 206689 da instrução não foi consultada no cadastro"
-      ],
+      "motivo_recusa": [],
       "recomendacao": "diligencia",
       "esperado": "diligencia",
-      "chamadas": 1,
+      "chamadas": 2,
       "entrada_por_chamada": [
-        2354
+        2640,
+        2737
       ],
-      "max_simultaneas": 0,
-      "tokens_entrada": 2354,
-      "tokens_saida": 510,
-      "custo": 0.0010828,
-      "segundos": 4.6
+      "max_simultaneas": 1,
+      "tokens_entrada": 5377,
+      "tokens_saida": 484,
+      "custo": 0.0016562,
+      "segundos": 4.9
     },
     {
       "rodada": 1,
@@ -480,14 +479,14 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2478
+        2640,
+        2764
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 509,
-      "custo": 0.0015772,
-      "segundos": 5.1
+      "tokens_entrada": 5404,
+      "tokens_saida": 588,
+      "custo": 0.0017864,
+      "segundos": 5.4
     },
     {
       "rodada": 1,
@@ -501,17 +500,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2937,
-        3034,
-        3215,
-        3355,
-        3430
+        3260,
+        3357,
+        3538,
+        3678,
+        3753
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 15971,
-      "tokens_saida": 806,
-      "custo": 0.0041614,
-      "segundos": 9.1
+      "tokens_entrada": 17586,
+      "tokens_saida": 746,
+      "custo": 0.0044124,
+      "segundos": 8.6
     },
     {
       "rodada": 1,
@@ -525,16 +524,16 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3031,
-        3123,
-        3304,
-        3444,
-        3519
+        3396,
+        3488,
+        3669,
+        3809,
+        3884
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16421,
-      "tokens_saida": 756,
-      "custo": 0.0041914000000000005,
+      "tokens_entrada": 18246,
+      "tokens_saida": 810,
+      "custo": 0.0046212,
       "segundos": 9.2
     },
     {
@@ -549,353 +548,21 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2857
+        2652,
+        2749,
+        2930,
+        3070,
+        3145
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13114,
-      "tokens_saida": 694,
-      "custo": 0.0034556,
-      "segundos": 8.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0102",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2894
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13161,
-      "tokens_saida": 737,
-      "custo": 0.0035166000000000004,
+      "tokens_entrada": 14546,
+      "tokens_saida": 744,
+      "custo": 0.0038020000000000003,
       "segundos": 8.7
     },
     {
       "rodada": 2,
       "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0103",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2855
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13095,
-      "tokens_saida": 663,
-      "custo": 0.0034146000000000003,
-      "segundos": 7.7
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0104",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2878
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13192,
-      "tokens_saida": 729,
-      "custo": 0.0035132,
-      "segundos": 8.9
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0105",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2815,
-        2889
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13202,
-      "tokens_saida": 885,
-      "custo": 0.0037024000000000002,
-      "segundos": 9.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0106",
-      "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'"
-      ],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2906
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13270,
-      "tokens_saida": 868,
-      "custo": 0.0036956000000000003,
-      "segundos": 10.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0107",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2935
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13438,
-      "tokens_saida": 916,
-      "custo": 0.0037868,
-      "segundos": 10.2
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0108",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2897
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13150,
-      "tokens_saida": 820,
-      "custo": 0.003614,
-      "segundos": 10.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0109",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2865
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13100,
-      "tokens_saida": 807,
-      "custo": 0.0035884000000000003,
-      "segundos": 9.0
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0110",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2870
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13132,
-      "tokens_saida": 720,
-      "custo": 0.0034904000000000003,
-      "segundos": 8.2
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0111",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "diligencia",
-      "esperado": "diligencia",
-      "chamadas": 2,
-      "entrada_por_chamada": [
-        2354,
-        2451
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 4805,
-      "tokens_saida": 553,
-      "custo": 0.0016246,
-      "segundos": 5.3
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0112",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "diligencia",
-      "esperado": "diligencia",
-      "chamadas": 2,
-      "entrada_por_chamada": [
-        2354,
-        2478
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 508,
-      "custo": 0.0015760000000000001,
-      "segundos": 5.1
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0111",
-      "turno": "complementacao",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        3043,
-        3140,
-        3321,
-        3461,
-        3536
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 16501,
-      "tokens_saida": 750,
-      "custo": 0.004200199999999999,
-      "segundos": 8.8
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0112",
-      "turno": "complementacao",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        3030,
-        3122,
-        3303,
-        3443,
-        3516
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 16414,
-      "tokens_saida": 740,
-      "custo": 0.0041708000000000005,
-      "segundos": 9.0
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas desligadas",
-      "pedido": "DIA-2026-0101",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2857
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13114,
-      "tokens_saida": 669,
-      "custo": 0.0034256,
-      "segundos": 8.6
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0102",
       "turno": "pedido",
       "classe": "acerto",
@@ -905,20 +572,20 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2896
+        2645,
+        2739,
+        2920,
+        3107,
+        3182
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13163,
-      "tokens_saida": 723,
-      "custo": 0.0035002,
-      "segundos": 8.3
+      "tokens_entrada": 14593,
+      "tokens_saida": 790,
+      "custo": 0.0038666000000000004,
+      "segundos": 9.4
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0103",
       "turno": "pedido",
@@ -929,20 +596,20 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2855
+        2647,
+        2745,
+        2926,
+        3066,
+        3139
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13095,
-      "tokens_saida": 674,
-      "custo": 0.0034278000000000004,
-      "segundos": 8.1
+      "tokens_entrada": 14523,
+      "tokens_saida": 746,
+      "custo": 0.0037998000000000003,
+      "segundos": 8.6
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0104",
       "turno": "pedido",
@@ -953,20 +620,20 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2876
+        2660,
+        2764,
+        2947,
+        3087,
+        3164
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13190,
-      "tokens_saida": 726,
-      "custo": 0.0035092,
-      "segundos": 8.6
+      "tokens_entrada": 14622,
+      "tokens_saida": 775,
+      "custo": 0.0038544,
+      "segundos": 9.0
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0105",
       "turno": "pedido",
@@ -977,72 +644,70 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2815,
-        2889
+        2650,
+        2745,
+        2961,
+        3101,
+        3175
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13202,
-      "tokens_saida": 903,
-      "custo": 0.0037240000000000003,
-      "segundos": 9.6
+      "tokens_entrada": 14632,
+      "tokens_saida": 981,
+      "custo": 0.0041036,
+      "segundos": 10.4
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0106",
       "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'"
+      "classe": "recusado",
+      "diferencas": [],
+      "motivo_recusa": [
+        "antecedencia: a instrução declara 'nao_atende', as consultas sustentam 'atende'"
       ],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
+      "recomendacao": "apto_para_autorizacao",
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2906
+        2662,
+        2756,
+        2975,
+        3115,
+        3192
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13270,
-      "tokens_saida": 875,
-      "custo": 0.003704,
-      "segundos": 9.9
+      "tokens_entrada": 14700,
+      "tokens_saida": 924,
+      "custo": 0.0040488,
+      "segundos": 10.3
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0107",
       "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "exige_autorizacao_superior: True ≠ False"
-      ],
+      "classe": "acerto",
+      "diferencas": [],
       "motivo_recusa": [],
       "recomendacao": "nao_recomendado",
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2937
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13440,
-      "tokens_saida": 861,
-      "custo": 0.0037212,
-      "segundos": 9.2
+      "tokens_entrada": 14870,
+      "tokens_saida": 952,
+      "custo": 0.0041164,
+      "segundos": 10.8
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0108",
       "turno": "pedido",
@@ -1053,20 +718,20 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2899
+        2640,
+        2733,
+        2914,
+        3110,
+        3183
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13152,
-      "tokens_saida": 832,
-      "custo": 0.0036288,
-      "segundos": 9.2
+      "tokens_entrada": 14580,
+      "tokens_saida": 837,
+      "custo": 0.0039204,
+      "segundos": 9.1
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0109",
       "turno": "pedido",
@@ -1077,20 +742,20 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2863
+        2641,
+        2740,
+        2921,
+        3077,
+        3149
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13098,
-      "tokens_saida": 784,
-      "custo": 0.0035604,
-      "segundos": 9.2
+      "tokens_entrada": 14528,
+      "tokens_saida": 822,
+      "custo": 0.0038919999999999996,
+      "segundos": 9.4
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0110",
       "turno": "pedido",
@@ -1101,20 +766,20 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2870
+        2647,
+        2749,
+        2935,
+        3075,
+        3154
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13132,
-      "tokens_saida": 726,
-      "custo": 0.0034976,
-      "segundos": 8.1
+      "tokens_entrada": 14560,
+      "tokens_saida": 821,
+      "custo": 0.0038972,
+      "segundos": 9.2
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0111",
       "turno": "pedido",
@@ -1125,17 +790,17 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2451
+        2640,
+        2737
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4805,
-      "tokens_saida": 589,
-      "custo": 0.0016678,
-      "segundos": 5.3
+      "tokens_entrada": 5377,
+      "tokens_saida": 470,
+      "custo": 0.0016394,
+      "segundos": 4.6
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0112",
       "turno": "pedido",
@@ -1146,17 +811,17 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2478
+        2640,
+        2764
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 523,
-      "custo": 0.001594,
-      "segundos": 4.9
+      "tokens_entrada": 5404,
+      "tokens_saida": 539,
+      "custo": 0.0017276000000000001,
+      "segundos": 5.2
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0111",
       "turno": "complementacao",
@@ -1167,20 +832,20 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3079,
-        3176,
-        3357,
-        3497,
-        3572
+        3246,
+        3343,
+        3524,
+        3664,
+        3739
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16681,
-      "tokens_saida": 785,
-      "custo": 0.0042782,
+      "tokens_entrada": 17516,
+      "tokens_saida": 791,
+      "custo": 0.0044524000000000005,
       "segundos": 8.8
     },
     {
-      "rodada": 3,
+      "rodada": 2,
       "configuracao": "paralelas desligadas",
       "pedido": "DIA-2026-0112",
       "turno": "complementacao",
@@ -1191,20 +856,350 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 8,
       "entrada_por_chamada": [
-        3045,
-        3137,
-        3318,
-        3458,
-        3531,
-        3712,
-        3852,
-        3925
+        3347,
+        3439,
+        3620,
+        3760,
+        3833,
+        4014,
+        4154,
+        4227
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 27978,
-      "tokens_saida": 959,
-      "custo": 0.0067464,
-      "segundos": 13.0
+      "tokens_entrada": 30394,
+      "tokens_saida": 919,
+      "custo": 0.007181600000000001,
+      "segundos": 12.4
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0101",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2652,
+        2749,
+        2930,
+        3070,
+        3145
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14546,
+      "tokens_saida": 751,
+      "custo": 0.0038104000000000002,
+      "segundos": 9.0
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0102",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2645,
+        2739,
+        2920,
+        3107,
+        3180
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14591,
+      "tokens_saida": 820,
+      "custo": 0.0039021999999999998,
+      "segundos": 9.3
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0103",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2647,
+        2745,
+        2926,
+        3066,
+        3141
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14525,
+      "tokens_saida": 750,
+      "custo": 0.0038050000000000002,
+      "segundos": 8.6
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0104",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2660,
+        2764,
+        2947,
+        3087,
+        3164
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14622,
+      "tokens_saida": 806,
+      "custo": 0.0038916000000000003,
+      "segundos": 9.3
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0105",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2650,
+        2745,
+        2961,
+        3101,
+        3175
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14632,
+      "tokens_saida": 989,
+      "custo": 0.0041132,
+      "segundos": 10.2
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0106",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2662,
+        2756,
+        2975,
+        3115,
+        3192
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14700,
+      "tokens_saida": 979,
+      "custo": 0.0041148,
+      "segundos": 10.3
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0107",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14870,
+      "tokens_saida": 985,
+      "custo": 0.004156,
+      "segundos": 10.5
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0108",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2640,
+        2733,
+        2914,
+        3110,
+        3183
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14580,
+      "tokens_saida": 865,
+      "custo": 0.003954,
+      "segundos": 9.8
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0109",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2641,
+        2740,
+        2921,
+        3077,
+        3149
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14528,
+      "tokens_saida": 794,
+      "custo": 0.0038583999999999997,
+      "segundos": 9.0
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0110",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2647,
+        2749,
+        2935,
+        3075,
+        3156
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14562,
+      "tokens_saida": 829,
+      "custo": 0.0039072,
+      "segundos": 8.9
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0111",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "diligencia",
+      "esperado": "diligencia",
+      "chamadas": 2,
+      "entrada_por_chamada": [
+        2640,
+        2737
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 5377,
+      "tokens_saida": 515,
+      "custo": 0.0016934,
+      "segundos": 4.9
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0112",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "diligencia",
+      "esperado": "diligencia",
+      "chamadas": 2,
+      "entrada_por_chamada": [
+        2640,
+        2764
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 5404,
+      "tokens_saida": 539,
+      "custo": 0.0017276000000000001,
+      "segundos": 5.2
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0111",
+      "turno": "complementacao",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        3291,
+        3388,
+        3569,
+        3709,
+        3784
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 17741,
+      "tokens_saida": 793,
+      "custo": 0.0044998,
+      "segundos": 9.2
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas desligadas",
+      "pedido": "DIA-2026-0112",
+      "turno": "complementacao",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        3347,
+        3439,
+        3620,
+        3760,
+        3835
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 18001,
+      "tokens_saida": 775,
+      "custo": 0.0045302,
+      "segundos": 8.6
     },
     {
       "rodada": 1,
@@ -1218,17 +1213,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2857
+        2652,
+        2749,
+        2930,
+        3070,
+        3143
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13114,
-      "tokens_saida": 676,
-      "custo": 0.003434,
-      "segundos": 8.6
+      "tokens_entrada": 14544,
+      "tokens_saida": 750,
+      "custo": 0.0038088,
+      "segundos": 11.5
     },
     {
       "rodada": 1,
@@ -1242,17 +1237,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2894
+        2645,
+        2739,
+        2920,
+        3107,
+        3180
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13161,
-      "tokens_saida": 749,
-      "custo": 0.0035310000000000003,
-      "segundos": 9.1
+      "tokens_entrada": 14591,
+      "tokens_saida": 756,
+      "custo": 0.0038254,
+      "segundos": 10.0
     },
     {
       "rodada": 1,
@@ -1266,17 +1261,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2853
+        2647,
+        2745,
+        2926,
+        3066,
+        3141
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13093,
-      "tokens_saida": 714,
-      "custo": 0.0034754000000000005,
-      "segundos": 8.8
+      "tokens_entrada": 14525,
+      "tokens_saida": 765,
+      "custo": 0.003823,
+      "segundos": 10.4
     },
     {
       "rodada": 1,
@@ -1290,17 +1285,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2878
+        2660,
+        2764,
+        2947,
+        3087,
+        3162
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13192,
-      "tokens_saida": 750,
-      "custo": 0.0035384000000000006,
-      "segundos": 9.6
+      "tokens_entrada": 14620,
+      "tokens_saida": 794,
+      "custo": 0.0038767999999999997,
+      "segundos": 10.5
     },
     {
       "rodada": 1,
@@ -1314,48 +1309,71 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2815,
-        2887
+        2650,
+        2745,
+        2961,
+        3101,
+        3173
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13200,
-      "tokens_saida": 894,
-      "custo": 0.0037128,
+      "tokens_entrada": 14630,
+      "tokens_saida": 960,
+      "custo": 0.004078,
+      "segundos": 11.9
+    },
+    {
+      "rodada": 1,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0106",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 6,
+      "entrada_por_chamada": [
+        2662,
+        2756,
+        2975,
+        3194,
+        3334,
+        3411
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 18332,
+      "tokens_saida": 1005,
+      "custo": 0.004872400000000001,
+      "segundos": 13.7
+    },
+    {
+      "rodada": 1,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0107",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14870,
+      "tokens_saida": 957,
+      "custo": 0.0041224,
       "segundos": 11.7
     },
     {
       "rodada": 1,
       "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0106",
-      "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'"
-      ],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2904
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13268,
-      "tokens_saida": 835,
-      "custo": 0.0036556,
-      "segundos": 9.8
-    },
-    {
-      "rodada": 1,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0107",
+      "pedido": "DIA-2026-0108",
       "turno": "pedido",
       "classe": "acerto",
       "diferencas": [],
@@ -1364,69 +1382,45 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2935
+        2640,
+        2733,
+        2914,
+        3110,
+        3185
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13438,
-      "tokens_saida": 887,
-      "custo": 0.003752,
+      "tokens_entrada": 14582,
+      "tokens_saida": 872,
+      "custo": 0.0039628,
+      "segundos": 10.6
+    },
+    {
+      "rodada": 1,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0109",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2641,
+        2740,
+        2921,
+        3077,
+        3151
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14530,
+      "tokens_saida": 801,
+      "custo": 0.0038672000000000003,
       "segundos": 10.7
     },
     {
       "rodada": 1,
       "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0108",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2897
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13150,
-      "tokens_saida": 754,
-      "custo": 0.0035348000000000003,
-      "segundos": 9.1
-    },
-    {
-      "rodada": 1,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0109",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2863
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13098,
-      "tokens_saida": 832,
-      "custo": 0.003618,
-      "segundos": 10.0
-    },
-    {
-      "rodada": 1,
-      "configuracao": "paralelas ligadas",
       "pedido": "DIA-2026-0110",
       "turno": "pedido",
       "classe": "acerto",
@@ -1434,19 +1428,23 @@
       "motivo_recusa": [],
       "recomendacao": "nao_recomendado",
       "esperado": "nao_recomendado",
-      "chamadas": 5,
+      "chamadas": 9,
       "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2870
+        2647,
+        2749,
+        2935,
+        3075,
+        3156,
+        3258,
+        3444,
+        3584,
+        3665
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13132,
-      "tokens_saida": 701,
-      "custo": 0.0034676,
-      "segundos": 8.4
+      "tokens_entrada": 28513,
+      "tokens_saida": 978,
+      "custo": 0.006876200000000001,
+      "segundos": 16.3
     },
     {
       "rodada": 1,
@@ -1460,14 +1458,14 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2451
+        2640,
+        2737
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4805,
-      "tokens_saida": 618,
-      "custo": 0.0017025999999999999,
-      "segundos": 6.3
+      "tokens_entrada": 5377,
+      "tokens_saida": 446,
+      "custo": 0.0016106,
+      "segundos": 5.0
     },
     {
       "rodada": 1,
@@ -1481,14 +1479,14 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2478
+        2640,
+        2764
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 489,
-      "custo": 0.0015532,
-      "segundos": 5.1
+      "tokens_entrada": 5404,
+      "tokens_saida": 515,
+      "custo": 0.0016988,
+      "segundos": 5.8
     },
     {
       "rodada": 1,
@@ -1502,17 +1500,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3108,
-        3205,
-        3386,
-        3526,
-        3599
+        3222,
+        3319,
+        3500,
+        3640,
+        3715
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16824,
-      "tokens_saida": 747,
-      "custo": 0.0042612,
-      "segundos": 9.3
+      "tokens_entrada": 17396,
+      "tokens_saida": 788,
+      "custo": 0.0044248,
+      "segundos": 10.4
     },
     {
       "rodada": 1,
@@ -1526,17 +1524,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3011,
-        3103,
-        3284,
-        3424,
-        3497
+        3323,
+        3415,
+        3596,
+        3736,
+        3809
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16319,
-      "tokens_saida": 730,
-      "custo": 0.0041398,
-      "segundos": 9.6
+      "tokens_entrada": 17879,
+      "tokens_saida": 834,
+      "custo": 0.0045766,
+      "segundos": 11.4
     },
     {
       "rodada": 2,
@@ -1550,17 +1548,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2857
+        2652,
+        2749,
+        2930,
+        3070,
+        3145
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13114,
-      "tokens_saida": 697,
-      "custo": 0.0034592000000000004,
-      "segundos": 8.7
+      "tokens_entrada": 14546,
+      "tokens_saida": 769,
+      "custo": 0.0038320000000000003,
+      "segundos": 11.6
     },
     {
       "rodada": 2,
@@ -1574,17 +1572,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2894
+        2645,
+        2739,
+        2920,
+        3107,
+        3182
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13161,
-      "tokens_saida": 717,
-      "custo": 0.0034926000000000002,
-      "segundos": 8.7
+      "tokens_entrada": 14593,
+      "tokens_saida": 781,
+      "custo": 0.0038558000000000004,
+      "segundos": 10.7
     },
     {
       "rodada": 2,
@@ -1598,17 +1596,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2853
+        2647,
+        2745,
+        2926,
+        3066,
+        3141
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13093,
-      "tokens_saida": 665,
-      "custo": 0.0034166000000000005,
-      "segundos": 8.5
+      "tokens_entrada": 14525,
+      "tokens_saida": 733,
+      "custo": 0.0037846,
+      "segundos": 12.9
     },
     {
       "rodada": 2,
@@ -1622,17 +1620,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2876
+        2660,
+        2764,
+        2947,
+        3087,
+        3162
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13190,
-      "tokens_saida": 748,
-      "custo": 0.0035356,
-      "segundos": 8.8
+      "tokens_entrada": 14620,
+      "tokens_saida": 809,
+      "custo": 0.0038948,
+      "segundos": 11.4
     },
     {
       "rodada": 2,
@@ -1646,43 +1644,41 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2815,
-        2887
+        2650,
+        2745,
+        2961,
+        3101,
+        3173
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13200,
-      "tokens_saida": 881,
-      "custo": 0.0036972,
-      "segundos": 10.0
+      "tokens_entrada": 14630,
+      "tokens_saida": 954,
+      "custo": 0.0040708,
+      "segundos": 11.8
     },
     {
       "rodada": 2,
       "configuracao": "paralelas ligadas",
       "pedido": "DIA-2026-0106",
       "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'"
-      ],
+      "classe": "acerto",
+      "diferencas": [],
       "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
+      "recomendacao": "apto_para_autorizacao",
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2904
+        2662,
+        2756,
+        2975,
+        3115,
+        3192
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13268,
-      "tokens_saida": 891,
-      "custo": 0.0037228,
-      "segundos": 9.7
+      "tokens_entrada": 14700,
+      "tokens_saida": 910,
+      "custo": 0.004032,
+      "segundos": 11.9
     },
     {
       "rodada": 2,
@@ -1696,17 +1692,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2937
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13440,
-      "tokens_saida": 878,
-      "custo": 0.0037416000000000003,
-      "segundos": 9.9
+      "tokens_entrada": 14870,
+      "tokens_saida": 940,
+      "custo": 0.004102,
+      "segundos": 12.5
     },
     {
       "rodada": 2,
@@ -1720,17 +1716,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2899
+        2640,
+        2733,
+        2914,
+        3110,
+        3183
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13152,
-      "tokens_saida": 774,
-      "custo": 0.0035592,
-      "segundos": 8.8
+      "tokens_entrada": 14580,
+      "tokens_saida": 933,
+      "custo": 0.0040356,
+      "segundos": 11.8
     },
     {
       "rodada": 2,
@@ -1744,232 +1740,22 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2863
+        2641,
+        2740,
+        2921,
+        3077,
+        3149
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13098,
-      "tokens_saida": 795,
-      "custo": 0.0035736,
-      "segundos": 9.2
+      "tokens_entrada": 14528,
+      "tokens_saida": 818,
+      "custo": 0.0038872,
+      "segundos": 12.0
     },
     {
       "rodada": 2,
       "configuracao": "paralelas ligadas",
       "pedido": "DIA-2026-0110",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
-      "esperado": "nao_recomendado",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2870
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13132,
-      "tokens_saida": 705,
-      "custo": 0.0034724,
-      "segundos": 8.2
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0111",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "diligencia",
-      "esperado": "diligencia",
-      "chamadas": 2,
-      "entrada_por_chamada": [
-        2354,
-        2451
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 4805,
-      "tokens_saida": 586,
-      "custo": 0.0016642000000000002,
-      "segundos": 6.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0112",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "diligencia",
-      "esperado": "diligencia",
-      "chamadas": 2,
-      "entrada_por_chamada": [
-        2354,
-        2478
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 540,
-      "custo": 0.0016144000000000002,
-      "segundos": 5.4
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0111",
-      "turno": "complementacao",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        3076,
-        3173,
-        3354,
-        3494,
-        3569
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 16666,
-      "tokens_saida": 753,
-      "custo": 0.0042368,
-      "segundos": 9.0
-    },
-    {
-      "rodada": 2,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0112",
-      "turno": "complementacao",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        3062,
-        3154,
-        3335,
-        3475,
-        3550
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 16576,
-      "tokens_saida": 773,
-      "custo": 0.0042428000000000006,
-      "segundos": 9.1
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0101",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2366,
-        2463,
-        2644,
-        2784,
-        2857
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13114,
-      "tokens_saida": 672,
-      "custo": 0.0034292000000000003,
-      "segundos": 8.2
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0102",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2359,
-        2453,
-        2634,
-        2821,
-        2894
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13161,
-      "tokens_saida": 776,
-      "custo": 0.0035634000000000004,
-      "segundos": 9.3
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0103",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2361,
-        2459,
-        2640,
-        2780,
-        2853
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13093,
-      "tokens_saida": 647,
-      "custo": 0.0033950000000000004,
-      "segundos": 8.6
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0104",
-      "turno": "pedido",
-      "classe": "acerto",
-      "diferencas": [],
-      "motivo_recusa": [],
-      "recomendacao": "apto_para_autorizacao",
-      "esperado": "apto_para_autorizacao",
-      "chamadas": 5,
-      "entrada_por_chamada": [
-        2374,
-        2478,
-        2661,
-        2801,
-        2876
-      ],
-      "max_simultaneas": 1,
-      "tokens_entrada": 13190,
-      "tokens_saida": 752,
-      "custo": 0.0035404,
-      "segundos": 8.9
-    },
-    {
-      "rodada": 3,
-      "configuracao": "paralelas ligadas",
-      "pedido": "DIA-2026-0105",
       "turno": "pedido",
       "classe": "acerto",
       "diferencas": [],
@@ -1978,70 +1764,276 @@
       "esperado": "nao_recomendado",
       "chamadas": 6,
       "entrada_por_chamada": [
-        2364,
-        2459,
-        2675,
-        2891,
-        3031,
-        3103
+        2647,
+        2749,
+        2935,
+        3075,
+        3156,
+        3237
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16523,
-      "tokens_saida": 956,
-      "custo": 0.0044518,
-      "segundos": 12.1
+      "tokens_entrada": 17799,
+      "tokens_saida": 845,
+      "custo": 0.0045738,
+      "segundos": 12.6
+    },
+    {
+      "rodada": 2,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0111",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "diligencia",
+      "esperado": "diligencia",
+      "chamadas": 2,
+      "entrada_por_chamada": [
+        2640,
+        2737
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 5377,
+      "tokens_saida": 506,
+      "custo": 0.0016826,
+      "segundos": 5.9
+    },
+    {
+      "rodada": 2,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0112",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "diligencia",
+      "esperado": "diligencia",
+      "chamadas": 2,
+      "entrada_por_chamada": [
+        2640,
+        2764
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 5404,
+      "tokens_saida": 508,
+      "custo": 0.0016903999999999999,
+      "segundos": 6.3
+    },
+    {
+      "rodada": 2,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0111",
+      "turno": "complementacao",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        3282,
+        3379,
+        3560,
+        3700,
+        3775
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 17696,
+      "tokens_saida": 818,
+      "custo": 0.0045208,
+      "segundos": 10.6
+    },
+    {
+      "rodada": 2,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0112",
+      "turno": "complementacao",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        3316,
+        3408,
+        3589,
+        3729,
+        3802
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 17844,
+      "tokens_saida": 743,
+      "custo": 0.0044604,
+      "segundos": 9.8
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0101",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2652,
+        2749,
+        2930,
+        3070,
+        3145
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14546,
+      "tokens_saida": 707,
+      "custo": 0.0037576000000000003,
+      "segundos": 9.9
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0102",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2645,
+        2739,
+        2920,
+        3107,
+        3182
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14593,
+      "tokens_saida": 766,
+      "custo": 0.0038378,
+      "segundos": 10.1
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0103",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2647,
+        2745,
+        2926,
+        3066,
+        3141
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14525,
+      "tokens_saida": 722,
+      "custo": 0.0037714,
+      "segundos": 10.1
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0104",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "apto_para_autorizacao",
+      "esperado": "apto_para_autorizacao",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2660,
+        2764,
+        2947,
+        3087,
+        3162
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14620,
+      "tokens_saida": 817,
+      "custo": 0.0039043999999999997,
+      "segundos": 10.8
+    },
+    {
+      "rodada": 3,
+      "configuracao": "paralelas ligadas",
+      "pedido": "DIA-2026-0105",
+      "turno": "pedido",
+      "classe": "acerto",
+      "diferencas": [],
+      "motivo_recusa": [],
+      "recomendacao": "nao_recomendado",
+      "esperado": "nao_recomendado",
+      "chamadas": 5,
+      "entrada_por_chamada": [
+        2650,
+        2745,
+        2961,
+        3101,
+        3173
+      ],
+      "max_simultaneas": 1,
+      "tokens_entrada": 14630,
+      "tokens_saida": 924,
+      "custo": 0.0040348,
+      "segundos": 11.9
     },
     {
       "rodada": 3,
       "configuracao": "paralelas ligadas",
       "pedido": "DIA-2026-0106",
       "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'"
-      ],
+      "classe": "acerto",
+      "diferencas": [],
       "motivo_recusa": [],
-      "recomendacao": "nao_recomendado",
+      "recomendacao": "apto_para_autorizacao",
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2376,
-        2470,
-        2689,
-        2829,
-        2904
+        2662,
+        2756,
+        2975,
+        3115,
+        3192
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13268,
-      "tokens_saida": 887,
-      "custo": 0.003718,
-      "segundos": 10.1
+      "tokens_entrada": 14700,
+      "tokens_saida": 927,
+      "custo": 0.004052399999999999,
+      "segundos": 12.2
     },
     {
       "rodada": 3,
       "configuracao": "paralelas ligadas",
       "pedido": "DIA-2026-0107",
       "turno": "pedido",
-      "classe": "entregue_errado",
-      "diferencas": [
-        "exige_autorizacao_superior: True ≠ False"
-      ],
+      "classe": "acerto",
+      "diferencas": [],
       "motivo_recusa": [],
       "recomendacao": "nao_recomendado",
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2410,
-        2507,
-        2723,
-        2863,
-        2935
+        2696,
+        2793,
+        3009,
+        3149,
+        3223
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13438,
-      "tokens_saida": 859,
-      "custo": 0.0037184,
-      "segundos": 9.7
+      "tokens_entrada": 14870,
+      "tokens_saida": 884,
+      "custo": 0.0040348,
+      "segundos": 13.5
     },
     {
       "rodada": 3,
@@ -2055,17 +2047,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2354,
-        2447,
-        2628,
-        2824,
-        2897
+        2640,
+        2733,
+        2914,
+        3110,
+        3185
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13150,
-      "tokens_saida": 813,
-      "custo": 0.0036056000000000005,
-      "segundos": 10.1
+      "tokens_entrada": 14582,
+      "tokens_saida": 855,
+      "custo": 0.0039424,
+      "segundos": 11.2
     },
     {
       "rodada": 3,
@@ -2079,17 +2071,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2355,
-        2454,
-        2635,
-        2791,
-        2863
+        2641,
+        2740,
+        2921,
+        3077,
+        3151
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13098,
-      "tokens_saida": 808,
-      "custo": 0.0035892,
-      "segundos": 9.2
+      "tokens_entrada": 14530,
+      "tokens_saida": 864,
+      "custo": 0.0039428,
+      "segundos": 10.8
     },
     {
       "rodada": 3,
@@ -2103,17 +2095,17 @@
       "esperado": "nao_recomendado",
       "chamadas": 5,
       "entrada_por_chamada": [
-        2361,
-        2463,
-        2649,
-        2789,
-        2868
+        2647,
+        2749,
+        2935,
+        3075,
+        3156
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 13130,
-      "tokens_saida": 772,
-      "custo": 0.0035524,
-      "segundos": 10.0
+      "tokens_entrada": 14562,
+      "tokens_saida": 806,
+      "custo": 0.0038796000000000004,
+      "segundos": 10.6
     },
     {
       "rodada": 3,
@@ -2127,14 +2119,14 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2451
+        2640,
+        2737
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4805,
-      "tokens_saida": 573,
-      "custo": 0.0016486,
-      "segundos": 6.2
+      "tokens_entrada": 5377,
+      "tokens_saida": 506,
+      "custo": 0.0016826,
+      "segundos": 6.0
     },
     {
       "rodada": 3,
@@ -2148,14 +2140,14 @@
       "esperado": "diligencia",
       "chamadas": 2,
       "entrada_por_chamada": [
-        2354,
-        2478
+        2640,
+        2764
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 4832,
-      "tokens_saida": 508,
-      "custo": 0.0015760000000000001,
-      "segundos": 5.4
+      "tokens_entrada": 5404,
+      "tokens_saida": 521,
+      "custo": 0.001706,
+      "segundos": 5.9
     },
     {
       "rodada": 3,
@@ -2169,17 +2161,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3063,
-        3160,
-        3341,
-        3481,
-        3554
+        3282,
+        3379,
+        3560,
+        3700,
+        3775
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16599,
-      "tokens_saida": 740,
-      "custo": 0.004207799999999999,
-      "segundos": 9.8
+      "tokens_entrada": 17696,
+      "tokens_saida": 781,
+      "custo": 0.0044764,
+      "segundos": 10.2
     },
     {
       "rodada": 3,
@@ -2193,17 +2185,17 @@
       "esperado": "apto_para_autorizacao",
       "chamadas": 5,
       "entrada_por_chamada": [
-        3030,
-        3122,
-        3303,
-        3443,
-        3518
+        3329,
+        3421,
+        3602,
+        3742,
+        3815
       ],
       "max_simultaneas": 1,
-      "tokens_entrada": 16416,
-      "tokens_saida": 779,
-      "custo": 0.0042179999999999995,
-      "segundos": 9.8
+      "tokens_entrada": 17909,
+      "tokens_saida": 745,
+      "custo": 0.0044758,
+      "segundos": 10.2
     }
   ]
 }

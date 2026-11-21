@@ -20,9 +20,10 @@ Decisões, cada uma com a aula de origem:
 - Memória: SqliteDb, histórico da sessão com teto; `session_id` = número do
   pedido e `user_id` = matrícula do pedido, informados em cada `run`, e não na
   construção (Aula 07, 2 e 7).
-- `resposta.status` conferido antes do conteúdo (Aula 06, 5.3), e a barreira em
-  código de `barreira.py` antes de qualquer coisa chegar ao conferente
-  (Aula 01, 8; Aula 03, 7; Aula 04, 8).
+- Resposta ausente, de outra execução ou com status diferente de concluído é
+  falha, conferida antes do conteúdo (Aula 06, 5.3), e a barreira em código de
+  `barreira.py` vem antes de qualquer coisa chegar ao conferente (Aula 01, 8;
+  Aula 03, 7; Aula 04, 8).
 """
 import json
 import pathlib
@@ -230,6 +231,7 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
     ids = {"session_id": pedido["numero"], "user_id": pedido["matricula"]}
 
     inicio = time.perf_counter()
+    run_id = None  # identificador da execução atual, anunciado no início do fluxo
     try:
         if ao_chamar_ferramenta is None:
             resposta = agente.run(entrada, **ids)
@@ -238,7 +240,9 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
             for evento in agente.run(entrada, stream=True, stream_events=True,
                                      yield_run_output=True, **ids):
                 nome = type(evento).__name__
-                if nome == "ToolCallStartedEvent":
+                if nome == "RunStartedEvent":
+                    run_id = getattr(evento, "run_id", None)
+                elif nome == "ToolCallStartedEvent":
                     ao_chamar_ferramenta(evento.tool.tool_name, evento.tool.tool_args)
                 elif nome == "RunOutput":
                     resposta = evento
@@ -249,20 +253,34 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
                          medidas={"segundos": round(time.perf_counter() - inicio, 1)})
     duracao = time.perf_counter() - inicio
 
-    consultas = [{"ferramenta": t.tool_name, "argumentos": dict(t.tool_args or {}),
-                  "resultado": str(t.result)} for t in (resposta.tools or [])]
-    medidas = medir(resposta, duracao)
-    entrada_enviada = str(getattr(resposta.input, "input_content", "")) if resposta.input else ""
+    # 1. Execução sem resposta, que não concluiu ou que não é a desta chamada:
+    # nada é lido do conteúdo (Aula 06, 5.3).
+    if resposta is None:
+        return Resultado("erro", motivo=["a execução terminou sem resposta"],
+                         medidas={"segundos": round(duracao, 1)})
+    if getattr(resposta, "session_id", None) != pedido["numero"] or (
+            run_id is not None and getattr(resposta, "run_id", None) != run_id):
+        return Resultado("erro", motivo=["a resposta não pertence à execução atual"],
+                         medidas={"segundos": round(duracao, 1)})
+    try:
+        consultas = [{"ferramenta": t.tool_name, "argumentos": dict(t.tool_args or {}),
+                      "resultado": str(t.result)} for t in (resposta.tools or [])]
+        medidas = medir(resposta, duracao)
+        entrada_enviada = (str(getattr(resposta.input, "input_content", ""))
+                           if resposta.input else "")
+    except Exception as erro:
+        return Resultado("erro", motivo=[f"resposta ilegível: {type(erro).__name__}: {erro}"],
+                         medidas={"segundos": round(duracao, 1)})
 
-    # 1. Erro da API devolvido como conteúdo (Aula 06, 5.3): nada segue ao conferente.
-    if resposta.status == RunStatus.error:
+    # 2. Erro da API devolvido como conteúdo, ou execução interrompida.
+    if resposta.status != RunStatus.completed:
         return Resultado("erro", motivo=[f"status {resposta.status}: {str(resposta.content)[:200]}"],
                          consultas=consultas, medidas=medidas, entrada_enviada=entrada_enviada)
     if not isinstance(resposta.content, Instrucao):
         return Resultado("erro", motivo=["a saída não satisfez o contrato Instrucao"],
                          consultas=consultas, medidas=medidas, entrada_enviada=entrada_enviada)
 
-    # 2. Barreira em código: matrículas, datas e números ancorados (barreira.py).
+    # 3. Barreira em código: identidade, papéis, evidências e fatos (barreira.py).
     try:
         problemas = verificar(resposta.content, consultas, pedido, complemento)
     except Exception as erro:  # argumento malformado: na dúvida, recusa

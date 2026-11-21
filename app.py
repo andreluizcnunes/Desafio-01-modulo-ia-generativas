@@ -15,8 +15,10 @@ instrutor.py e desenha o objeto `Instrucao` campo a campo (Aula 06, 6.1).
   servidor discorda do agente.
 - Na diligência, a complementação é enviada na mesma sessão do pedido.
 - Em área separada, a rotina de eliminação e o que restou no banco.
-- Falha da execução ou recusa da barreira: mensagem padrão e devolução à
-  análise manual (Aula 06, 5.3).
+- Falha da execução (inclusive fluxo sem resposta) ou recusa da barreira:
+  mensagem padrão e devolução à análise manual (Aula 06, 5.3). O progresso, a
+  instrução, a minuta, as consultas e as medidas da execução recusada não
+  aparecem.
 
 Execução: streamlit run app.py
 """
@@ -27,7 +29,7 @@ from datetime import datetime
 import streamlit as st
 
 from eliminacao import eliminar_titular
-from instrutor import BANCO_PADRAO, MENSAGEM_PADRAO, construir_agente, instruir
+from instrutor import BANCO_PADRAO, MENSAGEM_PADRAO, Resultado, construir_agente, instruir
 
 BASE = pathlib.Path(__file__).parent
 PEDIDOS = json.loads((BASE / "dados" / "pedidos.json").read_text(encoding="utf-8"))
@@ -65,13 +67,25 @@ def agente_em_cache():
 def executar(pedido: dict, complemento: dict | None) -> None:
     rotulo = "Aplicando a complementação" if complemento else "Instruindo o pedido"
     with st.status(f"{rotulo} {pedido['numero']}", expanded=True) as status:
-        resultado = instruir(pedido, agente_em_cache(), complemento=complemento,
-                             ao_chamar_ferramenta=lambda nome, _args: st.write(ROTULOS.get(nome, nome)))
+        # O progresso fica num espaço próprio, apagado se a instrução não for
+        # entregue: da execução recusada, nada além da mensagem padrão fica na tela.
+        progresso, etapas = st.empty(), []
+
+        def anunciar(nome, _args):
+            etapas.append(f"- {ROTULOS.get(nome, nome)}")
+            progresso.markdown("\n".join(etapas))
+
+        try:
+            resultado = instruir(pedido, agente_em_cache(), complemento=complemento,
+                                 ao_chamar_ferramenta=anunciar)
+        except Exception as erro:  # nenhuma falha pode derrubar a tela
+            resultado = Resultado("erro", motivo=[f"{type(erro).__name__}: {erro}"])
         if resultado.situacao == "entregue":
             status.update(label=f"Instrução concluída em {resultado.medidas['segundos']} s",
                           state="complete")
         else:
-            status.update(label="Instrução não concluída", state="error")
+            progresso.empty()
+            status.update(label="Instrução não concluída", state="error", expanded=False)
     st.session_state["atual"] = {"pedido": pedido, "complemento": complemento,
                                  "resultado": resultado}
 
@@ -186,7 +200,7 @@ with aba_instrucao:
                     st.rerun()
 
         m = resultado.medidas
-        if m.get("chamadas") is not None:
+        if resultado.situacao == "entregue" and m.get("chamadas") is not None:
             st.caption(f"{m.get('chamadas', 0)} chamadas ao modelo · "
                        f"{len(m.get('ferramentas', []))} consultas · "
                        f"{m.get('tokens_entrada', 0)} tokens de entrada · "

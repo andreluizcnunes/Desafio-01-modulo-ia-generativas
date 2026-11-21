@@ -18,6 +18,11 @@
 [A3] Diligência DIA-2026-0111 e complementação na mesma sessão
     recomendação no pedido: ['Diligência', '-', '-']
     recomendação após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
+[A3b] Complementação com data negada ou cancelada mantém a diligência
+    modelo tentou aptidão com «O retorno não será em 2026-11-20. A data ainda será informada.»: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno não será em 2026-11-20. A data ainda será informada.»: diligência exibida sem a data, quantidade ou valor
+    modelo tentou aptidão com «O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.»: tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
+    «O retorno está previsto para 2026-11-20. Essa previsão foi cancelada.»: diligência exibida sem a data, quantidade ou valor
 [A4] Falhas: só a mensagem padrão, nada da execução recusada
     recusa da barreira (valor total plantado): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
     status ERROR (erro da API como conteúdo): tela mostra apenas "Não foi possível concluir a instrução automática deste pedido. O pedido foi devolvido à análise manual."
@@ -34,8 +39,8 @@
     Carla (207418, sessão sob 207481): Conferência tabela por tabela: nada restou do titular no banco do agente.
     controle Ana Paula continua no banco: {'agno_sessions': 1, 'agno_runs': 1, 'agno_memories': 1}
 [B] Modelo real: DIA-2026-0101
-    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14331 tokens de entrada · 544 de saída · US$ 0.00352 · 7.9 s']
+    recomendação: ['Apto para autorização'] · ['5 chamadas ao modelo · 4 consultas · 14621 tokens de entrada · 546 de saída · US$ 0.00358 · 7.4 s']
 [B] Modelo real: DIA-2026-0111
-    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5291 tokens de entrada · 392 de saída · US$ 0.00153 · 4.0 s']
+    recomendação: ['Diligência'] · ['2 chamadas ao modelo · 1 consultas · 5407 tokens de entrada · 390 de saída · US$ 0.00155 · 3.8 s']
     após a complementação: ['Apto para autorização', '3.5', 'R$ 980,00']
 Todas as verificações do formulário passaram.

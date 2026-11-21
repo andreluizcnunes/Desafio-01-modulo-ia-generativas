@@ -12,7 +12,7 @@
       antes            : {'agno_sessions': 1, 'agno_runs': 2, 'agno_memories': 1}
       etapa 1 sessões  : {'pelo_user_id': ['DIA-2026-0111'], 'por_mencao_sob_outro_user_id': []}
       após a etapa 1   : {'agno_memories': 1}
-      etapa 2 memórias : 1 apagada(s) ['Beatriz Moraes Cunha (matrícula 206689) tem o pedido de diárias DIA-2026-0111, c']
+      etapa 2 memórias : 1 apagada(s) ['Beatriz Moraes Cunha tem o pedido de diárias DIA-2026-0111, complementado em 09/']
       depois (tabela por tabela): nenhuma tabela · nada restou: SIM
     titular: Carla Regina Souza (207418)
       antes            : {'agno_runs': 2}

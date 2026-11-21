@@ -30,7 +30,47 @@ deixou a data cancelada, negada, condicional ou indefinida (`desenho.md`, Seçã
 
 ### B2 — Medições reais
 
-Ver a seção seguinte, acrescentada depois da medição.
+**Diagnóstico da conexão.** A credencial não foi exibida. Neste ambiente, com a mesma
+configuração, foram verificados quatro pontos:
+
+- **Configuração:** `OPENAI_API_KEY` presente no `.env`, e nenhuma URL base ou variável
+  de proxy definida.
+- **Rede:** o DNS de `api.openai.com` resolveu.
+- **Autenticação:** `GET /v1/models` respondeu 200 em 0,7 s.
+- **Disponibilidade:** o `gpt-5.6-luna` constava da lista de modelos.
+
+O `Connection error` da auditoria, com zero tokens, veio da rede do ambiente do
+auditor. Nada foi alterado na configuração.
+
+**Medições reais da versão candidata (`6f4d2fa`, 21/11/2026).** A versão inclui a
+correção do B1. O cabeçalho de `medicao.md`, `memoria.md` e `falhas.md` registra a
+versão executada. A medição anterior está em `resultados/historico/medicao_067e97b.md`.
+
+| Medição | Resultado real | Evidência |
+|---|---|---|
+| 12 pedidos e duas complementações, 3 rodadas × 2 configurações | 42/42 e 42/42 (14/14 em cada rodada); 0 recusados, 0 erros, 0 entregues errados; nenhuma consulta barrada pela guarda | `resultados/medicao.md` |
+| Tokens (desligadas / ligadas) | entrada 576.462 / 575.896; saída 24.065 / 23.828; E₁ médio 2.741; acumulado de 5 passos 14.690 | `resultados/medicao.md` |
+| Tempo e custo (desligadas / ligadas) | 292,5 s / 295,5 s; US$ 0,14417 / 0,14377; mediana de US$ 0,00367 por pedido; US$ 1,74 por mês | `resultados/medicao.md`; `relatorio.md`, Seção 3 |
+| Chamadas paralelas | 0 execuções com chamadas simultâneas nas duas configurações; no máximo 5 chamadas por item | `resultados/medicao.md` |
+| Memória por turno, nas três configurações, para as duas complementações | A: 0/2 aplicadas; B: 2/2, com +504 / +532 tokens na 1ª chamada do turno; C: 2/2, custando 4% a 20% mais que B | `resultados/memoria.md` |
+| Quatro falhas provocadas | (1) resistiu e alertou 6/6; (2) `status=error` e mensagem padrão; (3) fábrica deixa CPF e conta passarem, configurado mascara; (4) diligência nas 6, todas recusadas | `resultados/falhas.md` |
+| Formulário com o modelo real | 0101 apto; 0111 diligência e apto após a complementação | `resultados/etapa5_formulario.txt`, parte B |
+| Etapa 3, parte 3, e eliminação com o modelo real | sem CPF ou conta nas mensagens e no banco; nada restou das duas titulares, controle preservado | `resultados/etapa3_filtro_e_barreira.txt`; `resultados/eliminacao.txt` |
+
+O confronto com o desenho e a justificativa da conferência humana estão no
+`relatorio.md`, Seções 3 e 8. E₁ ficou 33% acima do estimado, a saída ficou igual ao
+estimado e o custo mensal, 18% acima. Com 0 erros em 84, o limite superior de 95% de
+erro ainda é de cerca de 3,6%. Por isso, a conferência de toda instrução continua.
+
+**Resultados simulados, registrados à parte.** As respostas roteirizadas e o HTTP
+interceptado (`teste_barreira.py`, `teste_bloqueio.py`, `teste_eliminacao.py` e
+`teste_app.py`, parte A) verificam o código. Os números deles não entram nas medidas
+acima.
+
+**Impedimentos remanescentes.** Nenhum para B1 e B2. Os achados E1 e E2 da auditoria
+não eram bloqueadores e ficaram fora do escopo desta correção. O log de eliminação
+desta execução registra 0 memórias da Carla, e o relatório agora descreve isso
+(Seção 6). O falso alerta de E2 continua sem correção.
 
 ## Quarta revisão (base `067e97b`)
 

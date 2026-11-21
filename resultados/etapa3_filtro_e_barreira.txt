@@ -30,15 +30,15 @@
     0111 correto (diligencia)                                                      -> liberada
     0112 correto (diligencia)                                                      -> liberada
     0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> RECUSADA
-        · calcular_diarias: data_pedido='2026-11-09' não é a data_pedido do pedido (2026-10-08)
-        · calcular_diarias: data_partida='2026-10-08' não é a data_partida do pedido (2026-11-09)
-        · consultar_historico_diarias: data_partida='2026-10-08' não é a data de partida do pedido (2026-11-09)
-        · consultar_historico_diarias: quantidade 35.5 não veio de um cálculo válido
-        · consultar_saldo_diarias: valor 9940.0 não veio de um cálculo válido
+        · calcular_diarias: data_pedido não corresponde ao campo do pedido vigente
+        · calcular_diarias: data_partida não corresponde ao campo do pedido vigente
+        · consultar_historico_diarias: data_partida não é a data de partida do pedido vigente
+        · consultar_historico_diarias: quantidade pedida não veio de um cálculo válido desta execução
+        · consultar_saldo_diarias: valor não veio de um cálculo válido desta execução
         · consulta obrigatória ausente ou inválida para: antecedencia, prestacao_contas, limite_mensal, saldo_orcamentario
         · quantidade 35.5 e valor 9940.0 não são os do cálculo válido (None, None)
     0101 com a data de protocolo no lugar da partida, só no histórico              -> RECUSADA
-        · consultar_historico_diarias: data_partida='2026-10-08' não é a data de partida do pedido (2026-11-09)
+        · consultar_historico_diarias: data_partida não é a data de partida do pedido vigente
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
     0101 com saldo inventado no fundamento                                         -> liberada (textos refeitos pelo código)
     0101 com valor inventado na minuta                                             -> liberada (textos refeitos pelo código)
@@ -94,7 +94,7 @@
     0111 diligência com quantidade e valor                                         -> RECUSADA
         · diligência com quantidade ou valor: não há análise de mérito
     0111 diligência correta, mas com tentativa de cálculo sem retorno              -> RECUSADA
-        · calcular_diarias: grupo 'A' não é o do cadastro da matrícula vigente 206689
+        · calcular_diarias: argumento em formato inválido
         · consultas de mérito em pedido que exige diligência (art. 9º): calcular_diarias
     0112 diligência correta (nome diverge do cadastro)                             -> liberada
     0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> RECUSADA
@@ -106,21 +106,22 @@
     0111 complementação correta (retorno 2026-11-20)                               -> liberada
     complementação do 0111 aplicada ao 0112                                        -> RECUSADA
         · complementação do pedido DIA-2026-0111 aplicada ao pedido DIA-2026-0112
-        · calcular_diarias: data_partida='2026-11-17' não é a data_partida do pedido (2026-11-24)
-        · calcular_diarias: data_retorno='2026-11-20' não é a data_retorno do pedido (2026-11-27)
-        · consultar_servidor: matrícula 206689 não consta do pedido nem da complementação
-        · consultar_historico_diarias: matrícula 206689 não é a matrícula vigente 207481
-        · consultar_historico_diarias: data_partida='2026-11-17' não é a data de partida do pedido (2026-11-24)
-        · consultar_historico_diarias: quantidade 3.5 não veio de um cálculo válido
-        · consultar_saldo_diarias: unidade 'CFF' não é a do cadastro da matrícula vigente 207481
-        · consultar_saldo_diarias: valor 980.0 não veio de um cálculo válido
+        · consultar_servidor: matrícula não consta do pedido nem da complementação
+        · consultar_servidor: nome informado difere do pedido
+        · calcular_diarias: data_partida não corresponde ao campo do pedido vigente
+        · calcular_diarias: data_retorno não corresponde ao campo do pedido vigente
+        · consultar_historico_diarias: matrícula não é a matrícula vigente
+        · consultar_historico_diarias: data_partida não é a data de partida do pedido vigente
+        · consultar_historico_diarias: quantidade pedida não veio de um cálculo válido desta execução
+        · consultar_saldo_diarias: unidade não é a do cadastro da matrícula vigente
+        · consultar_saldo_diarias: valor não veio de um cálculo válido desta execução
         · instrução do pedido DIA-2026-0111, esperado DIA-2026-0112
         · matrícula 206689 da instrução não é a matrícula vigente do pedido (207481)
         · consulta obrigatória ausente ou inválida para: cadastro, antecedencia, prestacao_contas, limite_mensal, saldo_orcamentario
         · quantidade 3.5 e valor 980.0 não são os do cálculo válido (None, None)
     0112 complementação correta (matrícula 207418)                                 -> liberada
     0112 complementação com o histórico da matrícula digitada 207481               -> RECUSADA
-        · consultar_historico_diarias: matrícula 207481 não é a matrícula vigente 207418
+        · consultar_historico_diarias: matrícula não é a matrícula vigente
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
 
 [3] DIA-2026-0104 instruído de verdade: o CPF chega ao modelo ou ao banco?

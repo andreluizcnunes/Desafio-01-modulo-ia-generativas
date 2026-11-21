@@ -80,22 +80,22 @@ O enunciado anuncia "quatro perguntas", mas lista três. Respondo às três list
     em que a Aula 06, 4.3, mediu o cálculo feito com data errada em 2 de 6 execuções.
   - Na nossa medição, com as paralelas **ligadas**, o modelo pediu duas ferramentas ao
     mesmo tempo em **0 de 42** execuções, com 42/42 acertos nas duas configurações e
-    custo praticamente igual (US$ 0,1441 contra 0,1414).
+    custo praticamente igual (US$ 0,1438 contra 0,1442).
   - Desligar custa zero e passa a garantia do comportamento do modelo para a API.
 - **Teto: `tool_call_limit=8`.**
   - O pedido completo usa 4 ferramentas em **5 chamadas** ao modelo (mediana medida, igual
     ao previsto no `desenho.md`).
-  - O máximo observado foi 8 chamadas ao modelo (0110 de uma rodada, paralelas
-    ligadas); na medição anterior, 9, com as paralelas desligadas. Nas duas, a
-    instrução saiu correta. O teto acomoda esse caso e corta a cauda: a razão entre o
-    item mais caro e a mediana ficou entre 1,14× e 1,62× nesta medição (Aula 03, 5.4).
+  - Nesta medição, nenhum item passou de 5 chamadas. Nas anteriores, o 0110 chegou a 8
+    (paralelas ligadas) e a 9 (paralelas desligadas), e a instrução saiu correta. O
+    teto acomoda esse caso e corta a cauda: a razão entre o item mais caro e a mediana
+    ficou entre 1,12× e 1,14× nesta medição (Aula 03, 5.4).
 - **Memória: histórico da sessão com teto de 4 execuções**, sem memórias do usuário.
   - Sem memória, as complementações foram aplicadas ao pedido certo em **0/2**. Com o
-    histórico, em **2/2**, acrescentando cerca de 540 tokens (535 e 542) à primeira chamada
+    histórico, em **2/2**, acrescentando cerca de 520 tokens (504 e 532) à primeira chamada
     do turno.
-  - As memórias do usuário também acertaram 2/2, mas custaram 8% a 11% mais (16% a 18% na medição anterior) e guardaram
-    fatos da servidora entre sessões, inclusive sob a matrícula de outro servidor no caso
-    0112.
+  - As memórias do usuário também acertaram 2/2, mas custaram 4% a 20% mais (8% a 11% e
+    16% a 18% nas medições anteriores) e guardaram fatos da servidora entre sessões,
+    numa execução anterior inclusive sob a matrícula de outro servidor no caso 0112.
   - É a mesma conclusão da Aula 07, 3.3 e 7: histórico completo com teto para conversas
     curtas. Pedido mais complementação são 2 execuções, e o teto de 4 deixa folga para
     uma segunda complementação.
@@ -160,7 +160,7 @@ Por sete camadas, todas em código:
 
 Resultados medidos:
 
-- **Modelo real:** **84/84 acertos** e 0 instruções entregues diferentes do gabarito,
+- **Modelo real** (versão `6f4d2fa`): **84/84 acertos** e 0 instruções entregues diferentes do gabarito,
   com o critério que confere também situações, trilha sem consulta fora da etapa,
   fatos dos textos, o papel de cada dado e os alertas por categoria
   (`resultados/medicao.md`).

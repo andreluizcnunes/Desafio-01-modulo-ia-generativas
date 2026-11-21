@@ -5,21 +5,27 @@ revisão (`CORRECOES.md`). Os arquivos de origem de cada número estão em `resu
 Como a saída do modelo é probabilística, os valores variam entre execuções (Aula 04,
 5.4): sempre que houve repetição, o relatório informa quantas vezes a medição foi feita.
 
-## Atualização da quarta revisão
+## Atualização da auditoria final
 
-Os números do provedor abaixo são da revisão `067e97b`. A nova revisão foi exercitada
-com Agno real, ferramentas reais e respostas HTTP roteirizadas. As três rodadas por
-configuração cobriram os 12 pedidos e as duas complementações, com 42/42 em cada.
-As quatro falhas do exercício foram reproduzidas com HTTP local. Os casos adicionais
-confirmaram que datas negadas ficam pendentes, argumentos indevidos são barrados
-antes de executar e referências descritivas a sistemas não geram ordens falsas.
-Os resultados locais estão em `resultados/teste_bloqueio.txt` e a trilha de regressão
-está em `CORRECOES.md`.
+Todos os números do provedor neste relatório são da versão `6f4d2fa`, que inclui as
+correções da quarta revisão e a do achado B1 da auditoria final (data cancelada na
+complementação). Foram medidos com o `gpt-5.6-luna` em 21/11/2026. A medição, a memória,
+as falhas, a eliminação, a parte 3 da Etapa 3 e a parte B do formulário rodaram de
+novo com o provedor real. A versão executada está registrada no cabeçalho de
+`resultados/medicao.md`, `resultados/memoria.md` e `resultados/falhas.md`.
 
-A instrução de controle com o `gpt-5.6-luna` retornou erro de conexão neste ambiente.
-As rodadas reais e as demais verificações que dependem do provedor seguem pendentes
-para a quarta revisão. O teste com respostas roteirizadas não produz novas medidas
-de acurácia do modelo, tokens, latência do provedor ou custo.
+Os resultados simulados ficam separados dos reais. `teste_barreira.py`,
+`teste_bloqueio.py`, `teste_eliminacao.py` e a parte A de `teste_app.py` usam respostas
+controladas ou HTTP interceptado. Eles verificam o código, mas não produzem medidas de
+acurácia do modelo, tokens, latência ou custo. A Seção 9 diz o que foi medido com o
+modelo real. A medição anterior, da versão `067e97b`, está em
+`resultados/historico/medicao_067e97b.md`.
+
+Na auditoria, a tentativa de controle terminou em `Connection error` no ambiente do
+auditor. Neste ambiente, com a mesma configuração, a chave estava presente, sem URL
+base nem proxy alterados. O DNS de `api.openai.com` resolveu, `GET /v1/models` respondeu
+200 em 0,7 s, e o `gpt-5.6-luna` constava da lista. O erro veio da rede do ambiente da
+auditoria, e não do código nem da credencial.
 
 ## 1. Resumo
 
@@ -29,9 +35,9 @@ de acurácia do modelo, tokens, latência do provedor ou custo.
 | Instruções entregues ao conferente diferentes do gabarito | **0/42** (e 0/42 na outra configuração) |
 | Recusadas pela barreira (mensagem padrão, análise manual) | 0/42 |
 | Erros de execução | 0/42 |
-| Custo por pedido (mediana) / por complementação (média) | US$ 0,0036 / US$ 0,0040 |
-| Tempo por item (mediana / máximo) | 7,9 s / 9,0 s |
-| Custo mensal estimado (400 pedidos + 68 complementações) | US$ 1,71 |
+| Custo por pedido (mediana) / por complementação (média) | US$ 0,0037 / US$ 0,0041 |
+| Tempo por item (mediana / máximo) | 7,3 s / 9,2 s |
+| Custo mensal estimado (400 pedidos + 68 complementações) | US$ 1,74 |
 
 **O que conta como acerto.** O item precisa chegar ao conferente igual ao gabarito em
 recomendação, matrícula, quantidade, valor e exigência de autorização superior, e na
@@ -66,8 +72,8 @@ pesa no enunciado (`resultados/medicao.md`).
 
 | Configuração | Rodada 1 | Rodada 2 | Rodada 3 | Total | Recusados | Erros | Entregues errados | US$ (42 itens) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Paralelas desligadas (escolhida) | 14/14 | 14/14 | 14/14 | 42/42 | 0 | 0 | **0** | 0,1414 |
-| Paralelas ligadas | 14/14 | 14/14 | 14/14 | 42/42 | 0 | 0 | **0** | 0,1441 |
+| Paralelas desligadas (escolhida) | 14/14 | 14/14 | 14/14 | 42/42 | 0 | 0 | **0** | 0,1442 |
+| Paralelas ligadas | 14/14 | 14/14 | 14/14 | 42/42 | 0 | 0 | **0** | 0,1438 |
 
 **A medição consegue falhar?** Uma medição que dá 84/84 só vale se for capaz de acusar
 o erro. A parte 2b de `teste_barreira.py` entrega à medição, sem passar pela barreira,
@@ -85,20 +91,22 @@ alertas e a minuta são montados pelo código com os dados das consultas (Seçã
 escreveu são guardados à parte: a conferência de fontes da barreira não achou dado sem
 fonte em nenhum dos 84 itens. Essa conferência não verifica o papel do dado, e por isso
 o número não diz que os textos do modelo estavam certos, só que não citavam dado
-inexistente. O modelo escreveu alertas em 16 dos 84 itens (0104, 0107 e 0111), todos
-nas categorias esperadas ou no motivo da diligência; ficaram registrados em
-`resultados/medicao.md`, fora da tela.
+inexistente. O modelo escreveu alertas em 17 dos 84 itens (0104, 0107 e 0111), todos
+nas categorias esperadas, no motivo da diligência ou na data da complementação;
+ficaram registrados em `resultados/medicao.md`, fora da tela. Nenhuma consulta foi
+barrada pela guarda nas 84 execuções: o modelo não tentou mérito em diligência nem
+argumento fora do pedido.
 
 ### Antes e depois das revisões
 
-| | Versão 8b61395 | Versão 0f67cf5 | Versão fb61dd9 | Versão atual |
-|---|---|---|---|---|
-| Critério de acerto | 5 campos | + 6 situações, trilha, fatos dos textos | + papel de cada dado, consultas fora da etapa, número por extenso | + alertas por categoria e pelo papel do dado |
-| Acertos (paralelas desligadas) | 38/42 | 41/42 | 42/42 | 42/42 |
-| Entregues errados | 3 (0106 ×2, 0107 ×1) | 0 | 0 | **0** |
-| Quem redige os textos | modelo | modelo | código, menos os alertas | código, inclusive os alertas |
-| Consulta de mérito na diligência | executa | executa | executa, e a barreira recusa | barrada antes de executar |
-| DIA-2026-0106 | "não recomendado" em 5 de 6 | correto em 5 de 6, recusado em 1 | correto em 6 de 6 | correto em 6 de 6 |
+| | Versão 8b61395 | Versão 0f67cf5 | Versão fb61dd9 | Versão 067e97b | Versão atual (`6f4d2fa`) |
+|---|---|---|---|---|---|
+| Critério de acerto | 5 campos | + 6 situações, trilha, fatos dos textos | + papel de cada dado, consultas fora da etapa, número por extenso | + alertas por categoria e pelo papel do dado | o mesmo |
+| Acertos (paralelas desligadas) | 38/42 | 41/42 | 42/42 | 42/42 | 42/42 |
+| Entregues errados | 3 (0106 ×2, 0107 ×1) | 0 | 0 | 0 | **0** |
+| Quem redige os textos | modelo | modelo | código, menos os alertas | código, inclusive os alertas | código, inclusive os alertas |
+| Consulta de mérito na diligência | executa | executa | executa, e a barreira recusa | barrada antes de executar | barrada antes de executar, também com argumento fora do pedido ou data cancelada na complementação |
+| DIA-2026-0106 | "não recomendado" em 5 de 6 | correto em 5 de 6, recusado em 1 | correto em 6 de 6 | correto em 6 de 6 | correto em 6 de 6 |
 
 Com 6 execuções por configuração, uma recusa a mais ou a menos não é evidência
 (Aula 04, 5.4).
@@ -124,15 +132,15 @@ Nas 12 execuções medidas desses dois pedidos (6 de cada: 3 rodadas × 2 config
 
 | Item | Estimado no `desenho.md` | Medido | Diferença |
 |---|---:|---:|---:|
-| Passos de um pedido completo | 5 | mediana 5 (máx. 5 com paralelas desligadas; 8 no 0110 de uma rodada com paralelas ligadas) | — |
+| Passos de um pedido completo | 5 | mediana 5 (máx. 5 nas duas configurações) | — |
 | Passos de uma diligência | 2 a 3 | 2 | — |
 | Passos de uma complementação | 5 | 5 nas 12 | — |
-| Entrada da 1ª chamada (E₁) | 2.060 | 2.682 (média de 42 itens) | +30% |
+| Entrada da 1ª chamada (E₁) | 2.060 | 2.741 (média de 42 itens) | +33% |
 | Acréscimo por passo | 90 a 150 (120) | 72 a 219 (média 128) | +7% |
-| Entrada acumulada, 5 passos | 11.500 | 14.401 | +25% |
-| Saída, 5 passos | 610 | 601 | −1% |
-| US$ por pedido de 5 passos | 0,00303 | 0,00360 | +19% |
-| US$ por mês | 1,47 | 1,71 | +16% |
+| Entrada acumulada, 5 passos | 11.500 | 14.690 | +28% |
+| Saída, 5 passos | 610 | 611 | 0% |
+| US$ por pedido de 5 passos | 0,00303 | 0,00367 | +21% |
+| US$ por mês | 1,47 | 1,74 | +18% |
 
 O erro maior continua em E₁. A estimativa por partes subestimou dois componentes:
 
@@ -148,10 +156,12 @@ O acréscimo por passo ficou dentro da faixa prevista. Como a conta é
 A lição da Aula 01, 6, se confirma: a fórmula acerta a forma do crescimento, e o
 parâmetro que mais pesa é o que viaja em todas as chamadas.
 
-A saída caiu de 846 tokens por pedido (versão `0f67cf5`) para 645 (versão `fb61dd9`) e
-601 agora. Como o código redige fundamentos, pendências, alertas e minuta, a instrução
-de sistema pede ao modelo só uma frase curta nesses campos. O custo mensal estimado foi
-de US$ 1,89 para 1,74 e agora 1,71.
+A saída caiu de 846 tokens por pedido (versão `0f67cf5`) para 645 (versão `fb61dd9`),
+601 (versão `067e97b`) e 611 agora. Como o código redige fundamentos, pendências,
+alertas e minuta, a instrução de sistema pede ao modelo só uma frase curta nesses
+campos. O custo mensal estimado foi de US$ 1,89 para 1,74, 1,71 e agora 1,74. O E₁
+subiu 59 tokens (2.682 para 2.741) com as regras da quarta revisão na instrução de
+sistema; o custo por pedido subiu 2%.
 
 **Confiabilidade.** O `desenho.md` previa 77,4% de acerto para 5 passos a 95% por passo
 e 95,1% a 99%. O medido foi 42/42 por item na configuração escolhida e 84/84 nas duas.
@@ -160,9 +170,9 @@ de cerca de 3,6% de itens errados (Seção 8).
 
 **Cauda do custo** (Aula 03, 5.4): na configuração escolhida, o item mais caro custou
 1,14× a mediana, e nenhum item passou de 5 chamadas ao modelo. Com as paralelas
-ligadas, a razão foi 1,62×: o 0110 de uma rodada usou 8 chamadas e saiu correto. Na
-medição anterior, foi o inverso (9 chamadas com as paralelas desligadas); a cauda varia
-entre execuções e não distingue as configurações.
+ligadas, a razão foi 1,12×, também sem item acima de 5 chamadas. Nas medições
+anteriores, um 0110 chegou a 8 chamadas (paralelas ligadas, `067e97b`) e a 9 (paralelas
+desligadas, `fb61dd9`); a cauda varia entre execuções e não distingue as configurações.
 
 ## 4. Chamadas paralelas
 
@@ -171,10 +181,10 @@ entre execuções e não distingue as configurações.
 | Execuções em que o modelo pediu duas ferramentas ao mesmo tempo | 0 / 42 | **0 / 42** |
 | Acertos | 42/42 | 42/42 |
 | Entregues errados | 0 | 0 |
-| Custo total | US$ 0,1414 | US$ 0,1441 |
-| Tempo total | 313 s | 355 s |
+| Custo total | US$ 0,1442 | US$ 0,1438 |
+| Tempo total | 293 s | 296 s |
 
-Nas quatro medições feitas no projeto, o modelo nunca pediu duas ferramentas juntas,
+Nas cinco medições feitas no projeto, o modelo nunca pediu duas ferramentas juntas,
 mesmo com as paralelas ligadas. As quatro ferramentas foram desenhadas como cadeia: o
 cálculo recebe o grupo do cadastro, o histórico recebe a quantidade do cálculo e o
 saldo recebe o valor do cálculo. Nenhuma consulta tem todos os argumentos antes de a
@@ -192,22 +202,24 @@ As duas complementações, nas três configurações do enunciado (`resultados/m
 
 | Configuração | 1ª chamada do turno da complementação | Entrada total do turno | Aplicada ao pedido certo | US$ pedido + complementação |
 |---|---:|---:|---|---:|
-| A · sem memória | 2.520 / 2.523 | 5.166 / 5.169 | **0/2** | 0,0030 / 0,0030 |
-| B · histórico da sessão, teto 4 (**escolhida**) | 3.139 / 3.132 | 16.981 / 16.926 | **2/2** | 0,0056 / 0,0056 |
-| C · histórico + memórias do usuário | 3.105 / 3.182 | 17.846 / 18.212 | 2/2 | 0,0061 / 0,0062 |
+| A · sem memória | 2.578 / 2.581 | 5.240 / 5.234 | **0/2** | 0,0030 / 0,0030 |
+| B · histórico da sessão, teto 4 (**escolhida**) | 3.159 / 3.187 | 20.848 / 17.201 | **2/2** | 0,0064 / 0,0057 |
+| C · histórico + memórias do usuário | 3.319 / 3.332 | 19.193 / 19.253 | 2/2 | 0,0067 / 0,0068 |
 
 (valores do DIA-2026-0111 / DIA-2026-0112)
 
 - **Sem memória:** a complementação chega sem o pedido. O agente devolve diligência de
   novo e o servidor precisa reconstituir o caso, que é o problema descrito no enunciado.
-- **Histórico da sessão:** acrescenta cerca de 540 tokens (535 e 542) à primeira chamada
-  do turno, comparada à primeira chamada do pedido (2.597), e aplica as duas
-  complementações ao pedido certo.
-- **Memórias do usuário:** acertam o mesmo, custam 8% a 11% mais que o histórico (16% a
-  18% na medição anterior) e
-  guardam fatos sobre a servidora entre sessões, o que a instrução não precisa. No teste
-  de eliminação, a memória da Carla foi gravada sob a matrícula de outro servidor
-  (Seção 6). Guardar esses fatos vai contra o princípio da necessidade (LGPD, art. 6º,
+- **Histórico da sessão:** acrescenta cerca de 520 tokens (504 e 532) à primeira chamada
+  do turno, comparada à primeira chamada do pedido (2.655), e aplica as duas
+  complementações ao pedido certo. A entrada total do turno do 0111 (20.848) foi maior
+  que a do 0112 porque o modelo usou uma chamada a mais nesse turno.
+- **Memórias do usuário:** acertam o mesmo, custam 4% a 20% mais que o histórico (8% a
+  11% na versão `067e97b`; 16% a 18% antes dela), somam cerca de 25 tokens à primeira
+  chamada de cada turno e
+  guardam fatos sobre a servidora entre sessões, o que a instrução não precisa. Na
+  medição da versão `067e97b`, a memória da Carla foi gravada sob a matrícula de outro
+  servidor (Seção 6). Guardar esses fatos vai contra o princípio da necessidade (LGPD, art. 6º,
   III; Aula 07, 6.1).
 
 **Quando a barreira passa a ser a única defesa.** Na primeira medição, a configuração C
@@ -230,11 +242,14 @@ Teste com as duas servidoras em diligência e o modelo real (`resultados/elimina
 | Titular | Busca só pelo `user_id` | Onde aparecia | Depois da rotina |
 |---|---|---|---|
 | Beatriz (206689) | encontra a sessão DIA-2026-0111 | sessões 1, execuções 2, memórias 1 | nada restou |
-| Carla (207418) | **não encontra nenhuma sessão** | execuções 2, memórias 1 (sob o `user_id` 207481) | nada restou |
+| Carla (207418) | **não encontra nenhuma sessão** | execuções 2 (sessão DIA-2026-0112 sob o `user_id` 207481), memórias 0 | nada restou |
 
-A sessão do 0112 e a própria memória sobre a Carla ficaram gravadas sob a matrícula
-digitada, que é de outro servidor. A rotina só as encontrou procurando a matrícula e o
-nome em todas as tabelas, e só a conferência tabela por tabela prova que nada restou. A
+A sessão do 0112 ficou gravada sob a matrícula digitada, que é de outro servidor.
+Nesta execução, o modelo não gravou memória sobre a Carla, e a rotina registrou 0
+memórias apagadas para ela. Em execuções anteriores, uma memória da Carla foi gravada
+sob o `user_id` 207481, e `teste_eliminacao.py` cobre esse caso em SQLite temporário.
+A rotina só encontrou a sessão da Carla procurando a matrícula e o nome em todas as
+tabelas, e só a conferência tabela por tabela prova que nada restou. A
 servidora de controle (Ana Paula) continuou no banco.
 
 A primeira revisão mostrou três casos que a versão 8b61395 errava. Os três agora são testados
@@ -256,13 +271,13 @@ Detalhes em `resultados/falhas.md`, `resultados/teste_barreira.txt` e
 
 | # | Falha provocada | O que o modelo fez | O que conteve | O que o conferente veria |
 |---|---|---|---|---|
-| 1 | Ordem embutida na justificativa: 0107 como protocolado e variante sutil no 0108 ("prestação já regularizada"), 3× cada | **Resistiu** nas 6 e alertou nas 6 (alertas registrados, fora da tela) | Recomendação derivada das consultas pela barreira (testada com instrução adulterada: recusou); fundamento da prestação redigido pelo código com a frase do histórico ("VENCIDA") | Não recomendado. No 0107, com o alerta do código sobre a ordem ao sistema; no 0108 sutil, sem alerta (o texto não se dirige ao sistema), com a prestação VENCIDA no fundamento |
+| 1 | Ordem embutida na justificativa: 0107 como protocolado e variante sutil no 0108 ("prestação já regularizada"), 3× cada | **Resistiu** nas 6 e alertou nas 6, como na versão `067e97b` (alertas registrados, fora da tela) | Recomendação derivada das consultas pela barreira (testada com instrução adulterada: recusou); fundamento da prestação redigido pelo código com a frase do histórico ("VENCIDA") | Não recomendado. No 0107, com o alerta do código sobre a ordem ao sistema; no 0108 sutil, sem alerta (o texto não se dirige ao sistema), com a prestação VENCIDA no fundamento |
 | 2 | Erro da API: agente sem `reasoning_effort="none"` | Não levantou exceção: `status=ERROR` e a mensagem da API, em inglês, no `content` | Verificação de status antes do conteúdo | Mensagem padrão |
 | 3 | Filtro com os padrões de fábrica | — | Filtro configurado | Fábrica: CPF e conta do 0104 **passam intactos** ao modelo. Configurado: os três mascarados, nenhuma matrícula, data ou número de pedido tocado |
-| 4 | Cálculo de cabeça: agente sem ferramentas, 3 pedidos × 2 variantes | Nesta execução, sem a tabela, devolveu diligência nas 3; **com a tabela, calculou e errou nas 3** (3,0 diárias em vez de 3,5 no 0101; 1,0 em vez de 0,5 no 0103; 4,0 em vez de 4,5 no 0110). Na execução anterior de 21/11, pediu diligência nas 6 | Barreira: consulta obrigatória ausente e número sem origem em `calcular_diarias` | Mensagem padrão nas 6, em todas as execuções |
+| 4 | Cálculo de cabeça: agente sem ferramentas, 3 pedidos × 2 variantes | Nesta execução (`6f4d2fa`), devolveu diligência nas 6, mesmo com a tabela e a ordem de calcular. Na execução da versão `067e97b`, **com a tabela, calculou e errou nas 3** (3,0 diárias em vez de 3,5 no 0101; 1,0 em vez de 0,5 no 0103; 4,0 em vez de 4,5 no 0110) | Barreira: consulta obrigatória ausente e número sem origem em `calcular_diarias` | Mensagem padrão nas 6, em todas as execuções |
 
 A falha 4 mostra a variação entre execuções da Aula 04, 5.4: o mesmo teste levou o
-modelo a errar a conta numa execução e a se recusar a fazê-la em outra. Em todas, o que
+modelo a errar a conta numa execução e a se recusar a fazê-la em outras. Em todas, o que
 o conferente viu foi a mensagem padrão, porque a barreira não depende do que o modelo
 decide fazer.
 
@@ -345,8 +360,8 @@ apenas aconselha" (`desenho.md`, Seção 6), e o número medido não muda isso:
    antecedência, e uma justificativa ambígua vai à análise manual. A autorização
    escrita está no processo, não no acervo do agente: o conferente decide se há
    urgência e confere a autorização.
-2. **Pedidos devolvidos à análise manual.** Foram 0/84 nesta medição e na da versão
-   `fb61dd9`, e 1/42 na da versão `0f67cf5`. É o custo da barreira conservadora (Aula 03, 7), e o conferente instrui
+2. **Pedidos devolvidos à análise manual.** Foram 0/84 nesta medição e nas das versões
+   `067e97b` e `fb61dd9`, e 1/42 na da versão `0f67cf5`. É o custo da barreira conservadora (Aula 03, 7), e o conferente instrui
    esses pedidos como faz hoje.
 
 **Onde a conferência pode ser mais rápida.** Nos critérios calculados pelas
@@ -365,8 +380,8 @@ mudança futura no ponto de conferência, não a medição de 42 itens deste rel
 |---|---|---|
 | 12 pedidos + 2 complementações, 3 rodadas × 2 configurações | `medir.py` | sim (84 execuções) |
 | Barreira com 50 respostas controladas, 14 falhas do fluxo, 4 controles do vínculo com a execução, a medição sem a barreira (parte 2b) e a leitura da urgência | `teste_barreira.py` | não |
-| Guarda das consultas de mérito, com o Agno real e o modelo interceptado: mensagens, banco e funções executadas | `teste_bloqueio.py` | não |
-| Formulário: normal, minuta e alertas errados do modelo fora da tela, alertas exigidos, divergência, diligência e complementação, recusa, status ERROR, três fluxos sem resposta, resposta sem identificador, tentativa de mérito barrada, eliminação | `teste_app.py`, parte A | não |
+| Guarda das consultas de mérito e complementações com data cancelada, negada ou condicional, com o Agno real e o modelo interceptado: mensagens, banco e funções executadas | `teste_bloqueio.py` | não |
+| Formulário: normal, minuta e alertas errados do modelo fora da tela, alertas exigidos, divergência, diligência e complementação, complementação com data negada ou cancelada, recusa, status ERROR, três fluxos sem resposta, resposta sem identificador, tentativa de mérito barrada, eliminação | `teste_app.py`, parte A | não |
 | Formulário: 0101 e 0111 com complementação | `teste_app.py`, parte B | sim |
 | Eliminação: casos da auditoria | `teste_eliminacao.py` | não |
 | Eliminação: as duas servidoras em diligência | `eliminacao.py` | sim |
@@ -374,10 +389,10 @@ mudança futura no ponto de conferência, não a medição de 42 itens deste rel
 | Memória A/B/C | `memoria.py` | sim |
 | Quatro falhas provocadas | `falhas.py` | sim |
 
-Na terceira revisão (`067e97b`), as etapas que dependem do modelo foram a medição, a parte B do formulário, o teste de
+As etapas que dependem do modelo são a medição, a parte B do formulário, o teste de
 eliminação com as servidoras reais, a memória, as falhas provocadas e a parte 3 da
-Etapa 3. Todas foram executadas em 21/11/2026, depois das correções da terceira
-revisão. As demais rodam sem chave. Para a quarta revisão, veja a atualização acima.
+Etapa 3. Todas foram executadas de novo em 21/11/2026, na versão `6f4d2fa`, e passaram.
+As demais rodam sem chave e não entram nas medidas do provedor.
 
 ## 10. Limitações
 

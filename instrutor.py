@@ -33,8 +33,10 @@ Decisões, cada uma com a aula de origem:
   identificador de cada execução, e o agente compartilhado pela tela não
   mistura pedidos (art. 9º; Aula 01, 8).
 - Resposta ausente, de outra execução ou com status diferente de concluído é
-  falha, conferida antes do conteúdo (Aula 06, 5.3). Sem o identificador da
-  execução atual, nenhuma resposta é buscada no banco. A barreira em código de
+  falha, conferida antes do conteúdo (Aula 06, 5.3). O identificador de cada
+  execução é gerado aqui e entregue ao Agno; a resposta, direta ou do banco,
+  precisa trazê-lo, e no fluxo de eventos o evento inicial também. Sem o
+  evento inicial desta execução, nenhuma resposta é buscada no banco. A barreira em código de
   `barreira.py` vem antes de qualquer coisa chegar ao conferente (Aula 01, 8;
   Aula 03, 7; Aula 04, 8).
 """
@@ -346,7 +348,7 @@ def _executar(pedido: dict, agente: Agent, complemento: Optional[dict], ao_chama
     ids = {"session_id": pedido["numero"], "user_id": pedido["matricula"], "run_id": execucao}
 
     inicio = time.perf_counter()
-    run_id = None  # identificador da execução atual, anunciado no início do fluxo
+    anunciado = None  # identificador anunciado pelo evento inicial do fluxo
     try:
         if ao_chamar_ferramenta is None:
             resposta = agente.run(entrada, **ids)
@@ -356,15 +358,15 @@ def _executar(pedido: dict, agente: Agent, complemento: Optional[dict], ao_chama
                                      yield_run_output=True, **ids):
                 nome = type(evento).__name__
                 if nome == "RunStartedEvent":
-                    run_id = getattr(evento, "run_id", None)
+                    anunciado = getattr(evento, "run_id", None)
                 elif nome == "ToolCallStartedEvent":
                     ao_chamar_ferramenta(evento.tool.tool_name, evento.tool.tool_args)
                 elif nome == "RunOutput":
                     resposta = evento
-            if resposta is None and run_id is not None:
+            if resposta is None and anunciado == execucao:
                 # O fluxo terminou sem a resposta final. O banco só é consultado
-                # quando se sabe qual execução procurar, e o que vier de lá
-                # precisa ter o identificador desta execução (conferido abaixo).
+                # quando o fluxo anunciou esta execução, e o que vier de lá
+                # precisa ter o identificador dela (conferido abaixo).
                 resposta = agente.get_last_run_output(session_id=pedido["numero"])
     except Exception as erro:  # falha que nem chegou a virar RunOutput
         return Resultado("erro", motivo=[f"exceção: {type(erro).__name__}: {erro}"],
@@ -373,13 +375,17 @@ def _executar(pedido: dict, agente: Agent, complemento: Optional[dict], ao_chama
 
     # 1. Execução sem resposta, que não concluiu ou que não é a desta chamada:
     # nada é lido do conteúdo (Aula 06, 5.3). O vínculo é conferido antes de
-    # qualquer leitura: uma resposta anterior da mesma sessão, mesmo válida,
+    # qualquer leitura, pelo identificador que esta chamada gerou: a resposta,
+    # direta ou recuperada do banco, precisa trazê-lo, e, no fluxo de eventos, o
+    # evento inicial também. Dois identificadores ausentes não são iguais: uma
+    # resposta sem identificador, ou uma anterior da mesma sessão, mesmo válida,
     # não é a resposta desta execução.
     if resposta is None:
         return Resultado("erro", motivo=["a execução terminou sem resposta identificável"],
                          medidas={"segundos": round(duracao, 1)})
-    if getattr(resposta, "session_id", None) != pedido["numero"] or (
-            ao_chamar_ferramenta is not None and getattr(resposta, "run_id", None) != run_id):
+    if (not getattr(resposta, "run_id", None) or resposta.run_id != execucao
+            or getattr(resposta, "session_id", None) != pedido["numero"]
+            or (ao_chamar_ferramenta is not None and anunciado != execucao)):
         return Resultado("erro", motivo=["a resposta não pertence à execução atual"],
                          medidas={"segundos": round(duracao, 1)})
     try:

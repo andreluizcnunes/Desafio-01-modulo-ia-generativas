@@ -12,8 +12,8 @@ Depois, os mesmos casos passam por `instruir` com o agente simulado e pelo
 classificador da medição: a instrução recusada não chega à tela (situação
 "recusada") e não conta como acerto; e as falhas do fluxo (status de erro,
 fluxo sem resposta, resposta de outra execução, exceção, fluxo sem evento
-inicial com uma execução anterior válida no banco) viram erro de execução,
-sem reaproveitar a instrução anterior.
+inicial com uma execução anterior válida no banco, resposta sem
+identificador) viram erro de execução, sem reaproveitar a instrução anterior.
 
 Por fim, confere que nenhum módulo do agente nem a tela leem o gabarito.
 
@@ -313,7 +313,8 @@ def parte2_instruir_e_medir(casos) -> None:
                          ("outra_execucao", "resposta de outra execução"),
                          ("excecao", "exceção durante a execução"),
                          ("sem_inicio", "sem evento inicial nem resposta; anterior válida no banco"),
-                         ("anterior", "sem resposta; banco devolve a execução anterior")):
+                         ("anterior", "sem resposta; banco devolve a execução anterior"),
+                         ("sem_id", "sem evento inicial; resposta concluída sem run_id")):
         for progresso in (False, True):
             cenas = [modo]
             if modo in ("sem_inicio", "anterior"):
@@ -333,6 +334,22 @@ def parte2_instruir_e_medir(casos) -> None:
                 assert not r.consultas, (modo, progresso)
             log(f"    {rotulo:58} {'(com progresso)' if progresso else '(sem progresso)':16} "
                 f"-> {r.situacao} · {r.motivo[0][:60]}")
+
+    log("\n[3b] Controles do vínculo com a execução atual: resposta desta execução é entregue")
+    gc, kc, ic = caso_correto("DIA-2026-0111", complementacao=True)
+    for progresso in (False, True):
+        for rotulo, pedido, compl, instrucao, consultas, gab in (
+                ("execução atual concluída (0101)", PEDIDOS["DIA-2026-0101"], None, i, k, g),
+                ("complementação legítima (0111)", PEDIDOS["DIA-2026-0111"],
+                 COMPLEMENTOS["DIA-2026-0111"], ic, kc, gc)):
+            agente = AgenteSimulado(lambda *_: {"modo": "normal", "instrucao": instrucao,
+                                                "consultas": consultas})
+            r = instruir(pedido, agente, complemento=compl,
+                         ao_chamar_ferramenta=(lambda *_: None) if progresso else None)
+            classe, dif = classificar(r, gab)
+            assert r.situacao == "entregue" and classe == "acerto", (rotulo, r.motivo, dif)
+            log(f"    {rotulo:58} {'(com progresso)' if progresso else '(sem progresso)':16} "
+                f"-> {r.situacao} · medição: {classe}")
 
 
 def parte_urgencia() -> None:
@@ -373,5 +390,6 @@ if __name__ == "__main__":
     parte2_instruir_e_medir(casos)
     parte3_gabarito_isolado()
     parte_urgencia()
-    log(f"\nTodos os {len(casos)} casos controlados e as 12 falhas do fluxo passaram.")
+    log(f"\nTodos os {len(casos)} casos controlados, as 14 falhas do fluxo e os 4 controles "
+        f"do vínculo passaram.")
     SAIDA.write_text("\n".join(linhas) + "\n", encoding="utf-8")

@@ -106,8 +106,9 @@ class AgenteSimulado:
     """Imita o `Agent` do Agno no que `instruir` usa: `run` e `get_last_run_output`.
 
     `roteiro(session_id, entrada)` devolve a cena: um dicionário com `modo`
-    ("normal", "erro", "sem_saida", "outra_execucao", "excecao", "sem_inicio" ou
-    "anterior"), e, no modo normal, `instrucao` e `consultas`.
+    ("normal", "erro", "sem_saida", "outra_execucao", "excecao", "sem_inicio",
+    "anterior" ou "sem_id"), e, no modo normal, `instrucao` e `consultas`.
+    Como o Agno, usa o `run_id` recebido em `run`.
 
     - "sem_saida": o fluxo anuncia o início e termina sem resposta, e o banco não
       tem execução.
@@ -115,26 +116,32 @@ class AgenteSimulado:
       guarda a execução anterior da mesma sessão, válida e tipada.
     - "anterior": o fluxo anuncia o início e termina sem resposta; o banco guarda
       a execução anterior da mesma sessão, com outro identificador.
+    - "sem_id": o fluxo termina sem evento inicial e entrega uma resposta
+      concluída, da sessão certa e tipada, mas sem identificador (run_id=None).
     """
 
     def __init__(self, roteiro):
         self.roteiro = roteiro
         self.ultima = None
 
-    def _saida(self, cena: dict, session_id: str, user_id: str) -> RunOutput:
+    def _saida(self, cena: dict, session_id: str, user_id: str, run_id=None) -> RunOutput:
         status = RunStatus.error if cena["modo"] == "erro" else RunStatus.completed
         conteudo = ("Error code: 400 - simulação de erro da API" if cena["modo"] == "erro"
                     else cena.get("instrucao"))
         ferramentas = [ToolExecution(tool_name=c["ferramenta"], tool_args=c["argumentos"],
                                      result=c["resultado"]) for c in cena.get("consultas", [])]
-        return RunOutput(run_id=str(uuid.uuid4()), session_id=session_id, user_id=user_id,
+        if cena["modo"] == "sem_id":
+            run_id = None
+        else:
+            run_id = run_id or str(uuid.uuid4())
+        return RunOutput(run_id=run_id, session_id=session_id, user_id=user_id,
                          content=conteudo, status=status, tools=ferramentas, messages=[])
 
-    def run(self, entrada, session_id=None, user_id=None, stream=False, **_):
+    def run(self, entrada, session_id=None, user_id=None, stream=False, run_id=None, **_):
         cena = self.roteiro(session_id, entrada)
         if cena["modo"] == "excecao":
             raise RuntimeError("simulação de falha de conexão")
-        saida = self._saida(cena, session_id, user_id)
+        saida = self._saida(cena, session_id, user_id, run_id)
         if cena["modo"] == "sem_saida":
             self.ultima = None
         elif cena["modo"] not in ("sem_inicio", "anterior"):
@@ -145,7 +152,7 @@ class AgenteSimulado:
             return None if cena["modo"] in ("sem_saida", "sem_inicio", "anterior") else saida
 
         def eventos():
-            if cena["modo"] != "sem_inicio":
+            if cena["modo"] not in ("sem_inicio", "sem_id"):
                 yield RunStartedEvent(run_id=saida.run_id, session_id=session_id)
             for t in saida.tools or []:
                 yield ToolCallStartedEvent(run_id=saida.run_id, session_id=session_id, tool=t)

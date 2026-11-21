@@ -12,7 +12,8 @@ humana, a diligência com complementação na mesma sessão, a recusa da barreir
 a tentativa de consulta de mérito no 0112 em diligência, barrada antes de
 executar (Agno real com o modelo interceptado), o status ERROR, o fluxo que
 termina sem resposta (inclusive sem evento
-inicial, com uma instrução válida anterior no banco) e a eliminação (válida e
+inicial, com uma instrução válida anterior no banco), a resposta sem
+identificador da execução e a eliminação (válida e
 com identidade inválida).
 
 Parte B (com chave): o pedido regular e a diligência com complementação pelo
@@ -76,8 +77,8 @@ class AgenteComutavel:
             # refaz a minuta com os dados do cálculo.
             instrucao = alterar(instrucao, minuta_despacho="Pedido DIA-2026-0101: valor total "
                                                            "de R$ 280,00. Apto.")
-        modo = self.cena if self.cena in ("erro", "sem_saida", "sem_inicio", "anterior") \
-            else "normal"
+        modo = self.cena if self.cena in ("erro", "sem_saida", "sem_inicio", "anterior",
+                                          "sem_id") else "normal"
         return {"modo": modo, "instrucao": instrucao, "consultas": consultas}
 
     def _alvo(self):
@@ -221,7 +222,8 @@ def parte_a() -> None:
             ("erro", "status ERROR (erro da API como conteúdo)", ["Error code"]),
             ("sem_saida", "fluxo terminou sem RunOutput", []),
             ("sem_inicio", "sem evento inicial nem resposta, anterior válida no banco", []),
-            ("anterior", "sem resposta, banco devolve a execução anterior", [])):
+            ("anterior", "sem resposta, banco devolve a execução anterior", []),
+            ("sem_id", "sem evento inicial, resposta concluída sem run_id", [])):
         # Antes de cada falha, uma instrução válida do mesmo pedido: a falha
         # não pode reaproveitá-la.
         AGENTE.cena = "normal"

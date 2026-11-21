@@ -235,6 +235,14 @@
     sem evento inicial nem resposta; anterior válida no banco  (com progresso)  -> erro · a execução terminou sem resposta identificável
     sem resposta; banco devolve a execução anterior            (sem progresso)  -> erro · a execução terminou sem resposta identificável
     sem resposta; banco devolve a execução anterior            (com progresso)  -> erro · a resposta não pertence à execução atual
+    sem evento inicial; resposta concluída sem run_id          (sem progresso)  -> erro · a resposta não pertence à execução atual
+    sem evento inicial; resposta concluída sem run_id          (com progresso)  -> erro · a resposta não pertence à execução atual
+
+[3b] Controles do vínculo com a execução atual: resposta desta execução é entregue
+    execução atual concluída (0101)                            (sem progresso)  -> entregue · medição: acerto
+    complementação legítima (0111)                             (sem progresso)  -> entregue · medição: acerto
+    execução atual concluída (0101)                            (com progresso)  -> entregue · medição: acerto
+    complementação legítima (0111)                             (com progresso)  -> entregue · medição: acerto
 
 [4] O gabarito só é lido pela avaliação
     ferramentas.py   não lê o gabarito
@@ -256,4 +264,4 @@
     ambigua   (menção isolada a incêndio, sem situação emergencial em curso descrita, contexto passado) Vistoria após o incêndio florestal do ano passado.
     legitima  (infração ambiental em curso)                              Fiscalização de infração ambiental em curso: desmatamento 
 
-Todos os 50 casos controlados e as 12 falhas do fluxo passaram.
+Todos os 50 casos controlados, as 14 falhas do fluxo e os 4 controles do vínculo passaram.

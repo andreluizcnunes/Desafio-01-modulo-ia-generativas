@@ -190,12 +190,19 @@ capacitação (não é urgência do § 1º) e traz ordem dirigida ao sistema. Fi
 **`nao_recomendado`** e alerta da ordem embutida.
 
 **Quem decide que há urgência.** Uma marcação feita pelo modelo não basta para abrir a
-exceção. A barreira (`barreira.py`) reconhece a urgência por código, pelas hipóteses
-que o § 1º lista (incêndio, desastre ambiental, infração ambiental em curso,
-determinação judicial), e só a aceita quando `calcular_diarias` devolveu antecedência
-"NÃO ATENDE". Nessa situação, a instrução precisa vir como apto (se os demais critérios
-atendem), com `exige_autorizacao_superior = true` e com a minuta condicionando a
-autorização à autorização escrita do Secretário Adjunto. Em qualquer outro caso, a
-exigência fica `false`. A leitura é conservadora: o § 1º usa "como", e uma emergência
-fora da lista sai como "não recomendado" pela antecedência. Quem pode reconhecê-la é o
+exceção, e uma palavra isolada também não. A barreira (`barreira.ler_urgencia`) lê a
+justificativa e só reconhece a urgência quando ela afirma uma das hipóteses que o § 1º
+lista (incêndio, desastre ambiental, infração ambiental em curso, determinação
+judicial) sem sinal contrário: menção negada ("não há incêndio em curso"), atividade
+programada (capacitação, reunião, cronograma), autorização verbal ou ordem dirigida ao
+sistema. A exceção só vale quando `calcular_diarias` devolveu antecedência "NÃO
+ATENDE". Nessa situação, a instrução precisa vir como apto (se os demais critérios
+atendem), com `exige_autorizacao_superior = true`, e a condição da autorização expressa
+e escrita do Secretário Adjunto, registrada no processo, entra na minuta por regra do
+código, que monta o texto (Seção 2, passo 7b). Se a justificativa menciona uma hipótese
+com sinal contrário, a urgência é **ambígua**: o código não decide, a instrução é
+recusada e o pedido vai à análise manual com a mensagem padrão. Sem hipótese alguma, a
+antecedência fica "não atende" e a recomendação é "não recomendado", como no
+DIA-2026-0107. A leitura é conservadora: o § 1º usa "como", e uma emergência fora da
+lista sai como "não recomendado" pela antecedência. Quem pode reconhecê-la é o
 conferente, não o agente.

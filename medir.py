@@ -188,7 +188,7 @@ def _minuta_fora_do_papel(minuta: str, esperado: dict) -> list[str]:
             dif.append(f"minuta: valor {rotulo} {rotulados.get(rotulo)} ≠ {valor}")
     encaminhamento = {"apto_para_autorizacao": "apto para autorizacao",
                       "nao_recomendado": "nao recomendado",
-                      "diligencia": "diligencia"}[esperado["recomendacao"]]
+                      "diligencia": "diligencia"}.get(esperado["recomendacao"], "-")
     sugerido = re.search(r"encaminhamento sugerido: ([a-z ]+)", minuta)
     if not sugerido or not sugerido.group(1).startswith(encaminhamento):
         dif.append(f"minuta sem o encaminhamento '{encaminhamento}'")

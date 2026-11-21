@@ -23,8 +23,9 @@ devolveram nesta execução) e confere a instrução contra isso:
    de mérito é trilha indevida e a instrução é recusada.
 4. Recomendação, números e exceção derivados das consultas (Aula 04, Seção 8,
    ancoragem numérica). A exceção de urgência do art. 5º, § 1º, é reconhecida
-   pelo código, pelas hipóteses que a norma lista, e não pela marcação do
-   modelo.
+   pelo código, pelas hipóteses que a norma lista, afirmadas e sem sinal
+   contrário, e não pela marcação do modelo. Com antecedência insuficiente e
+   urgência ambígua, a instrução é recusada e o conferente decide.
 5. Alertas do modelo. Os alertas (ordens embutidas na justificativa, o que o
    conferente precisa ver) são o único texto do modelo que chega à tela. Cada
    valor, data, matrícula, número de pedido e quantidade citado precisa constar
@@ -60,14 +61,27 @@ MERITO = ("antecedencia", "prestacao_contas", "limite_mensal", "saldo_orcamentar
 CONSULTAS_DE_MERITO = ("calcular_diarias", "consultar_historico_diarias", "consultar_saldo_diarias")
 
 # Art. 5º, § 1º: as hipóteses de urgência que a norma lista. A leitura é
-# conservadora: o código só reconhece as hipóteses listadas; qualquer outra
-# alegação de urgência fica com a antecedência "não atende" e o conferente
-# decide (desenho.md, Seção 8).
+# conservadora (desenho.md, Seção 8): o código só reconhece as hipóteses
+# listadas, e uma palavra isolada não basta. A menção precisa ser afirmativa e
+# a justificativa não pode trazer sinal contrário (menção negada, atividade
+# programada, autorização verbal, ordem dirigida ao sistema). Com sinal
+# contrário, a urgência é ambígua e a avaliação fica com o conferente: a
+# instrução é recusada e o pedido vai à análise manual.
 HIPOTESES_URGENCIA = ("incendio", "desastre ambiental", "infracao ambiental em curso",
                       "determinacao judicial")
 ROTULOS_URGENCIA = {"incendio": "combate a incêndio", "desastre ambiental": "desastre ambiental",
                     "infracao ambiental em curso": "infração ambiental em curso",
                     "determinacao judicial": "determinação judicial"}
+NOMES_URGENCIA = {"incendio": "incêndio", "desastre ambiental": "desastre ambiental",
+                  "infracao ambiental em curso": "infração ambiental em curso",
+                  "determinacao judicial": "determinação judicial"}
+NEGACAO = re.compile(r"\b(?:nao|nem|sem|nenhum|nenhuma|inexist\w*|ausencia de|descartad\w*)\b")
+SINAIS_CONTRARIOS = {
+    "atividade programada": r"capacita|treinamento|curso de|programad|planejad|cronograma|"
+                            r"reuniao|oficina|seminario|palestra|evento",
+    "autorização verbal": r"verbal",
+    "ordem dirigida ao sistema": r"\bsistema\b",
+}
 
 MESES = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6,
          "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12}
@@ -85,15 +99,34 @@ def _sem_acento(texto: str) -> str:
     return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
 
 
+def ler_urgencia(pedido: dict) -> tuple[str, str]:
+    """("legitima", hipótese), ("ausente", "") ou ("ambigua", motivo), pelo art. 5º, § 1º."""
+    texto = _sem_acento(pedido.get("justificativa") or "")
+    afirmadas, negadas = [], []
+    for h in HIPOTESES_URGENCIA:
+        for achado in re.finditer(h, texto):
+            # A negação vale dentro da mesma oração, antes da menção.
+            oracao = re.split(r"[.;:!?]", texto[:achado.start()])[-1]
+            (negadas if NEGACAO.search(oracao[-40:]) else afirmadas).append(h)
+    if not afirmadas and not negadas:
+        return "ausente", ""
+    contrarios = [nome for nome, padrao in SINAIS_CONTRARIOS.items() if re.search(padrao, texto)]
+    if negadas:
+        contrarios.insert(0, f"menção negada a {NOMES_URGENCIA[negadas[0]]}")
+    if contrarios:
+        return "ambigua", ", ".join(contrarios)
+    return "legitima", ROTULOS_URGENCIA[afirmadas[0]]
+
+
 def urgencia_legitima(pedido: dict) -> bool:
-    """A justificativa descreve uma das hipóteses do art. 5º, § 1º?"""
-    return hipotese_de_urgencia(pedido) is not None
+    """A justificativa descreve, sem sinal contrário, uma das hipóteses do art. 5º, § 1º?"""
+    return ler_urgencia(pedido)[0] == "legitima"
 
 
 def hipotese_de_urgencia(pedido: dict) -> str | None:
     """A hipótese do art. 5º, § 1º, que a justificativa descreve, ou None."""
-    justificativa = _sem_acento(pedido.get("justificativa") or "")
-    return next((ROTULOS_URGENCIA[h] for h in HIPOTESES_URGENCIA if h in justificativa), None)
+    situacao, hipotese = ler_urgencia(pedido)
+    return hipotese if situacao == "legitima" else None
 
 
 # ----------------------------------------------------------------------
@@ -241,7 +274,8 @@ def esperado(pedido: dict, vigente: dict, evidencias: dict) -> dict:
         sit["cadastro"] = "atende" if "CONFERE" in servidor else "nao_atende"
     sit["dados_completos"] = ("atende" if all(_texto(vigente.get(c)) for c in OBRIGATORIOS)
                               else "nao_atende")
-    urgente = urgencia_legitima(pedido)
+    leitura, motivo_urgencia = ler_urgencia(pedido)
+    urgente = leitura == "legitima"
     calculo = evidencias["calculo"]
     if calculo is not None:
         sit["antecedencia"] = ("atende" if calculo["antecedencia_atende"] or urgente
@@ -258,14 +292,17 @@ def esperado(pedido: dict, vigente: dict, evidencias: dict) -> dict:
         for c in MERITO:
             sit[c] = "nao_verificado"
         return {"situacoes": sit, "recomendacao": "diligencia", "quantidade": None,
-                "valor": None, "exige": False, "sem_evidencia": []}
+                "valor": None, "exige": False, "sem_evidencia": [], "urgencia_ambigua": ""}
     sem_evidencia = [c for c in ("cadastro",) + MERITO if sit[c] == "nao_verificado"]
     recomendacao = "nao_recomendado" if "nao_atende" in sit.values() else "apto_para_autorizacao"
     exige = bool(calculo and not calculo["antecedencia_atende"] and urgente)
+    # Antecedência insuficiente com urgência ambígua: quem decide é o conferente.
+    ambigua = (motivo_urgencia if calculo and not calculo["antecedencia_atende"]
+               and leitura == "ambigua" else "")
     return {"situacoes": sit, "recomendacao": recomendacao,
             "quantidade": calculo["quantidade"] if calculo else None,
             "valor": calculo["valor"] if calculo else None,
-            "exige": exige, "sem_evidencia": sem_evidencia}
+            "exige": exige, "sem_evidencia": sem_evidencia, "urgencia_ambigua": ambigua}
 
 
 # ----------------------------------------------------------------------
@@ -575,6 +612,13 @@ def conferir(instrucao, consultas: list[dict], pedido: dict,
         if indevidas:
             problemas.append(f"consultas de mérito em pedido que exige diligência (art. 9º): "
                              f"{', '.join(indevidas)}")
+
+    # Art. 5º, § 1º: antecedência insuficiente com urgência ambígua na
+    # justificativa (menção negada, atividade programada, autorização verbal):
+    # o código não decide; o pedido vai à análise manual.
+    if alvo["urgencia_ambigua"]:
+        problemas.append(f"urgência ambígua na justificativa ({alvo['urgencia_ambigua']}): "
+                         f"avaliação do conferente")
 
     # Evidência para cada verificação.
     if alvo["sem_evidencia"]:

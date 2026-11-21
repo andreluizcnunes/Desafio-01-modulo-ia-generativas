@@ -12,7 +12,10 @@ Classificação de cada item, na ordem de gravidade do enunciado:
   papel, sem consulta ausente nem fora da etapa), nos dados factuais dos
   fundamentos, pendências, alertas e minuta, no papel de cada dado (o
   fundamento diz o que a situação diz; a minuta traz o valor total, o
-  unitário e o encaminhamento esperados) e sem número por extenso;
+  unitário e o encaminhamento esperados), nos alertas (exatamente as
+  categorias esperadas, sem alerta fora delas, sem valor no papel errado e
+  sem afirmação que contradiga a situação de um critério) e sem número por
+  extenso;
 - recusado: a barreira recusou e o servidor viu a mensagem padrão (erro visível);
 - erro de execução: status de erro ou saída fora do contrato (erro visível);
 - ENTREGUE ERRADO: chegou ao conferente diferente do gabarito (o que mais pesa).
@@ -122,6 +125,7 @@ def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
                 for d in _fundamento_incoerente(v.criterio, esperado["situacoes"].get(v.criterio),
                                                 _plano(v.detalhe or ""))]
     dif += _minuta_fora_do_papel(_plano(instrucao.minuta_despacho or ""), esperado)
+    dif += _alertas_fora_do_papel([_plano(a or "") for a in instrucao.alertas], esperado)
     # Urgência: a minuta preserva a condição da autorização escrita (art. 5º, § 2º).
     minuta = _plano(instrucao.minuta_despacho or "")
     if esperado["exige_autorizacao_superior"] and not (
@@ -179,7 +183,7 @@ def _fundamento_incoerente(criterio: str, situacao: str | None, texto: str) -> l
 def _minuta_fora_do_papel(minuta: str, esperado: dict) -> list[str]:
     dif = []
     rotulados = {rotulo: _num(v) for rotulo, v in
-                 re.findall(r"valor (total|unitario)[^r\n]{0,15}r\$\s*(\d+(?:[.,]\d+)*)", minuta)}
+                 re.findall(r"valor (total|unitario)[^\d\n]{0,15}?r\$\s*(\d+(?:[.,]\d+)*)", minuta)}
     pares = (("total", esperado["valor_total"]), ("unitario", esperado["papeis"]["valor_unitario"]))
     for rotulo, valor in pares:
         if valor is None and rotulo in rotulados:
@@ -192,6 +196,46 @@ def _minuta_fora_do_papel(minuta: str, esperado: dict) -> list[str]:
     sugerido = re.search(r"encaminhamento sugerido: ([a-z ]+)", minuta)
     if not sugerido or not sugerido.group(1).startswith(encaminhamento):
         dif.append(f"minuta sem o encaminhamento '{encaminhamento}'")
+    return dif
+
+
+# Categorias de alerta que o enunciado descreve, reconhecidas pela própria
+# medição. A ordem importa: o alerta da autorização verbal também cita a
+# autorização escrita que ela não supre.
+CATEGORIAS_ALERTA = (("dados_pessoais", r"dados pessoais|\bcpf\b|conta (?:corrente|bancaria)"),
+                     ("ordem_embutida", r"\bordem\b|dirigida ao sistema"),
+                     ("autorizacao_verbal", r"verbal"),
+                     ("autorizacao_escrita", r"autorizacao expressa e escrita"))
+# Assunto de cada critério, para conferir o que um alerta afirma sobre ele.
+ASSUNTOS = {"prestacao_contas": r"prestac", "limite_mensal": r"limite",
+            "saldo_orcamentario": r"saldo", "cadastro": r"cadastro|matricula",
+            "antecedencia": r"antecedencia"}
+
+
+def _alertas_fora_do_papel(alertas: list[str], esperado: dict) -> list[str]:
+    dif, achadas = [], []
+    for alerta in alertas:
+        categoria = next((c for c, padrao in CATEGORIAS_ALERTA if re.search(padrao, alerta)), None)
+        if categoria is None:
+            dif.append(f"alerta fora das categorias esperadas: {alerta[:60]!r}")
+        else:
+            achadas.append(categoria)
+        # Um valor rotulado no alerta precisa ser o daquele papel.
+        for rotulo, valor in re.findall(r"valor (total|unitario)[^\d\n]{0,25}?r\$\s*(\d+(?:[.,]\d+)*)",
+                                        alerta):
+            certo = (esperado["valor_total"] if rotulo == "total"
+                     else esperado["papeis"]["valor_unitario"])
+            if certo is None or _num(valor) != round(certo, 2):
+                dif.append(f"alerta: valor {rotulo} {_num(valor)} ≠ {certo}")
+        # O que o alerta afirma sobre um critério não pode contradizer a situação.
+        for criterio, assunto in ASSUNTOS.items():
+            situacao = esperado["situacoes"].get(criterio)
+            if re.search(assunto, alerta) and situacao != "nao_verificado":
+                proibidos = TERMOS.get((criterio, situacao), ([], []))[1]
+                dif += [f"alerta sobre {criterio} contradiz a situação com '{t}'"
+                        for t in proibidos if re.search(t, alerta)]
+    if sorted(achadas) != sorted(esperado.get("alertas", [])):
+        dif.append(f"alertas: categorias {sorted(achadas)} ≠ {sorted(esperado.get('alertas', []))}")
     return dif
 
 
@@ -216,7 +260,9 @@ def item(rodada, config, numero, turno, resultado, esperado) -> dict:
             "tokens_entrada": m.get("tokens_entrada"), "tokens_saida": m.get("tokens_saida"),
             "custo": m.get("custo", 0), "segundos": m.get("segundos"),
             # Erros nos textos do modelo que o código substituiu antes da entrega.
-            "textos_do_modelo_substituidos": resultado.textos_substituidos}
+            "textos_do_modelo_substituidos": resultado.textos_substituidos,
+            # Alertas escritos pelo modelo, registrados e não exibidos.
+            "alertas_do_modelo": resultado.alertas_do_modelo}
 
 
 def resumir(itens: list[dict]) -> dict:
@@ -294,9 +340,10 @@ def escrever_md(resumo: dict, itens: list[dict]) -> None:
          "Critério de acerto: os cinco campos, as situações dos seis critérios, a trilha "
          "(argumentos no papel, sem consulta ausente nem fora da etapa), os dados factuais dos "
          "textos com fonte, o papel de cada dado (fundamento coerente com a situação; valor "
-         "total, unitário e encaminhamento da minuta), a condição da autorização escrita na "
-         "urgência e nenhum número por extenso. A medição anterior, com o critério da versão "
-         "0f67cf5, está em `historico/medicao_0f67cf5.md`.", "",
+         "total, unitário e encaminhamento da minuta), os alertas (exatamente as categorias "
+         "esperadas, sem valor no papel errado nem afirmação que contradiga um critério), a "
+         "condição da autorização escrita na urgência e nenhum número por extenso. As medições "
+         "anteriores, com o critério de cada versão, estão em `historico/`.", "",
          "## Por rodada", "",
          "| Configuração | Rodada | Acertos | Recusados (msg padrão) | Erros de execução "
          "| ENTREGUES ERRADOS | Execuções c/ chamadas simultâneas | US$ | Tempo (s) |",
@@ -329,6 +376,18 @@ def escrever_md(resumo: dict, itens: list[dict]) -> None:
                 for t in i["textos_do_modelo_substituidos"]]
     for config, rodada, pedido, texto in exemplos[:10]:
         l.append(f"  - {config}, rodada {rodada}, {pedido}: {texto[:160]}")
+    l += ["", "## Alertas escritos pelo modelo (registrados, não exibidos)", "",
+          "A tela mostra os alertas montados pelo código (barreira.py, item 5). Os do modelo "
+          "ficam no resultado para comparação.", ""]
+    for config, _ in resumo.items():
+        com = [i for i in itens if i["configuracao"] == config and i["alertas_do_modelo"]]
+        l.append(f"- {config}: {len(com)} itens com alerta do modelo")
+    vistos = set()
+    for i in itens:
+        for a in i["alertas_do_modelo"]:
+            if (i["pedido"], a) not in vistos and len(vistos) < 8:
+                vistos.add((i["pedido"], a))
+                l.append(f"  - {i['pedido']}: {a[:160]}")
     l += ["", "## Itens que não foram acerto", "",
           "| Configuração | Rodada | Pedido | Turno | Classe | Detalhe |", "|---|---|---|---|---|---|"]
     for i in itens:

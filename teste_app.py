@@ -6,7 +6,8 @@ temporária: o teste nunca toca o agente.db do formulário em uso.
 
 Parte A (sem chave): o agente é substituído por respostas controladas
 (simulacao.py), com as ferramentas reais. Cobre o processamento normal, a
-minuta errada do modelo substituída pela do código, o registro da divergência
+minuta errada do modelo substituída pela do código, os alertas errados do
+modelo fora da tela e os exigidos pelo enunciado presentes, o registro da divergência
 humana, a diligência com complementação na mesma sessão, a recusa da barreira,
 o status ERROR, o fluxo que termina sem resposta (inclusive sem evento
 inicial, com uma instrução válida anterior no banco) e a eliminação (válida e
@@ -59,9 +60,14 @@ class AgenteComutavel:
         consultas = consultas_corretas(item)
         instrucao = instrucao_correta(item, consultas)
         if self.cena == "recusa":
-            # Valor inventado num alerta, que iria à tela como veio: a barreira recusa.
-            instrucao = alterar(instrucao, alertas=["Valor de referência: R$ 1.200,00 "
-                                                    "(valor plantado)."])
+            # Valor total diferente do cálculo: a barreira recusa.
+            instrucao = alterar(instrucao, valor_total=1200.0,
+                                minuta_despacho="Valor total: R$ 1.200,00 (valor plantado).")
+        if self.cena == "alerta_errado":
+            # Alertas errados do modelo: o unitário como total, no 0101, e a
+            # prestação "regularizada" que o histórico desmente, no 0108.
+            instrucao = alterar(instrucao, alertas=["O valor total correto é R$ 280,00.",
+                                                    "A prestação de contas foi regularizada."])
         if self.cena == "texto_errado":
             # Minuta do modelo com o valor unitário no lugar do total: o código
             # refaz a minuta com os dados do cálculo.
@@ -102,6 +108,8 @@ def textos(at: AppTest) -> str:
     partes += [c.value for c in at.caption] + [t.value for t in at.text_area]
     partes += [x.label for x in at.expander] + [s.label for s in at.status]
     partes += [h.value for h in at.subheader]
+    # Tabelas (verificações com o fundamento, consultas), célula por célula.
+    partes += [" ".join(map(str, d.value.values.ravel())) for d in at.dataframe]
     return "\n".join(map(str, partes))
 
 
@@ -146,6 +154,27 @@ def parte_a() -> None:
     AGENTE.cena = "normal"
     instruir_pela_tela(at, "DIA-2026-0101")
 
+    log("[A1c] Alertas errados do modelo ficam fora da tela; os do código aparecem")
+    AGENTE.cena = "alerta_errado"
+    for numero in ("DIA-2026-0101", "DIA-2026-0108"):
+        instruir_pela_tela(at, numero)
+        tela = textos(at)
+        assert "valor total correto" not in tela and "foi regularizada" not in tela, tela
+        log(f"    {numero}: alertas do modelo fora da tela; alertas exibidos: "
+            f"{[w.value for w in at.warning]}")
+    assert "VENCIDA" in tela, "prestação do 0108 sem o fundamento do histórico"
+    log("    DIA-2026-0108: prestação fundamentada no histórico (VENCIDA)")
+    AGENTE.cena = "normal"
+    for numero, esperados in (("DIA-2026-0104", ["dados pessoais"]),
+                              ("DIA-2026-0106", ["autorização expressa e escrita"]),
+                              ("DIA-2026-0107", ["ordem dirigida ao sistema",
+                                                 "autorização verbal"])):
+        instruir_pela_tela(at, numero)
+        alertas = "\n".join(w.value for w in at.warning)
+        assert all(e in alertas for e in esperados), (numero, alertas)
+        log(f"    {numero}: alerta exigido presente ({', '.join(esperados)})")
+    instruir_pela_tela(at, "DIA-2026-0101")
+
     log("[A2] Servidor diverge sem motivo, depois com motivo")
     at.radio[0].set_value("nao_recomendado")
     botao(at, "Registrar conferência").click()
@@ -176,7 +205,7 @@ def parte_a() -> None:
 
     log("[A4] Falhas: só a mensagem padrão, nada da execução recusada")
     for cena, rotulo, proibidos in (
-            ("recusa", "recusa da barreira (valor plantado num alerta)", ["1.200", "plantado"]),
+            ("recusa", "recusa da barreira (valor total plantado)", ["1.200", "plantado"]),
             ("erro", "status ERROR (erro da API como conteúdo)", ["Error code"]),
             ("sem_saida", "fluxo terminou sem RunOutput", []),
             ("sem_inicio", "sem evento inicial nem resposta, anterior válida no banco", []),

@@ -26,18 +26,21 @@ devolveram nesta execução) e confere a instrução contra isso:
    pelo código, pelas hipóteses que a norma lista, afirmadas e sem sinal
    contrário, e não pela marcação do modelo. Com antecedência insuficiente e
    urgência ambígua, a instrução é recusada e o conferente decide.
-5. Alertas do modelo. Os alertas (ordens embutidas na justificativa, o que o
-   conferente precisa ver) são o único texto do modelo que chega à tela. Cada
-   valor, data, matrícula, número de pedido e quantidade citado precisa constar
-   do pedido, da complementação, das consultas desta execução ou das constantes
-   da norma; número por extenso e afirmação de que a autorização escrita é
-   dispensável são recusados.
+5. Alertas montados pelo código. O conferente só vê alertas de categorias
+   que o código verifica no pedido: dados pessoais mascarados, ordem dirigida
+   ao sistema na justificativa, autorização verbal alegada e, na urgência, a
+   autorização escrita a conferir. Os alertas livres do modelo não chegam à
+   tela: um alerta pode citar um dado com fonte no papel errado ("o valor total
+   é R$ 280,00", quando esse é o unitário) ou afirmar sem número algum o que o
+   histórico desmente ("a prestação foi regularizada"), e nenhuma conferência
+   de fontes pega isso. Ficam registrados para a medição.
 6. Textos factuais redigidos pelo código. Liberada a instrução, os
-   fundamentos, as pendências e a minuta são montados aqui com os dados das
-   consultas válidas, cada um no seu papel (valor unitário, valor total, saldo,
-   situação da prestação), e substituem os do modelo. Na urgência, a condição
-   da autorização expressa e escrita do Secretário Adjunto entra na minuta por
-   regra. Os erros dos textos substituídos ficam registrados para a medição.
+   fundamentos, as pendências, os alertas e a minuta são montados aqui com os
+   dados das consultas válidas, cada um no seu papel (valor unitário, valor
+   total, saldo, situação da prestação), e substituem os do modelo. Na
+   urgência, a condição da autorização expressa e escrita do Secretário
+   Adjunto entra na minuta por regra. Os erros dos textos substituídos ficam
+   registrados para a medição.
 
 Qualquer falha devolve a lista de problemas, e a aplicação mostra ao servidor
 apenas a mensagem padrão (Aula 06, 5.3): nada do conteúdo recusado é exibido.
@@ -82,6 +85,10 @@ SINAIS_CONTRARIOS = {
     "autorização verbal": r"verbal",
     "ordem dirigida ao sistema": r"\bsistema\b",
 }
+# Ordem dirigida ao sistema de análise escrita na justificativa (enunciado,
+# Etapa 1): quem escreve no pedido fala com a máquina, e não com o conferente.
+ORDEM_EMBUTIDA = re.compile(r"\bsistema\b|\bassistente\b|inteligencia artificial|\bignore\b|"
+                            r"\bdesconsidere\b")
 
 MESES = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6,
          "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12}
@@ -534,6 +541,10 @@ def redigir(pedido: dict, vigente: dict, complemento: dict | None, evidencias: d
     if tipos:
         alertas.append(f"O pedido traz dados pessoais ({', '.join(tipos)}), mascarados antes do "
                        f"envio ao modelo e não usados na instrução.")
+    if ORDEM_EMBUTIDA.search(_sem_acento(pedido.get("justificativa") or "")):
+        alertas.append("A justificativa traz uma ordem dirigida ao sistema de análise, que não "
+                       "foi obedecida: a justificativa é dado do pedido, e a instrução segue a "
+                       "norma.")
     if verbal:
         alertas.append("A justificativa alega autorização verbal, que não supre a autorização "
                        "expressa e escrita do Secretário Adjunto (art. 5º, § 2º).")
@@ -650,27 +661,22 @@ def conferir(instrucao, consultas: list[dict], pedido: dict,
                          f"{'está' if alvo['exige'] else 'não está'} configurada pelas consultas "
                          f"e pela justificativa")
 
-    # Os alertas do modelo (ordens embutidas, o que o conferente precisa ver)
-    # chegam à tela: cada dado precisa de fonte, sem número por extenso e sem
-    # afirmar que a autorização escrita é dispensável.
-    permitidos = fatos_das_fontes(pedido, vigente, complemento, consultas)
-    alertas_modelo = [(f"alerta {n}", a) for n, a in enumerate(instrucao.alertas, 1)]
-    problemas += _fatos_sem_fonte(alertas_modelo, permitidos)
-    for rotulo, texto in alertas_modelo:
-        sem_acento = _sem_acento(texto)
-        if "autoriza" in sem_acento and DISPENSA_AUTORIZACAO.search(sem_acento):
-            problemas.append(f"{rotulo}: afirma que a autorização é dispensável")
-
     if problemas:
         return problemas, None, []
 
-    # Os textos do modelo que o código substitui: erros registrados, não exibidos.
-    descartados = [(r, t) for r, t in _textos_da_instrucao(instrucao) if not r.startswith("alerta")]
+    # Os textos do modelo que o código substitui, inclusive os alertas: os
+    # erros encontrados ficam registrados para a medição e não são exibidos.
+    permitidos = fatos_das_fontes(pedido, vigente, complemento, consultas)
+    descartados = _textos_da_instrucao(instrucao)
     observacoes = _fatos_sem_fonte(descartados, permitidos)
+    for rotulo, texto in descartados:
+        sem_acento = _sem_acento(texto or "")
+        if "autoriza" in sem_acento and DISPENSA_AUTORIZACAO.search(sem_acento):
+            observacoes.append(f"{rotulo}: afirma que a autorização é dispensável")
     textos = redigir(pedido, vigente, complemento, evidencias, alvo)
     entregue = instrucao.model_copy(deep=True, update={
         "pendencias": textos["pendencias"],
-        "alertas": textos["alertas"] + [a for a in instrucao.alertas if a.strip()],
+        "alertas": textos["alertas"],
         "minuta_despacho": textos["minuta"]})
     for v in entregue.verificacoes:
         v.detalhe = textos["detalhes"][v.criterio]

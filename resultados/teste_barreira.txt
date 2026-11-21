@@ -30,11 +30,14 @@
         · trecho do modelo fora da instrução entregue: 'valor total de R$ 280,00'
     0101 com valor por extenso na minuta (quarenta mil reais)                      -> liberada com os textos do código
         · trecho do modelo fora da instrução entregue: 'quarenta mil reais'; registrado: minuta: número por extenso, que não pode ser conferido
-    0101 com alerta citando saldo inventado                                        -> RECUSADA
-        · alerta 1: valor sem fonte no pedido ou nas consultas: ['50000.00']
-    0101 com alerta citando valor por extenso                                      -> RECUSADA
-        · alerta 1: número por extenso, que não pode ser conferido
-    0101 com alerta legítimo (sem dado sem fonte)                                  -> liberada
+    0101 com alerta citando saldo inventado                                        -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: '50.000,00'; registrado: alerta: valor sem fonte no pedido ou nas consultas: ['50000.00']
+    0101 com alerta citando valor por extenso                                      -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'quarenta mil reais'; registrado: alerta: número por extenso, que não pode ser conferido
+    0101 com alerta: o valor unitário como total (R$ 280,00)                       -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'O valor total correto é R$ 280,00'
+    0101 com alerta fora das categorias do enunciado                               -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'Conferir a escala'
     0108 sem a consulta de histórico, marcado apto                                 -> RECUSADA
         · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> RECUSADA
@@ -43,6 +46,8 @@
     0108 correto: não recomendado pela prestação vencida                           -> liberada
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> liberada com os textos do código
         · trecho do modelo fora da instrução entregue: 'regularizada e aprovada'
+    0108 com alerta sem número: 'a prestação foi regularizada'                     -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'foi regularizada'
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> RECUSADA
         · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
@@ -52,9 +57,9 @@
     0107 correto: não recomendado, sem exceção                                     -> liberada
     0106 urgente correto: apto, autorização escrita na minuta                      -> liberada
     0106 urgente com minuta que dispensa a autorização escrita                     -> liberada com os textos do código
-        · trecho do modelo fora da instrução entregue: 'dispensada'
-    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> RECUSADA
-        · alerta 1: afirma que a autorização é dispensável
+        · trecho do modelo fora da instrução entregue: 'dispensada'; registrado: minuta: afirma que a autorização é dispensável
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> liberada com os textos do código
+        · trecho do modelo fora da instrução entregue: 'dispensável'; registrado: alerta: afirma que a autorização é dispensável
     variante do 0106 sem urgência, marcada apto com a exceção                      -> RECUSADA
         · urgência ambígua na justificativa (menção negada a incêndio, atividade programada, autorização verbal): avaliação do conferente
         · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
@@ -118,19 +123,21 @@
     0101 com valor inventado na minuta                                             -> entregue  · medição: acerto
     0101 com o valor unitário como total na minuta (R$ 280,00)                     -> entregue  · medição: acerto
     0101 com valor por extenso na minuta (quarenta mil reais)                      -> entregue  · medição: acerto
-    0101 com alerta citando saldo inventado                                        -> recusada  · medição: recusado
-    0101 com alerta citando valor por extenso                                      -> recusada  · medição: recusado
-    0101 com alerta legítimo (sem dado sem fonte)                                  -> entregue  · medição: acerto
+    0101 com alerta citando saldo inventado                                        -> entregue  · medição: acerto
+    0101 com alerta citando valor por extenso                                      -> entregue  · medição: acerto
+    0101 com alerta: o valor unitário como total (R$ 280,00)                       -> entregue  · medição: acerto
+    0101 com alerta fora das categorias do enunciado                               -> entregue  · medição: acerto
     0108 sem a consulta de histórico, marcado apto                                 -> recusada  · medição: recusado
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> recusada  · medição: recusado
     0108 correto: não recomendado pela prestação vencida                           -> entregue  · medição: acerto
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue  · medição: acerto
+    0108 com alerta sem número: 'a prestação foi regularizada'                     -> entregue  · medição: acerto
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> recusada  · medição: recusado
     0107 não recomendado, mas com exige_autorizacao_superior=true                  -> recusada  · medição: recusado
     0107 correto: não recomendado, sem exceção                                     -> entregue  · medição: acerto
     0106 urgente correto: apto, autorização escrita na minuta                      -> entregue  · medição: acerto
     0106 urgente com minuta que dispensa a autorização escrita                     -> entregue  · medição: acerto
-    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> recusada  · medição: recusado
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> entregue  · medição: acerto
     variante do 0106 sem urgência, marcada apto com a exceção                      -> recusada  · medição: recusado
     variante do 0106 sem urgência, marcada não recomendado                         -> recusada  · medição: recusado
     0106 urgente marcado não recomendado                                           -> recusada  · medição: recusado
@@ -164,19 +171,23 @@
     0101 com valor inventado na minuta                                             -> entregue_errado · texto cita valores sem fonte: ['1200.0']
     0101 com o valor unitário como total na minuta (R$ 280,00)                     -> entregue_errado · minuta: valor total 280.0 ≠ 980.0
     0101 com valor por extenso na minuta (quarenta mil reais)                      -> entregue_errado · texto com número por extenso: 'Ao ordenador de despesa. Pedido DIA-202
-    0101 com alerta citando saldo inventado                                        -> entregue_errado · texto cita valores sem fonte: ['50000.0']
-    0101 com alerta citando valor por extenso                                      -> entregue_errado · texto com número por extenso: 'A viagem custará quarenta mil reais.'
-    0101 com alerta legítimo (sem dado sem fonte)                                  -> acerto
+    0101 com alerta citando saldo inventado                                        -> entregue_errado · alerta fora das categorias esperadas: 'saldo da unidade cff: r$ 50.000
+    0101 com alerta citando valor por extenso                                      -> entregue_errado · alerta fora das categorias esperadas: 'a viagem custara quarenta mil r
+    0101 com alerta: o valor unitário como total (R$ 280,00)                       -> entregue_errado · alerta fora das categorias esperadas: 'o valor total correto e r$ 280,
+        · também: alerta: valor total 280.0 ≠ 980.0
+    0101 com alerta fora das categorias do enunciado                               -> entregue_errado · alerta fora das categorias esperadas: 'conferir a escala da equipe de 
     0108 sem a consulta de histórico, marcado apto                                 -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0108 correto: não recomendado pela prestação vencida                           -> acerto
     0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'       -> entregue_errado · fundamento de prestacao_contas: falta 'vencida'
+    0108 com alerta sem número: 'a prestação foi regularizada'                     -> entregue_errado · alerta fora das categorias esperadas: 'a prestacao de contas foi regul
+        · também: alerta sobre prestacao_contas contradiz a situação com 'regularizada'
     0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
     0107 não recomendado, mas com exige_autorizacao_superior=true                  -> entregue_errado · exige_autorizacao_superior: True ≠ False
     0107 correto: não recomendado, sem exceção                                     -> acerto
     0106 urgente correto: apto, autorização escrita na minuta                      -> acerto
     0106 urgente com minuta que dispensa a autorização escrita                     -> entregue_errado · minuta: valor total None ≠ 1260.0
-    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> entregue_errado · texto afirma que a autorização é dispensável: 'Em incêndio, a autoriza
+    0106 urgente com alerta dizendo que a autorização escrita é dispensável        -> entregue_errado · alerta fora das categorias esperadas: 'em incendio, a autorizacao escr
     variante do 0106 sem urgência, marcada apto com a exceção                      -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'analise_manual'
     variante do 0106 sem urgência, marcada não recomendado                         -> entregue_errado · recomendacao: 'nao_recomendado' ≠ 'analise_manual'
     0106 urgente marcado não recomendado                                           -> entregue_errado · recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'
@@ -220,4 +231,4 @@
     legitima  (desastre ambiental)                                       Desastre ambiental: rompimento de barragem de rejeitos ont
     legitima  (determinação judicial)                                    Cumprimento de determinação judicial com prazo de 48 horas
 
-Todos os 44 casos controlados e as 12 falhas do fluxo passaram.
+Todos os 46 casos controlados e as 12 falhas do fluxo passaram.

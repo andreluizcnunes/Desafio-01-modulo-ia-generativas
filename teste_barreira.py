@@ -111,15 +111,21 @@ def montar_casos() -> list[tuple]:
                   alterar(i, minuta_despacho=i.minuta_despacho + " Valor estimado da operação: "
                                                                   "quarenta mil reais."),
                   "corrige", g, "quarenta mil reais"))
-    # Os alertas vão à tela como o modelo escreve: são conferidos e recusados.
+    # Os alertas do modelo não vão à tela: o conferente vê os alertas montados
+    # pelo código. Um alerta errado é descartado, mesmo quando cita um dado com
+    # fonte no papel errado ou não cita número algum.
     casos.append(("0101 com alerta citando saldo inventado", p101, None, k,
-                  alterar(i, alertas=["Saldo da unidade CFF: R$ 50.000,00."]), "recusa", g, None))
+                  alterar(i, alertas=["Saldo da unidade CFF: R$ 50.000,00."]), "corrige", g,
+                  "50.000,00"))
     casos.append(("0101 com alerta citando valor por extenso", p101, None, k,
-                  alterar(i, alertas=["A viagem custará quarenta mil reais."]), "recusa", g,
-                  None))
-    casos.append(("0101 com alerta legítimo (sem dado sem fonte)", p101, None, k,
-                  alterar(i, alertas=["Conferir a escala da equipe de vistoria."]), "libera", g,
-                  None))
+                  alterar(i, alertas=["A viagem custará quarenta mil reais."]), "corrige", g,
+                  "quarenta mil reais"))
+    casos.append(("0101 com alerta: o valor unitário como total (R$ 280,00)", p101, None, k,
+                  alterar(i, alertas=["O valor total correto é R$ 280,00."]), "corrige", g,
+                  "O valor total correto é R$ 280,00"))
+    casos.append(("0101 com alerta fora das categorias do enunciado", p101, None, k,
+                  alterar(i, alertas=["Conferir a escala da equipe de vistoria."]), "corrige", g,
+                  "Conferir a escala"))
 
     # Consulta obrigatória omitida.
     g, k, i = caso_correto("DIA-2026-0108")
@@ -137,6 +143,9 @@ def montar_casos() -> list[tuple]:
             v.detalhe = "Prestação de contas regularizada e aprovada."
     casos.append(("0108 com situação vencida e fundamento dizendo 'regularizada e aprovada'",
                   p108, None, k, regularizada, "corrige", g, "regularizada e aprovada"))
+    casos.append(("0108 com alerta sem número: 'a prestação foi regularizada'", p108, None, k,
+                  alterar(i, alertas=["A prestação de contas foi regularizada."]), "corrige", g,
+                  "foi regularizada"))
 
     # A exceção de urgência não vem da marcação do modelo.
     g, k, i = caso_correto("DIA-2026-0107")
@@ -158,7 +167,7 @@ def montar_casos() -> list[tuple]:
     casos.append(("0106 urgente com alerta dizendo que a autorização escrita é dispensável",
                   p106, None, k,
                   alterar(i, alertas=["Em incêndio, a autorização escrita é dispensável."]),
-                  "recusa", g, None))
+                  "corrige", g, "dispensável"))
     # Variante do 0106 (mesmas datas e cadastro): capacitação programada, incêndio
     # em curso negado e autorização verbal. A menção a incêndio não abre a exceção;
     # a urgência é ambígua e o pedido vai à análise manual, qualquer que seja a
@@ -265,6 +274,14 @@ def parte2_instruir_e_medir(casos) -> None:
         assert classe == ("acerto" if desfecho == "libera" else "entregue_errado"), \
             (rotulo, classe, diferencas)
         log(f"    {rotulo:78} -> {classe}" + (f" · {diferencas[0][:70]}" if diferencas else ""))
+        # Os dois alertas da terceira revisão são apontados também pelo papel do
+        # dado, e não só por estarem fora das categorias esperadas.
+        especificos = {"O valor total correto é R$ 280,00": "alerta: valor total 280.0 ≠ 980.0",
+                       "foi regularizada": "alerta sobre prestacao_contas contradiz a situação "
+                                           "com 'regularizada'"}
+        if trecho in especificos:
+            assert especificos[trecho] in diferencas, (rotulo, diferencas)
+            log(f"        · também: {especificos[trecho]}")
 
     log("\n[3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução")
     g, k, i = caso_correto("DIA-2026-0101")

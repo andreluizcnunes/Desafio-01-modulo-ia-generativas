@@ -118,12 +118,22 @@ def montar_casos() -> list[tuple]:
     casos.append(("0111 diligência correta (falta o retorno)", p111, None, k, i, False, g))
     casos.append(("0111 diligência com quantidade e valor", p111, None, k,
                   alterar(i, quantidade_diarias=4.5, valor_total=1260.0), True, g))
+    casos.append(("0111 diligência correta, mas com tentativa de cálculo sem retorno", p111, None,
+                  k + [consulta("calcular_diarias", grupo="A", destino_uf="MT",
+                                data_pedido="2026-10-09", data_partida="2026-11-17",
+                                data_retorno=None)], i, True, g))
     g, k, i = caso_correto("DIA-2026-0112")
     casos.append(("0112 diligência correta (nome diverge do cadastro)", p112, None, k, i, False, g))
+    merito_207481 = [consulta("calcular_diarias", grupo="B", destino_uf="MT",
+                              data_pedido="2026-10-09", data_partida="2026-11-24",
+                              data_retorno="2026-11-27"),
+                     consulta("consultar_historico_diarias", matricula="207481",
+                              data_partida="2026-11-24", quantidade_pedida=3.5),
+                     consulta("consultar_saldo_diarias", unidade="CFA", valor=980.0)]
+    casos.append(("0112 diligência correta, mas com cálculo, histórico e saldo de 207481", p112,
+                  None, k + merito_207481, i, True, g))
     casos.append(("0112 calculado para o servidor da matrícula digitada", p112, None,
-                  k + [consulta("calcular_diarias", grupo="B", destino_uf="MT",
-                                data_pedido="2026-10-09", data_partida="2026-11-24",
-                                data_retorno="2026-11-27")],
+                  k + merito_207481[:1],
                   alterar(i, recomendacao="apto_para_autorizacao", quantidade_diarias=3.5,
                           valor_total=980.0), True, g))
 
@@ -165,6 +175,16 @@ def parte2_instruir_e_medir(casos) -> None:
         elif compl is None or pedido["numero"] == compl["numero"]:
             assert classe == "acerto", (rotulo, diferencas)
         log(f"    {rotulo:78} -> {r.situacao:9} · medição: {classe}")
+
+    log("\n[2b] Medição independente: os casos de recusa entregues sem barreira não são acerto")
+    from instrutor import Resultado
+    for rotulo, pedido, compl, consultas, instrucao, deve_recusar, gab in casos:
+        if not deve_recusar or (compl and compl["numero"] != pedido["numero"]):
+            continue
+        classe, diferencas = classificar(Resultado("entregue", instrucao=instrucao,
+                                                   consultas=consultas), gab)
+        assert classe == "entregue_errado", (rotulo, classe)
+        log(f"    {rotulo:78} -> {classe} · {diferencas[0][:60]}")
 
     log("\n[3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução")
     g, k, i = caso_correto("DIA-2026-0101")

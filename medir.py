@@ -9,7 +9,7 @@ Classificação de cada item, na ordem de gravidade do enunciado:
 - acerto: entregue ao conferente e igual ao gabarito em recomendação,
   matrícula, quantidade, valor e exigência de autorização superior, nas
   situações dos seis critérios, na trilha de consultas (cada argumento no seu
-  papel) e nos dados factuais dos fundamentos, pendências, alertas e minuta;
+  papel, sem consulta ausente nem fora da etapa) e nos dados factuais dos fundamentos, pendências, alertas e minuta;
 - recusado: a barreira recusou e o servidor viu a mensagem padrão (erro visível);
 - erro de execução: status de erro ou saída fora do contrato (erro visível);
 - ENTREGUE ERRADO: chegou ao conferente diferente do gabarito (o que mais pesa).
@@ -59,6 +59,10 @@ def _num(texto: str) -> float:
     return round(float(texto), 2)
 
 
+def _plano(texto: str) -> str:
+    return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
+
+
 def fatos_do_texto(texto: str) -> dict:
     """Extração própria da medição: valores, datas, matrículas, pedidos e números com unidade."""
     plano = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
@@ -92,8 +96,12 @@ def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
     declaradas = {v.criterio: v.situacao for v in instrucao.verificacoes}
     dif += [f"situação de {c}: {declaradas.get(c)!r} ≠ {s!r}"
             for c, s in esperado["situacoes"].items() if declaradas.get(c) != s]
-    # Trilha: cada ferramenta esperada foi chamada com os argumentos esperados, e
-    # nenhuma chamada a essas ferramentas usou argumento fora do papel.
+    # Trilha: cada ferramenta esperada foi chamada com os argumentos esperados,
+    # nenhuma chamada usou argumento fora do papel e nenhuma ferramenta fora da
+    # etapa foi chamada (na diligência, só o cadastro).
+    extras = sorted({c["ferramenta"] for c in consultas} - set(esperado["trilha"]))
+    if extras:
+        dif.append(f"trilha: consultas fora da etapa: {', '.join(extras)}")
     for ferramenta, args in esperado["trilha"].items():
         feitas = [c["argumentos"] for c in consultas if c["ferramenta"] == ferramenta]
         if not any(all(_igual(f.get(k), v) for k, v in args.items()) for f in feitas):
@@ -104,6 +112,11 @@ def conferir(instrucao, consultas: list[dict], esperado: dict) -> list[str]:
                 continue
             if not all(_igual(f.get(k), v) for k, v in args.items()):
                 dif.append(f"trilha: {ferramenta} chamada fora do papel com {f}")
+    # Urgência: a minuta preserva a condição da autorização escrita (art. 5º, § 2º).
+    minuta = _plano(instrucao.minuta_despacho or "")
+    if esperado["exige_autorizacao_superior"] and not (
+            "autorizacao expressa e escrita" in minuta and "dispens" not in minuta):
+        dif.append("minuta do pedido urgente sem a condição da autorização expressa e escrita")
     # Fatos citados nos textos.
     permitidos = {k: set(v) for k, v in esperado["fatos"].items()}
     textos = [v.detalhe for v in instrucao.verificacoes] + list(instrucao.pendencias) + \

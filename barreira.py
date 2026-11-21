@@ -18,7 +18,9 @@ devolveram nesta execução) e confere a instrução contra isso:
    matrícula vigente; quantidade e valor passados adiante vêm do cálculo.
 3. Evidência para cada verificação. A situação de cada um dos seis critérios
    é derivada aqui, das consultas, e a instrução precisa coincidir com ela.
-   Instrução de mérito com consulta obrigatória ausente é recusada.
+   Instrução de mérito com consulta obrigatória ausente é recusada. Na
+   diligência (dado ausente ou cadastro divergente, art. 9º), qualquer consulta
+   de mérito é trilha indevida e a instrução é recusada.
 4. Recomendação, números e exceção derivados das consultas (Aula 04, Seção 8,
    ancoragem numérica). A exceção de urgência do art. 5º, § 1º, é reconhecida
    pelo código, pelas hipóteses que a norma lista, e não pela marcação do
@@ -47,6 +49,7 @@ OBRIGATORIOS = ("numero", "data_pedido", "matricula", "nome", "destino_uf", "dat
 CRITERIOS = ("cadastro", "dados_completos", "antecedencia", "prestacao_contas",
              "limite_mensal", "saldo_orcamentario")
 MERITO = ("antecedencia", "prestacao_contas", "limite_mensal", "saldo_orcamentario")
+CONSULTAS_DE_MERITO = ("calcular_diarias", "consultar_historico_diarias", "consultar_saldo_diarias")
 
 # Art. 5º, § 1º: as hipóteses de urgência que a norma lista. A leitura é
 # conservadora: o código só reconhece as hipóteses listadas; qualquer outra
@@ -351,6 +354,16 @@ def verificar(instrucao, consultas: list[dict], pedido: dict,
     vistos = [v.criterio for v in instrucao.verificacoes]
     if sorted(vistos) != sorted(CRITERIOS):
         problemas.append(f"verificações incompletas ou repetidas: {vistos}")
+
+    # Art. 9º: na diligência não há análise de mérito. Cálculo, histórico ou
+    # saldo feitos nesse cenário (inclusive para o servidor da matrícula
+    # digitada, quando o cadastro diverge) são trilha indevida, e nada dela
+    # pode chegar ao formulário.
+    if alvo["recomendacao"] == "diligencia":
+        indevidas = [c["ferramenta"] for c in consultas if c["ferramenta"] in CONSULTAS_DE_MERITO]
+        if indevidas:
+            problemas.append(f"consultas de mérito em pedido que exige diligência (art. 9º): "
+                             f"{', '.join(indevidas)}")
 
     # Evidência para cada verificação.
     if alvo["sem_evidencia"]:

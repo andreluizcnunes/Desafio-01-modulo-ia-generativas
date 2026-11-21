@@ -49,8 +49,14 @@
     0111 diligência correta (falta o retorno)                                      -> liberada
     0111 diligência com quantidade e valor                                         -> RECUSADA
         · diligência com quantidade ou valor: não há análise de mérito
+    0111 diligência correta, mas com tentativa de cálculo sem retorno              -> RECUSADA
+        · calcular_diarias: grupo 'A' não é o do cadastro da matrícula vigente 206689
+        · consultas de mérito em pedido que exige diligência (art. 9º): calcular_diarias
     0112 diligência correta (nome diverge do cadastro)                             -> liberada
+    0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> RECUSADA
+        · consultas de mérito em pedido que exige diligência (art. 9º): calcular_diarias, consultar_historico_diarias, consultar_saldo_diarias
     0112 calculado para o servidor da matrícula digitada                           -> RECUSADA
+        · consultas de mérito em pedido que exige diligência (art. 9º): calcular_diarias
         · recomendação 'apto_para_autorizacao', as consultas sustentam 'diligencia'
         · quantidade 3.5 e valor 980.0 não são os do cálculo válido (None, None)
     0111 complementação correta (retorno 2026-11-20)                               -> liberada
@@ -90,12 +96,31 @@
     0106 urgente marcado não recomendado                                           -> recusada  · medição: recusado
     0111 diligência correta (falta o retorno)                                      -> entregue  · medição: acerto
     0111 diligência com quantidade e valor                                         -> recusada  · medição: recusado
+    0111 diligência correta, mas com tentativa de cálculo sem retorno              -> recusada  · medição: recusado
     0112 diligência correta (nome diverge do cadastro)                             -> entregue  · medição: acerto
+    0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> recusada  · medição: recusado
     0112 calculado para o servidor da matrícula digitada                           -> recusada  · medição: recusado
     0111 complementação correta (retorno 2026-11-20)                               -> entregue  · medição: acerto
     complementação do 0111 aplicada ao 0112                                        -> recusada  · medição: recusado
     0112 complementação correta (matrícula 207418)                                 -> entregue  · medição: acerto
     0112 complementação com o histórico da matrícula digitada 207481               -> recusada  · medição: recusado
+
+[2b] Medição independente: os casos de recusa entregues sem barreira não são acerto
+    0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> entregue_errado · quantidade_diarias: 35.5 ≠ 3.5
+    0101 com a data de protocolo no lugar da partida, só no histórico              -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matric
+    0101 com saldo inventado no fundamento                                         -> entregue_errado · texto cita valores sem fonte: ['50000.0']
+    0101 com valor inventado na minuta                                             -> entregue_errado · texto cita valores sem fonte: ['1200.0']
+    0108 sem a consulta de histórico, marcado apto                                 -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
+    0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
+    0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'nao_recomendado'
+    0107 não recomendado, mas com exige_autorizacao_superior=true                  -> entregue_errado · exige_autorizacao_superior: True ≠ False
+    0106 urgente sem a condição da autorização escrita na minuta                   -> entregue_errado · minuta do pedido urgente sem a condição da autorização expre
+    0106 urgente marcado não recomendado                                           -> entregue_errado · recomendacao: 'nao_recomendado' ≠ 'apto_para_autorizacao'
+    0111 diligência com quantidade e valor                                         -> entregue_errado · quantidade_diarias: 4.5 ≠ None
+    0111 diligência correta, mas com tentativa de cálculo sem retorno              -> entregue_errado · trilha: consultas fora da etapa: calcular_diarias
+    0112 diligência correta, mas com cálculo, histórico e saldo de 207481          -> entregue_errado · trilha: consultas fora da etapa: calcular_diarias, consultar
+    0112 calculado para o servidor da matrícula digitada                           -> entregue_errado · recomendacao: 'apto_para_autorizacao' ≠ 'diligencia'
+    0112 complementação com o histórico da matrícula digitada 207481               -> entregue_errado · trilha: consultar_historico_diarias não chamada com {'matric
 
 [3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução
     status ERROR (erro da API como conteúdo)                   (sem progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro 
@@ -117,4 +142,4 @@
     barreira.py      não lê o gabarito
     app.py           não lê o gabarito
 
-Todos os 22 casos controlados e as 12 falhas do fluxo passaram.
+Todos os 24 casos controlados e as 12 falhas do fluxo passaram.

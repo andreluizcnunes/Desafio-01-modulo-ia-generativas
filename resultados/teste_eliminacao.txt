@@ -1,0 +1,34 @@
+[0] Banco montado: {'agno_sessions': 3, 'agno_runs': 3, 'agno_memories': 2}
+
+[1] Carla (207418): sessão sob 207481, nome em minúsculas, sem a matrícula correta
+    antes, a busca normalizada encontra: {'agno_runs': 1, 'agno_memories': 1} (a linha da sessão só tem o user_id 207481)
+    sessões apagadas: {'pelo_user_id': [], 'por_mencao_sob_outro_user_id': ['DIA-2026-0112']}
+    memórias apagadas: ['a servidora carla regina souza vai a Alta Floresta em novembro.']
+    depois: nenhuma tabela · falhas de verificação: nenhuma · nada restou: True
+    banco: {'agno_sessions': 2, 'agno_runs': 2, 'agno_memories': 1}
+      controles intactos: Ana Paula Figueiredo, Beatriz Moraes Cunha
+
+[2] Matrícula parcial '20' com nome fictício
+    recusada: ["matrícula '20' inválida: são seis algarismos"]
+    nada apagado: {'agno_sessions': 2, 'agno_runs': 2, 'agno_memories': 1}
+      controles intactos: Ana Paula Figueiredo, Beatriz Moraes Cunha
+
+[3] Matrícula de Ana Paula com o nome de outra pessoa
+    recusada: ['o nome informado não confere com o cadastro da matrícula 204317']
+    nada apagado: {'agno_sessions': 2, 'agno_runs': 2, 'agno_memories': 1}
+      controles intactos: Ana Paula Figueiredo, Beatriz Moraes Cunha
+
+[3b] Matrícula inexistente
+    recusada: ['matrícula 999999 não localizada no cadastro funcional']
+    nada apagado: {'agno_sessions': 2, 'agno_runs': 2, 'agno_memories': 1}
+      controles intactos: Ana Paula Figueiredo, Beatriz Moraes Cunha
+
+[4] Arquivo que não é o banco do agente
+    recusada: ['pedidos.json não é o banco de trabalho do agente']
+
+[5] Tabela que não pode ser lida
+    falhas de verificação: ["anexo_corrompido: OperationalError: Could not decode to UTF-8 column 'conteudo' with text '??'"]
+    nada restou: False
+      controle Ana Paula intacto
+
+Todos os casos de eliminação passaram.

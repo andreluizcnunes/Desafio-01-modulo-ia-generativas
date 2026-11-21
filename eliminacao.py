@@ -8,6 +8,10 @@ digitada pertence a outro servidor, a sessão fica gravada sob o `user_id`
 dele, e a busca pelo `user_id` da titular não a encontra. Por isso a rotina
 procura também pela matrícula e pelo nome do titular em todas as tabelas.
 
+Antes de apagar, a rotina valida a identidade: matrícula de seis algarismos e
+nome igual ao do cadastro dessa matrícula. Matrícula parcial ou nome que não
+confere não apagam nada. E só se apaga o banco de trabalho do agente.
+
 Etapas da rotina:
 1. Sessões do titular: as que têm o `user_id` dele e as que mencionam a
    matrícula ou o nome sob outro identificador. `delete_sessions` leva junto
@@ -17,7 +21,9 @@ Etapas da rotina:
    usuário (Aula 07, 6.2), inclusive memórias gravadas sob outro `user_id` que
    mencionem o titular.
 3. Conferência tabela por tabela: procura a matrícula e o nome em cada linha
-   de cada tabela, como o `ocorrencias_do_titular` da Aula 07.
+   de cada tabela, como o `ocorrencias_do_titular` da Aula 07, sem distinguir
+   maiúsculas e acentos e abrindo o JSON em que o Agno guarda as execuções.
+   Tabela que não pôde ser conferida é falha de verificação.
 
 Alcance: esta rotina apaga somente o banco do agente, que é cópia de
 trabalho. O processo de diárias é registro de despesa pública, sujeito à
@@ -28,6 +34,7 @@ Saída: resultados/eliminacao.txt
 """
 import json
 import pathlib
+import re
 import sqlite3
 import warnings
 
@@ -35,47 +42,145 @@ warnings.filterwarnings("ignore")
 
 from agno.db.sqlite import SqliteDb
 
+from ferramentas import SERVIDORES, _normalizar_nome
+
 BASE = pathlib.Path(__file__).parent
+TABELAS_DO_AGENTE = {"agno_sessions"}
 
 
-def ocorrencias(banco: pathlib.Path, termos: list[str]) -> dict:
-    """Conta, em cada tabela, as linhas que contêm algum dos termos."""
+def validar_titular(matricula: str, nome: str) -> list[str]:
+    """Confere a identidade antes de apagar qualquer coisa.
+
+    A matrícula precisa ter os seis algarismos e o nome precisa ser o do
+    cadastro dessa matrícula. Matrícula parcial ou nome que não confere não
+    apagam nada: a busca por menção, com termo curto ou de outra pessoa,
+    alcançaria registros de outros servidores.
+    """
+    matricula, nome = (matricula or "").strip(), (nome or "").strip()
+    if not re.fullmatch(r"\d{6}", matricula):
+        return [f"matrícula {matricula!r} inválida: são seis algarismos"]
+    servidor = SERVIDORES.get(matricula)
+    if servidor is None:
+        return [f"matrícula {matricula} não localizada no cadastro funcional"]
+    if _normalizar_nome(servidor["nome"]) != _normalizar_nome(nome):
+        return [f"o nome informado não confere com o cadastro da matrícula {matricula}"]
+    return []
+
+
+def _textos(valor):
+    """Todo texto guardado na célula, inclusive o JSON aninhado e escapado.
+
+    O Agno guarda as execuções em JSON com acentos escapados ("Patr\\u00edcia")
+    e com o pedido como texto JSON dentro de outro JSON. A busca em str(linha)
+    não vê esses nomes; aqui o JSON é aberto em cada nível.
+    """
+    if isinstance(valor, bytes):
+        valor = valor.decode("utf-8", "ignore")
+    if isinstance(valor, str):
+        yield valor
+        if valor[:1] in "{[\"":
+            try:
+                yield from _textos(json.loads(valor))
+            except (ValueError, RecursionError):
+                pass
+    elif isinstance(valor, dict):
+        for k, v in valor.items():
+            yield str(k)
+            yield from _textos(v)
+    elif isinstance(valor, (list, tuple)):
+        for v in valor:
+            yield from _textos(v)
+    elif valor is not None:
+        yield str(valor)
+
+
+def _menciona(linha, termos: list[str]) -> bool:
+    """A linha menciona a matrícula (seis algarismos isolados) ou o nome completo,
+    sem distinguir maiúsculas, acentos e espaços?"""
+    texto = " ".join(_normalizar_nome(t) for t in _textos(list(linha)))
+    for termo in termos:
+        alvo = _normalizar_nome(termo)
+        if re.search(rf"(?<![\w]){re.escape(alvo)}(?![\w])", texto):
+            return True
+    return False
+
+
+def _banco_do_agente(banco: pathlib.Path) -> bool:
+    """Só se apaga o banco de trabalho do agente: um arquivo SQLite do Agno."""
+    if not banco.is_file():
+        return False
+    try:
+        conexao = sqlite3.connect(f"file:{banco}?mode=ro", uri=True)
+        tabelas = {t for (t,) in conexao.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        conexao.close()
+    except sqlite3.Error:
+        return False
+    return TABELAS_DO_AGENTE <= tabelas
+
+
+def ocorrencias(banco: pathlib.Path, termos: list[str]) -> tuple[dict, list]:
+    """Conta, em cada tabela, as linhas que mencionam o titular.
+
+    Devolve também as tabelas que não puderam ser conferidas: uma tabela não
+    lida é falha de verificação, e não "nada restou".
+    """
     if not banco.exists():
-        return {}
+        return {}, []
+    encontrado, falhas = {}, []
     conexao = sqlite3.connect(banco)
-    encontrado = {}
-    for (tabela,) in conexao.execute("SELECT name FROM sqlite_master WHERE type='table'"):
+    try:
+        tabelas = [t for (t,) in conexao.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+    except sqlite3.Error as erro:
+        conexao.close()
+        return {}, [f"banco ilegível: {erro}"]
+    for tabela in tabelas:
         try:
-            linhas = conexao.execute(f"SELECT * FROM {tabela}").fetchall()
-        except sqlite3.Error:
+            linhas = conexao.execute(f'SELECT * FROM "{tabela}"').fetchall()
+            total = sum(1 for linha in linhas if _menciona(linha, termos))
+        except Exception as erro:  # tabela ilegível ou conteúdo que não se abre
+            falhas.append(f"{tabela}: {type(erro).__name__}: "
+                          f"{str(erro).encode('ascii', 'replace').decode()[:120]}")
             continue
-        total = sum(1 for linha in linhas if any(t in str(linha) for t in termos))
         if total:
             encontrado[tabela] = total
     conexao.close()
-    return encontrado
+    return encontrado, falhas
 
 
 def _sessoes_que_mencionam(banco: pathlib.Path, termos: list[str]) -> set:
-    """Sessões cujo registro menciona o titular, sob qualquer `user_id`."""
+    """Sessões cujo registro (sessão ou execução) menciona o titular, sob qualquer `user_id`."""
     conexao = sqlite3.connect(banco)
     ids = set()
-    tabelas = {t for (t,) in conexao.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    tabelas = [t for (t,) in conexao.execute("SELECT name FROM sqlite_master WHERE type='table'")]
     for tabela in tabelas:
-        colunas = [c[1] for c in conexao.execute(f"PRAGMA table_info({tabela})")]
+        colunas = [c[1] for c in conexao.execute(f'PRAGMA table_info("{tabela}")')]
         if "session_id" not in colunas:
             continue
-        for linha in conexao.execute(f"SELECT * FROM {tabela}"):
-            if any(t in str(linha) for t in termos):
+        for linha in conexao.execute(f'SELECT * FROM "{tabela}"'):
+            if _menciona(linha, termos):
                 ids.add(linha[colunas.index("session_id")])
     conexao.close()
     return ids
 
 
 def eliminar_titular(banco: pathlib.Path, matricula: str, nome: str) -> dict:
-    """Apaga sessões, execuções e memórias do titular e confere o banco."""
+    """Apaga sessões, execuções e memórias do titular e confere o banco.
+
+    Nada é apagado se a identidade não confere com o cadastro ou se o arquivo
+    não é o banco do agente.
+    """
+    matricula, nome = (matricula or "").strip(), (nome or "").strip()
+    relatorio = {"titular": f"{nome} ({matricula})", "recusada": [], "antes": {},
+                 "etapa1_sessoes_apagadas": {}, "apos_etapa1": {}, "etapa2_memorias_apagadas": [],
+                 "depois": {}, "falhas_de_verificacao": [], "nada_restou": False}
+    relatorio["recusada"] = validar_titular(matricula, nome)
+    if not relatorio["recusada"] and not _banco_do_agente(banco):
+        relatorio["recusada"] = [f"{banco.name} não é o banco de trabalho do agente"]
+    if relatorio["recusada"]:
+        return relatorio
+
     termos = [matricula, nome]
-    relatorio = {"titular": f"{nome} ({matricula})", "antes": ocorrencias(banco, termos)}
+    relatorio["antes"], _ = ocorrencias(banco, termos)
     db = SqliteDb(db_file=str(banco))
 
     # Etapa 1 — sessões (e, em cascata, as execuções).
@@ -86,20 +191,20 @@ def eliminar_titular(banco: pathlib.Path, matricula: str, nome: str) -> dict:
         db.delete_sessions(session_ids=sessoes)
     relatorio["etapa1_sessoes_apagadas"] = {"pelo_user_id": sorted(proprias),
                                             "por_mencao_sob_outro_user_id": sorted(mencionam - proprias)}
-    relatorio["apos_etapa1"] = ocorrencias(banco, termos)
+    relatorio["apos_etapa1"], _ = ocorrencias(banco, termos)
 
     # Etapa 2 — memórias do usuário: listar para apagar.
     memorias = list(db.get_user_memories(user_id=matricula) or [])
     memorias += [m for m in (db.get_user_memories() or [])
-                 if m.user_id != matricula and any(t in str(m.memory) for t in termos)]
+                 if m.user_id != matricula and _menciona([m.memory, m.input, m.topics], termos)]
     ids = [m.memory_id for m in memorias if m.memory_id]
     if ids:
         db.delete_user_memories(memory_ids=ids)
     relatorio["etapa2_memorias_apagadas"] = [str(m.memory)[:80] for m in memorias]
 
     # Etapa 3 — conferência tabela por tabela.
-    relatorio["depois"] = ocorrencias(banco, termos)
-    relatorio["nada_restou"] = not relatorio["depois"]
+    relatorio["depois"], relatorio["falhas_de_verificacao"] = ocorrencias(banco, termos)
+    relatorio["nada_restou"] = not relatorio["depois"] and not relatorio["falhas_de_verificacao"]
     return relatorio
 
 
@@ -138,7 +243,7 @@ def main() -> None:
     for matricula, nome in titulares:
         achadas = [s.session_id for s in (db.get_sessions(user_id=matricula) or [])]
         log(f"    {nome} ({matricula}): sessões pelo user_id = {achadas or 'nenhuma'} · "
-            f"mas o titular aparece em {ocorrencias(banco, [matricula, nome])}")
+            f"mas o titular aparece em {ocorrencias(banco, [matricula, nome])[0]}")
 
     log("\n[3] Rotina de eliminação completa")
     for matricula, nome in titulares:
@@ -153,7 +258,7 @@ def main() -> None:
             f"nada restou: {'SIM' if r['nada_restou'] else 'NÃO'}")
         assert r["nada_restou"], r
 
-    restante = ocorrencias(banco, controle)
+    restante, _ = ocorrencias(banco, controle)
     log(f"\n[4] Controle: a outra servidora (Ana Paula, 204317) continua no banco? "
         f"{'sim' if restante else 'NÃO'} {restante}")
     assert restante, "a rotina apagou dados de quem não pediu"

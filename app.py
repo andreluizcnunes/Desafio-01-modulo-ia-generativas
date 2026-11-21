@@ -19,23 +19,29 @@ instrutor.py e desenha o objeto `Instrucao` campo a campo (Aula 06, 6.1).
   mensagem padrão e devolução à análise manual (Aula 06, 5.3). O progresso, a
   instrução, a minuta, as consultas e as medidas da execução recusada não
   aparecem.
+- Eliminação: a identidade é validada antes (matrícula de seis algarismos e
+  nome do cadastro), e só o banco de trabalho do agente é tocado.
 
 Execução: streamlit run app.py
 """
 import json
+import os
 import pathlib
 from datetime import datetime
 
 import streamlit as st
 
-from eliminacao import eliminar_titular
+from eliminacao import eliminar_titular, validar_titular
 from instrutor import BANCO_PADRAO, MENSAGEM_PADRAO, Resultado, construir_agente, instruir
 
 BASE = pathlib.Path(__file__).parent
 PEDIDOS = json.loads((BASE / "dados" / "pedidos.json").read_text(encoding="utf-8"))
 COMPLEMENTOS = {c["numero"]: c for c in
                 json.loads((BASE / "dados" / "complementacoes.json").read_text(encoding="utf-8"))}
-REGISTRO = BASE / "resultados" / "conferencias.jsonl"
+# Onde as conferências são registradas; configurável para que os testes não
+# misturem registros simulados aos da operação.
+REGISTRO = pathlib.Path(os.environ.get("CONFERENCIAS_ARQUIVO",
+                                       BASE / "resultados" / "conferencias.jsonl"))
 
 ROTULOS = {
     "consultar_servidor": "Consultando o cadastro funcional",
@@ -218,20 +224,28 @@ with aba_eliminacao:
         nome_titular = col_n.text_input("Nome completo do titular", placeholder="Carla Regina Souza")
         eliminar = st.form_submit_button("Eliminar dados do titular", type="primary")
     if eliminar:
-        if not (matricula_titular.strip() and nome_titular.strip()):
-            st.error("Informe a matrícula e o nome: a busca só pelo identificador não alcança "
-                     "sessões gravadas sob a matrícula de outro servidor.")
+        problemas = validar_titular(matricula_titular, nome_titular)
+        if problemas:
+            # Identidade não confere: nada é apagado (matrícula parcial, nome de outra pessoa).
+            st.error("Eliminação não executada: " + "; ".join(problemas) + ".")
         elif not BANCO_PADRAO.exists():
             st.info("O banco do agente ainda não existe: não há dados a eliminar.")
         else:
-            r = eliminar_titular(BANCO_PADRAO, matricula_titular.strip(), nome_titular.strip())
-            st.write(f"**Antes:** {r['antes'] or 'o titular não aparece em nenhuma tabela'}")
-            st.write(f"**Sessões apagadas:** {r['etapa1_sessoes_apagadas']}")
-            st.write(f"**Memórias apagadas:** {len(r['etapa2_memorias_apagadas'])}")
-            if r["nada_restou"]:
-                st.success("Conferência tabela por tabela: nada restou do titular no banco do agente.")
+            r = eliminar_titular(BANCO_PADRAO, matricula_titular, nome_titular)
+            if r["recusada"]:
+                st.error("Eliminação não executada: " + "; ".join(r["recusada"]) + ".")
             else:
-                st.error(f"Ainda restam registros: {r['depois']}")
+                st.write(f"**Antes:** {r['antes'] or 'o titular não aparece em nenhuma tabela'}")
+                st.write(f"**Sessões apagadas:** {r['etapa1_sessoes_apagadas']}")
+                st.write(f"**Memórias apagadas:** {len(r['etapa2_memorias_apagadas'])}")
+                if r["falhas_de_verificacao"]:
+                    st.error("Falha de verificação: tabelas que não puderam ser conferidas: "
+                             + "; ".join(r["falhas_de_verificacao"]))
+                if r["nada_restou"]:
+                    st.success("Conferência tabela por tabela: nada restou do titular no banco "
+                               "do agente.")
+                elif r["depois"]:
+                    st.error(f"Ainda restam registros: {r['depois']}")
     if BANCO_PADRAO.exists():
         st.caption("O que há no banco agora (registros por tabela):")
         import sqlite3

@@ -176,3 +176,14 @@ condicionado à juntada da autorização escrita, e é esse campo que avisa o co
 O DIA-2026-0107 alega só autorização **verbal** (que o § 2º diz não suprir), descreve
 capacitação (não é urgência do § 1º) e traz ordem dirigida ao sistema. Fica com
 **`nao_recomendado`** e alerta da ordem embutida.
+
+**Quem decide que há urgência.** Uma marcação feita pelo modelo não basta para abrir a
+exceção. A barreira (`barreira.py`) reconhece a urgência por código, pelas hipóteses
+que o § 1º lista (incêndio, desastre ambiental, infração ambiental em curso,
+determinação judicial), e só a aceita quando `calcular_diarias` devolveu antecedência
+"NÃO ATENDE". Nessa situação, a instrução precisa vir como apto (se os demais critérios
+atendem), com `exige_autorizacao_superior = true` e com a minuta condicionando a
+autorização à autorização escrita do Secretário Adjunto. Em qualquer outro caso, a
+exigência fica `false`. A leitura é conservadora: o § 1º usa "como", e uma emergência
+fora da lista sai como "não recomendado" pela antecedência. Quem pode reconhecê-la é o
+conferente, não o agente.

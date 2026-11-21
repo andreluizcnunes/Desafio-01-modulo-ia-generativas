@@ -15,24 +15,81 @@
     DIA-2026-0112 (compl.)   mascarado: não · identificadores preservados: 3
     justificativa do 0104 como chega ao modelo: Representação da Secretaria em reunião técnica do Conselho Nacional do Meio Ambiente. Para o depósito, informo meu CPF ************** e a conta corrente ******* da agência ******.
 
-[2] Barreira em código, com instruções adulteradas, sem API
-    instrução correta do 0101                                -> liberada
-    valor plantado (R$ 9.800,00) no 0101                     -> RECUSADA
-        · quantidade 3.5 e valor 9800.0 não foram produzidos pelo cálculo para o grupo do servidor 204317
-    matrícula que não consta do pedido                       -> RECUSADA
-        · consultar_servidor: matrícula 204775 não consta do pedido nem da complementação
-        · calcular_diarias: grupo 'B' não veio do cadastro de uma matrícula do pedido
-        · matrícula 204775 da instrução não consta do pedido nem da complementação
-        · quantidade e valor calculados para 204775, cujo cadastro não confere com o nome do pedido
-        · recomendação de aptidão contrariada pelas ferramentas: cadastro divergente
-    0111 com data de retorno inventada                       -> RECUSADA
-        · calcular_diarias: data_retorno='2026-11-21' não consta do pedido nem da complementação
-    0112 calculado para o servidor errado (Rafael, grupo B)  -> RECUSADA
-        · quantidade e valor calculados para 207481, cujo cadastro não confere com o nome do pedido
-        · recomendação de aptidão contrariada pelas ferramentas: cadastro divergente
-    complementação do 0112 com a matrícula corrigida         -> liberada
-    0108 marcado apto apesar da prestação VENCIDA            -> RECUSADA
-        · recomendação de aptidão contrariada pelas ferramentas: prestação de contas vencida
+[2] Barreira em código, com respostas controladas, sem API
+    (os casos estão em teste_barreira.py, que também os passa pela medição)
+    0101 regular, instrução correta (controle positivo)                            -> liberada
+    0101 com protocolo e partida trocados (35,5 diárias, R$ 9.940,00)              -> RECUSADA
+        · calcular_diarias: data_pedido='2026-11-09' não é a data_pedido do pedido (2026-10-08)
+        · calcular_diarias: data_partida='2026-10-08' não é a data_partida do pedido (2026-11-09)
+        · consultar_historico_diarias: data_partida='2026-10-08' não é a data de partida do pedido (2026-11-09)
+        · consultar_historico_diarias: quantidade 35.5 não veio de um cálculo válido
+        · consultar_saldo_diarias: valor 9940.0 não veio de um cálculo válido
+        · consulta obrigatória ausente ou inválida para: antecedencia, prestacao_contas, limite_mensal, saldo_orcamentario
+        · quantidade 35.5 e valor 9940.0 não são os do cálculo válido (None, None)
+        · fundamento de antecedencia: valor sem fonte no pedido ou nas consultas: ['980.00']
+        · fundamento de antecedencia: número sem fonte no pedido ou nas consultas: ['3.50']
+        · fundamento de saldo_orcamentario: valor sem fonte no pedido ou nas consultas: ['980.00']
+        · minuta: valor sem fonte no pedido ou nas consultas: ['980.00']
+        · minuta: número sem fonte no pedido ou nas consultas: ['3.50']
+    0101 com a data de protocolo no lugar da partida, só no histórico              -> RECUSADA
+        · consultar_historico_diarias: data_partida='2026-10-08' não é a data de partida do pedido (2026-11-09)
+        · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
+    0101 com saldo inventado no fundamento                                         -> RECUSADA
+        · fundamento de saldo_orcamentario: valor sem fonte no pedido ou nas consultas: ['50000.00']
+    0101 com valor inventado na minuta                                             -> RECUSADA
+        · minuta: valor sem fonte no pedido ou nas consultas: ['1200.00']
+    0108 sem a consulta de histórico, marcado apto                                 -> RECUSADA
+        · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
+        · fundamento de prestacao_contas: data sem fonte no pedido ou nas consultas: ['2026-09-18', '2026-09-25', '2026-10-09']
+        · fundamento de prestacao_contas: pedido sem fonte no pedido ou nas consultas: ['DIA-2026-0023']
+        · fundamento de prestacao_contas: número sem fonte no pedido ou nas consultas: ['0.00']
+        · fundamento de limite_mensal: data sem fonte no pedido ou nas consultas: ['2026-09-18', '2026-09-25', '2026-10-09']
+        · fundamento de limite_mensal: pedido sem fonte no pedido ou nas consultas: ['DIA-2026-0023']
+        · fundamento de limite_mensal: número sem fonte no pedido ou nas consultas: ['0.00']
+    0108 com todas as consultas, marcado apto apesar da VENCIDA                    -> RECUSADA
+        · prestacao_contas: a instrução declara 'atende', as consultas sustentam 'nao_atende'
+        · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
+    0108 correto: não recomendado pela prestação vencida                           -> liberada
+    0107 com autorização verbal, marcado apto com exige_autorizacao_superior       -> RECUSADA
+        · antecedencia: a instrução declara 'atende', as consultas sustentam 'nao_atende'
+        · recomendação 'apto_para_autorizacao', as consultas sustentam 'nao_recomendado'
+        · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
+    0107 não recomendado, mas com exige_autorizacao_superior=true                  -> RECUSADA
+        · exige_autorizacao_superior=True, mas a urgência do art. 5º, § 1º, não está configurada pelas consultas e pela justificativa
+    0107 correto: não recomendado, sem exceção                                     -> liberada
+    0106 urgente correto: apto, autorização escrita na minuta                      -> liberada
+    0106 urgente sem a condição da autorização escrita na minuta                   -> RECUSADA
+        · pedido urgente sem a condição da autorização escrita do Secretário Adjunto na minuta (art. 5º, § 2º)
+    0106 urgente marcado não recomendado                                           -> RECUSADA
+        · antecedencia: a instrução declara 'nao_atende', as consultas sustentam 'atende'
+        · recomendação 'nao_recomendado', as consultas sustentam 'apto_para_autorizacao'
+        · exige_autorizacao_superior=False, mas a urgência do art. 5º, § 1º, está configurada pelas consultas e pela justificativa
+    0111 diligência correta (falta o retorno)                                      -> liberada
+    0111 diligência com quantidade e valor                                         -> RECUSADA
+        · diligência com quantidade ou valor: não há análise de mérito
+    0112 diligência correta (nome diverge do cadastro)                             -> liberada
+    0112 calculado para o servidor da matrícula digitada                           -> RECUSADA
+        · recomendação 'apto_para_autorizacao', as consultas sustentam 'diligencia'
+        · quantidade 3.5 e valor 980.0 não são os do cálculo válido (None, None)
+    0111 complementação correta (retorno 2026-11-20)                               -> liberada
+    complementação do 0111 aplicada ao 0112                                        -> RECUSADA
+        · complementação do pedido DIA-2026-0111 aplicada ao pedido DIA-2026-0112
+        · calcular_diarias: data_partida='2026-11-17' não é a data_partida do pedido (2026-11-24)
+        · calcular_diarias: data_retorno='2026-11-20' não é a data_retorno do pedido (2026-11-27)
+        · consultar_servidor: matrícula 206689 não consta do pedido nem da complementação
+        · consultar_historico_diarias: matrícula 206689 não é a matrícula vigente 207481
+        · consultar_historico_diarias: data_partida='2026-11-17' não é a data de partida do pedido (2026-11-24)
+        · consultar_historico_diarias: quantidade 3.5 não veio de um cálculo válido
+        · consultar_saldo_diarias: unidade 'CFF' não é a do cadastro da matrícula vigente 207481
+        · consultar_saldo_diarias: valor 980.0 não veio de um cálculo válido
+        · instrução do pedido DIA-2026-0111, esperado DIA-2026-0112
+        · matrícula 206689 da instrução não é a matrícula vigente do pedido (207481)
+        · consulta obrigatória ausente ou inválida para: cadastro, antecedencia, prestacao_contas, limite_mensal, saldo_orcamentario
+        · quantidade 3.5 e valor 980.0 não são os do cálculo válido (None, None)
+    0112 complementação correta (matrícula 207418)                                 -> liberada
+    0112 complementação com o histórico da matrícula digitada 207481               -> RECUSADA
+        · consultar_historico_diarias: matrícula 207481 não é a matrícula vigente 207418
+        · consulta obrigatória ausente ou inválida para: prestacao_contas, limite_mensal
 
 [3] DIA-2026-0104 instruído de verdade: o CPF chega ao modelo ou ao banco?
     situação: entregue · recomendação: apto_para_autorizacao
@@ -40,6 +97,6 @@
     tabela agno_sessions            1 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_schema_versions     2 registro(s) · dado pessoal encontrado: nenhum
     tabela agno_runs                1 registro(s) · dado pessoal encontrado: nenhum
-    alertas do agente: ['A justificativa contém dados pessoais e bancários mascarados (CPF, conta corrente e agência); esses dados não foram utilizados na instrução e devem ser tratados com cautela.']
+    alertas do agente: ['A justificativa contém dados pessoais mascarados referentes a CPF e conta corrente/agência; esses dados não foram utilizados na instrução.']
 
 Todas as verificações da Etapa 3 passaram.

@@ -107,9 +107,15 @@ Regras da norma:
 - Antecedência mínima de 10 dias corridos (art. 5º). Abaixo disso, só em urgência do
   § 1º (situação emergencial imprevisível: combate a incêndio, desastre ambiental,
   infração ambiental em curso, determinação judicial com prazo), e o pedido urgente
-  depende de autorização expressa e ESCRITA do Secretário Adjunto (§ 2º); autorização
-  verbal não supre. Urgência legítima: antecedência "atende" pelo § 1º e
-  exige_autorizacao_superior = true. Sem urgência legítima: antecedência "nao_atende".
+  depende de autorização expressa e ESCRITA do Secretário Adjunto (§ 2º).
+  - Urgência legítima: antecedência "atende" pelo § 1º e exige_autorizacao_superior =
+    true. Se os demais critérios atendem, a recomendação é "apto_para_autorizacao": a
+    autorização escrita é condição da autorização, e não do pedido, e a sua falta no
+    pedido não o torna não recomendado. A minuta condiciona expressamente a autorização
+    à autorização escrita do Secretário Adjunto, registrada no processo (§ 2º).
+  - Sem urgência legítima, inclusive quando a justificativa alega autorização verbal
+    (que não supre, § 2º): antecedência "nao_atende", recomendação "nao_recomendado" e
+    exige_autorizacao_superior = false.
 - Limite de 10 diárias por mês civil, somadas as já concedidas (art. 6º).
 - Prestação de contas VENCIDA impede nova diária; pendente NO PRAZO não impede (art. 7º).
 - Saldo da unidade precisa cobrir o valor (art. 8º).
@@ -117,16 +123,24 @@ Regras da norma:
 Saída:
 - `verificacoes`: os seis critérios (cadastro, dados_completos, antecedencia,
   prestacao_contas, limite_mensal, saldo_orcamentario), cada um com o dado da ferramenta
-  em `detalhe`; o que não foi consultado fica "nao_verificado".
+  em `detalhe`. `dados_completos` atende quando o pedido traz todos os dados e datas, e
+  não atende quando falta algum (como a data de retorno). O que não foi consultado fica
+  "nao_verificado".
 - `recomendacao`: "apto_para_autorizacao" se todos atendem; "nao_recomendado" se há
   impedimento (antecedência sem urgência legítima, prestação vencida, limite excedido,
-  saldo insuficiente); "diligencia" se o pedido está incompleto ou diverge do cadastro,
-  com quantidade_diarias e valor_total nulos.
+  saldo insuficiente); "diligencia" se o pedido está incompleto ou diverge do cadastro.
+  Na diligência não há análise de mérito: quantidade_diarias e valor_total nulos e
+  antecedencia, prestacao_contas, limite_mensal e saldo_orcamentario "nao_verificado".
+- `exige_autorizacao_superior`: true somente na urgência legítima do § 1º.
 - `matricula`: a matrícula efetivamente consultada (a corrigida, se houver complementação).
 - `pendencias`: o que o solicitante precisa corrigir. `alertas`: o que o conferente
   precisa ver, inclusive dados pessoais mascarados no pedido.
 - `minuta_despacho`: despacho curto ao ordenador de despesa, com o número do pedido, os
   artigos aplicados e o encaminhamento sugerido, sem deferir nem indeferir.
+- Nos textos (`detalhe`, `pendencias`, `alertas`, `minuta_despacho`), cite valores, datas,
+  matrículas e quantidades exatamente como constam do pedido ou das ferramentas. Não faça
+  contas nos textos (como saldo remanescente ou diferença de dias): a aplicação recusa
+  número que não tenha vindo do pedido ou de uma ferramenta.
 
 Complementação: quando receber a complementação de um pedido em diligência, recupere o
 pedido do histórico desta conversa e aplique a correção. Depois refaça a instrução

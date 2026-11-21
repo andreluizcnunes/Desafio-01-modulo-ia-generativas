@@ -92,8 +92,15 @@ class AgenteSimulado:
     """Imita o `Agent` do Agno no que `instruir` usa: `run` e `get_last_run_output`.
 
     `roteiro(session_id, entrada)` devolve a cena: um dicionário com `modo`
-    ("normal", "erro", "sem_saida", "outra_execucao" ou "excecao"), e, no modo
-    normal, `instrucao` e `consultas`.
+    ("normal", "erro", "sem_saida", "outra_execucao", "excecao", "sem_inicio" ou
+    "anterior"), e, no modo normal, `instrucao` e `consultas`.
+
+    - "sem_saida": o fluxo anuncia o início e termina sem resposta, e o banco não
+      tem execução.
+    - "sem_inicio": o fluxo termina sem evento inicial e sem resposta; o banco
+      guarda a execução anterior da mesma sessão, válida e tipada.
+    - "anterior": o fluxo anuncia o início e termina sem resposta; o banco guarda
+      a execução anterior da mesma sessão, com outro identificador.
     """
 
     def __init__(self, roteiro):
@@ -114,17 +121,21 @@ class AgenteSimulado:
         if cena["modo"] == "excecao":
             raise RuntimeError("simulação de falha de conexão")
         saida = self._saida(cena, session_id, user_id)
-        self.ultima = None if cena["modo"] == "sem_saida" else saida
+        if cena["modo"] == "sem_saida":
+            self.ultima = None
+        elif cena["modo"] not in ("sem_inicio", "anterior"):
+            self.ultima = saida  # nos dois outros, o banco fica com a execução anterior
         if not stream:
             if cena["modo"] == "outra_execucao":
                 saida.session_id = "DIA-2026-0000"
-            return self.ultima
+            return None if cena["modo"] in ("sem_saida", "sem_inicio", "anterior") else saida
 
         def eventos():
-            yield RunStartedEvent(run_id=saida.run_id, session_id=session_id)
+            if cena["modo"] != "sem_inicio":
+                yield RunStartedEvent(run_id=saida.run_id, session_id=session_id)
             for t in saida.tools or []:
                 yield ToolCallStartedEvent(run_id=saida.run_id, session_id=session_id, tool=t)
-            if cena["modo"] == "sem_saida":
+            if cena["modo"] in ("sem_saida", "sem_inicio", "anterior"):
                 return
             if cena["modo"] == "outra_execucao":
                 saida.run_id = str(uuid.uuid4())
@@ -132,4 +143,6 @@ class AgenteSimulado:
         return eventos()
 
     def get_last_run_output(self, session_id=None):
-        return self.ultima
+        if self.ultima is not None and self.ultima.session_id == session_id:
+            return self.ultima
+        return None

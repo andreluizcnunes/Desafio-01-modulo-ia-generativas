@@ -98,14 +98,18 @@
     0112 complementação com o histórico da matrícula digitada 207481               -> recusada  · medição: recusado
 
 [3] Falhas do fluxo: nada é lido do conteúdo, a medição conta erro de execução
-    status ERROR (erro da API como conteúdo)             (sem progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro da API
-    status ERROR (erro da API como conteúdo)             (com progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro da API
-    fluxo terminou sem RunOutput e sem última execução   (sem progresso)  -> erro · a execução terminou sem resposta
-    fluxo terminou sem RunOutput e sem última execução   (com progresso)  -> erro · a execução terminou sem resposta
-    resposta de outra execução                           (sem progresso)  -> erro · a resposta não pertence à execução atual
-    resposta de outra execução                           (com progresso)  -> erro · a resposta não pertence à execução atual
-    exceção durante a execução                           (sem progresso)  -> erro · exceção: RuntimeError: simulação de falha de conexão
-    exceção durante a execução                           (com progresso)  -> erro · exceção: RuntimeError: simulação de falha de conexão
+    status ERROR (erro da API como conteúdo)                   (sem progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro 
+    status ERROR (erro da API como conteúdo)                   (com progresso)  -> erro · status RunStatus.error: Error code: 400 - simulação de erro 
+    fluxo terminou sem RunOutput e sem última execução         (sem progresso)  -> erro · a execução terminou sem resposta identificável
+    fluxo terminou sem RunOutput e sem última execução         (com progresso)  -> erro · a execução terminou sem resposta identificável
+    resposta de outra execução                                 (sem progresso)  -> erro · a resposta não pertence à execução atual
+    resposta de outra execução                                 (com progresso)  -> erro · a resposta não pertence à execução atual
+    exceção durante a execução                                 (sem progresso)  -> erro · exceção: RuntimeError: simulação de falha de conexão
+    exceção durante a execução                                 (com progresso)  -> erro · exceção: RuntimeError: simulação de falha de conexão
+    sem evento inicial nem resposta; anterior válida no banco  (sem progresso)  -> erro · a execução terminou sem resposta identificável
+    sem evento inicial nem resposta; anterior válida no banco  (com progresso)  -> erro · a execução terminou sem resposta identificável
+    sem resposta; banco devolve a execução anterior            (sem progresso)  -> erro · a execução terminou sem resposta identificável
+    sem resposta; banco devolve a execução anterior            (com progresso)  -> erro · a resposta não pertence à execução atual
 
 [4] O gabarito só é lido pela avaliação
     ferramentas.py   não lê o gabarito
@@ -113,4 +117,4 @@
     barreira.py      não lê o gabarito
     app.py           não lê o gabarito
 
-Todos os 22 casos controlados e as 8 falhas do fluxo passaram.
+Todos os 22 casos controlados e as 12 falhas do fluxo passaram.

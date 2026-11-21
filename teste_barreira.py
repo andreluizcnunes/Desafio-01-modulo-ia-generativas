@@ -11,8 +11,9 @@ o pedido urgente e as duas complementações.
 Depois, os mesmos casos passam por `instruir` com o agente simulado e pelo
 classificador da medição: a instrução recusada não chega à tela (situação
 "recusada") e não conta como acerto; e as falhas do fluxo (status de erro,
-fluxo sem resposta, resposta de outra execução, exceção) viram erro de
-execução.
+fluxo sem resposta, resposta de outra execução, exceção, fluxo sem evento
+inicial com uma execução anterior válida no banco) viram erro de execução,
+sem reaproveitar a instrução anterior.
 
 Por fim, confere que nenhum módulo do agente nem a tela leem o gabarito.
 
@@ -170,15 +171,28 @@ def parte2_instruir_e_medir(casos) -> None:
     for modo, rotulo in (("erro", "status ERROR (erro da API como conteúdo)"),
                          ("sem_saida", "fluxo terminou sem RunOutput e sem última execução"),
                          ("outra_execucao", "resposta de outra execução"),
-                         ("excecao", "exceção durante a execução")):
+                         ("excecao", "exceção durante a execução"),
+                         ("sem_inicio", "sem evento inicial nem resposta; anterior válida no banco"),
+                         ("anterior", "sem resposta; banco devolve a execução anterior")):
         for progresso in (False, True):
-            agente = AgenteSimulado(lambda *_, m=modo: {"modo": m, "instrucao": i, "consultas": k})
+            cenas = [modo]
+            if modo in ("sem_inicio", "anterior"):
+                cenas = ["normal", modo]  # primeiro uma execução válida da mesma sessão
+            roteiro = iter(cenas)
+            agente = AgenteSimulado(lambda *_: {"modo": next(roteiro), "instrucao": i,
+                                                "consultas": k})
+            if len(cenas) == 2:
+                anterior = instruir(PEDIDOS["DIA-2026-0101"], agente)
+                assert anterior.situacao == "entregue", anterior.motivo
             r = instruir(PEDIDOS["DIA-2026-0101"], agente,
                          ao_chamar_ferramenta=(lambda *_: None) if progresso else None)
             classe, _ = classificar(r, g)
             assert r.situacao == "erro" and classe == "erro_execucao", (modo, progresso, r)
-            log(f"    {rotulo:52} {'(com progresso)' if progresso else '(sem progresso)':16} "
-                f"-> {r.situacao} · {r.motivo[0][:70]}")
+            assert r.instrucao is None, (modo, progresso)
+            if modo != "erro":  # nada da resposta foi lido
+                assert not r.consultas, (modo, progresso)
+            log(f"    {rotulo:58} {'(com progresso)' if progresso else '(sem progresso)':16} "
+                f"-> {r.situacao} · {r.motivo[0][:60]}")
 
 
 def parte3_gabarito_isolado() -> None:
@@ -194,5 +208,5 @@ if __name__ == "__main__":
     parte1_barreira(casos)
     parte2_instruir_e_medir(casos)
     parte3_gabarito_isolado()
-    log(f"\nTodos os {len(casos)} casos controlados e as 8 falhas do fluxo passaram.")
+    log(f"\nTodos os {len(casos)} casos controlados e as 12 falhas do fluxo passaram.")
     SAIDA.write_text("\n".join(linhas) + "\n", encoding="utf-8")

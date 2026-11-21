@@ -8,7 +8,8 @@ Parte A (sem chave): o agente é substituído por respostas controladas
 (simulacao.py), com as ferramentas reais. Cobre o processamento normal, o
 registro da divergência humana, a diligência com complementação na mesma
 sessão, a recusa da barreira, o status ERROR, o fluxo que termina sem resposta
-e a eliminação (válida e com identidade inválida).
+(inclusive sem evento inicial, com uma instrução válida anterior no banco) e a
+eliminação (válida e com identidade inválida).
 
 Parte B (com chave): o pedido regular e a diligência com complementação pelo
 modelo real, para mostrar o fluxo de ponta a ponta.
@@ -60,7 +61,8 @@ class AgenteComutavel:
             # Valor inventado na minuta: a barreira recusa.
             instrucao = alterar(instrucao, minuta_despacho=instrucao.minuta_despacho
                                 + " Valor de referência: R$ 1.200,00 (valor plantado).")
-        modo = self.cena if self.cena in ("erro", "sem_saida") else "normal"
+        modo = self.cena if self.cena in ("erro", "sem_saida", "sem_inicio", "anterior") \
+            else "normal"
         return {"modo": modo, "instrucao": instrucao, "consultas": consultas}
 
     def _alvo(self):
@@ -161,10 +163,18 @@ def parte_a() -> None:
     for cena, rotulo, proibidos in (
             ("recusa", "recusa da barreira (valor plantado na minuta)", ["1.200", "plantado"]),
             ("erro", "status ERROR (erro da API como conteúdo)", ["Error code"]),
-            ("sem_saida", "fluxo terminou sem RunOutput", [])):
+            ("sem_saida", "fluxo terminou sem RunOutput", []),
+            ("sem_inicio", "sem evento inicial nem resposta, anterior válida no banco", []),
+            ("anterior", "sem resposta, banco devolve a execução anterior", [])):
+        # Antes de cada falha, uma instrução válida do mesmo pedido: a falha
+        # não pode reaproveitá-la.
+        AGENTE.cena = "normal"
+        instruir_pela_tela(at, "DIA-2026-0101")
+        assert "Apto para autorização" in textos(at), textos(at)
         AGENTE.cena = cena
         instruir_pela_tela(at, "DIA-2026-0101")
-        so_mensagem_padrao(at, rotulo, proibidos + ["Consultando o cadastro", "204317 ·"])
+        so_mensagem_padrao(at, rotulo, proibidos + ["Consultando o cadastro", "204317 ·",
+                                                    "Apto para autorização"])
 
     log("[A5] Eliminação pela tela")
     montar_banco(BANCO_TESTE)

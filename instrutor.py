@@ -21,7 +21,8 @@ Decisões, cada uma com a aula de origem:
   pedido e `user_id` = matrícula do pedido, informados em cada `run`, e não na
   construção (Aula 07, 2 e 7).
 - Resposta ausente, de outra execução ou com status diferente de concluído é
-  falha, conferida antes do conteúdo (Aula 06, 5.3), e a barreira em código de
+  falha, conferida antes do conteúdo (Aula 06, 5.3). Sem o identificador da
+  execução atual, nenhuma resposta é buscada no banco. A barreira em código de
   `barreira.py` vem antes de qualquer coisa chegar ao conferente (Aula 01, 8;
   Aula 03, 7; Aula 04, 8).
 """
@@ -260,7 +261,10 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
                     ao_chamar_ferramenta(evento.tool.tool_name, evento.tool.tool_args)
                 elif nome == "RunOutput":
                     resposta = evento
-            if resposta is None:
+            if resposta is None and run_id is not None:
+                # O fluxo terminou sem a resposta final. O banco só é consultado
+                # quando se sabe qual execução procurar, e o que vier de lá
+                # precisa ter o identificador desta execução (conferido abaixo).
                 resposta = agente.get_last_run_output(session_id=pedido["numero"])
     except Exception as erro:  # falha que nem chegou a virar RunOutput
         return Resultado("erro", motivo=[f"exceção: {type(erro).__name__}: {erro}"],
@@ -268,12 +272,14 @@ def instruir(pedido: dict, agente: Agent, complemento: Optional[dict] = None,
     duracao = time.perf_counter() - inicio
 
     # 1. Execução sem resposta, que não concluiu ou que não é a desta chamada:
-    # nada é lido do conteúdo (Aula 06, 5.3).
+    # nada é lido do conteúdo (Aula 06, 5.3). O vínculo é conferido antes de
+    # qualquer leitura: uma resposta anterior da mesma sessão, mesmo válida,
+    # não é a resposta desta execução.
     if resposta is None:
-        return Resultado("erro", motivo=["a execução terminou sem resposta"],
+        return Resultado("erro", motivo=["a execução terminou sem resposta identificável"],
                          medidas={"segundos": round(duracao, 1)})
     if getattr(resposta, "session_id", None) != pedido["numero"] or (
-            run_id is not None and getattr(resposta, "run_id", None) != run_id):
+            ao_chamar_ferramenta is not None and getattr(resposta, "run_id", None) != run_id):
         return Resultado("erro", motivo=["a resposta não pertence à execução atual"],
                          medidas={"segundos": round(duracao, 1)})
     try:
